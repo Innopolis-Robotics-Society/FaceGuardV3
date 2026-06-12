@@ -22,10 +22,10 @@ if not st.session_state.authenticated:
                 st.error("Wrong login or password")
         st.stop()
 
-employeesPage = st.Page("pages/pageEmployees.py", title="Employees")
-logsPage = st.Page("pages/pageLogs.py", title="Logs")
+pageEmployees = st.Page("pageEmployees.py", title="Employees")
+pageLogs = st.Page("pageLogs.py", title="Logs")
 
-pg = st.navigation([employeesPage, logsPage], position="sidebar")
+pg = st.navigation([pageEmployees, pageLogs], position="sidebar")
 pg.run()
 with st.sidebar.container(key="sidebar_bottom"):
     if st.button("Log out", use_container_width=True):
