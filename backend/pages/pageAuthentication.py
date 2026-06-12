@@ -22,8 +22,8 @@ if not st.session_state.authenticated:
                 st.error("Wrong login or password")
         st.stop()
 
-pageEmployees = st.Page("pageEmployees.py", title="Employees")
-pageLogs = st.Page("pageLogs.py", title="Logs")
+pageEmployees = st.Page("pageEmployees.py")
+pageLogs = st.Page("pageLogs.py")
 
 pg = st.navigation([pageEmployees, pageLogs], position="sidebar")
 pg.run()
