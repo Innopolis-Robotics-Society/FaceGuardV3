@@ -12,12 +12,12 @@ Face recognition access control system for the university laboratory.
    `cd FaceGuardV3`
    
 **2. Install dependencies**  
-   `pip install -r requirements.txt`  
+   `pip install -r backend/requirements.txt`  
    
 **3. Set up the database**  
    `psql -U postgres -c "CREATE DATABASE faceguard;"`  
-   `psql -U postgres -d faceguard -f logs.sql"`  
-   `psql -U postgres -d faceguard -f employees.sql`
+   `psql -U postgres -d faceguard -f backend/pages/logs.sql`  
+   `psql -U postgres -d faceguard -f backend/pages/employees.sql`
    
 **4. Create your secrets file**  
    `cp .streamlit/secrets.toml.example .streamlit/secrets.toml`  
