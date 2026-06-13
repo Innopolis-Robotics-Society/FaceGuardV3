@@ -1,12 +1,42 @@
 import psycopg2 as ps2
 import streamlit as st
 
+def connect_to_db():
+    return ps2.connect(
+        host=st.secrets["host"],
+        database=st.secrets["database"],
+        user=st.secrets["user"],
+        password=st.secrets["password"],
+        options="-c lc_messages=C"
+)
+
+def init_db():
+    connection = connect_to_db()
+    cursor = connection.cursor()
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS logs (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(50) NOT NULL
+    );
+    """
+    try:
+        cursor.execute(create_table_query)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        st.error(f"Error: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
 def get_connection():
     return ps2.connect(
-        host=st.secrets["db_host"],
-        database=st.secrets["db_name"],
-        user=st.secrets["db_user"],
-        password=st.secrets["db_password"]
+        host=st.secrets["host"],
+        database=st.secrets["database"],
+        user=st.secrets["user"],
+        password=st.secrets["password"]
     )
 
 def add_log(name: str, status: str):
