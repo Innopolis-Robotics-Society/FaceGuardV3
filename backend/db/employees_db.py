@@ -2,6 +2,21 @@ import psycopg2 as ps2
 import pandas as pd
 import streamlit as st
 
+def create_db_if_not_exists():
+    conn = ps2.connect(
+        host=st.secrets["host"],
+        database="postgres",
+        user=st.secrets["user"],
+        password=st.secrets["password"]
+    )
+    conn.autocommit = True
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (st.secrets["database"],))
+    if not cursor.fetchone():
+        cursor.execute(f"CREATE DATABASE {st.secrets['database']}")
+    cursor.close()
+    conn.close()
+
 def connect_to_db():
     return ps2.connect(
         host=st.secrets["host"],
@@ -12,6 +27,7 @@ def connect_to_db():
 )
 
 def init_db():
+    create_db_if_not_exists()
     connection = connect_to_db()
     cursor = connection.cursor()
     create_table_query = """
