@@ -7,7 +7,7 @@ def connect_to_db():
         database=st.secrets["database"],
         user=st.secrets["user"],
         password=st.secrets["password"],
-        options="-c lc_messages=C"
+        sslmode="require"
 )
 
 def init_db():
@@ -36,7 +36,8 @@ def get_connection():
         host=st.secrets["host"],
         database=st.secrets["database"],
         user=st.secrets["user"],
-        password=st.secrets["password"]
+        password=st.secrets["password"],
+        sslmode="require"
     )
 
 def add_log(name: str, status: str):
