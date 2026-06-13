@@ -1,4 +1,5 @@
 import streamlit as st
+
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -22,11 +23,11 @@ if not st.session_state.authenticated:
                 st.error("Wrong login or password")
         st.stop()
 
-pageEmployees = st.Page("page_employees.py",title="employees")
-pageLogs = st.Page("page_logs.py",title="logs")
-pageAddEmployee = st.Page("page_add_employee.py",title="add an employee")
+page_logs = st.Page("page_logs.py",title="Access Logs History")
+page_employees = st.Page("page_employees.py",title="Employees")
+page_add_employee = st.Page("page_add_employee.py",title="Add an employee")
 
-pg = st.navigation([pageEmployees, pageLogs, pageAddEmployee], position="sidebar")
+pg = st.navigation([page_employees, page_add_employee, page_logs], position="sidebar")
 pg.run()
 with st.sidebar.container(key="sidebar_bottom"):
     if st.button("Log out", use_container_width=True):
