@@ -1,7 +1,11 @@
 import streamlit as st
 import base64
 import pandas as pd
-from employees_db import connect_to_db, init_db, load_employees, delete_employee, add_employees
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from db.employees_db import connect_to_db, init_db, load_employees, delete_employee, add_employees
 st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=True)
 init_db()
 df = load_employees()

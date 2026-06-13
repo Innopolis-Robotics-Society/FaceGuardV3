@@ -1,9 +1,9 @@
 import streamlit as st
 import sys
 import os
-sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from logs_db import get_all_logs, delete_old_logs, init_db
+from db.logs_db import get_all_logs, delete_old_logs, init_db
 init_db()
 delete_old_logs()
 
