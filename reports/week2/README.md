@@ -13,14 +13,15 @@
    - [Run Instructions](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/8268e948d1f1068b80be9aa6a9f1d01df7406602/README.md)
    - [Public Video Demonstration]()
 
-**5. Minimal PR/MR template** created during Week 2 **[TODO - ask Maksim]**
-Link to the Lychee configuration and latest successful protected-default-branch run.
+**5. Minimal PR/MR template** created during Week 2 **[TODO - Maksim]**
+[Minimal PR/MR template](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/.github/pull_request_template.md)
 
-**6. [Lychee configuration]()** **[TODO - ask Maksim]**
-List and justification of excluded Lychee links, plus confirmation of manual verification (visit each excluded link in a browser to confirm it is accessible before submission).  
+**6. [Lychee configuration]()** **[TODO - Maksim]**
+[Lychee configuration workflow](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/.github/workflows/lychee.yml)
+[Latest successful protected-default-branch run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/27469928204)
 
-**7. Excluded Lychee links:**  **[TODO - ask Maksim]**
-List and justification of excluded Lychee links, plus confirmation of manual verification (visit each excluded link in a browser to confirm it is accessible before submission).  
+**7. Excluded Lychee links:**  **[TODO - Maksim]**
+No links were excluded from Lychee checks
 
 **8. Screenshots**  **[TODO - Varya]**
 reports/week2/images/
