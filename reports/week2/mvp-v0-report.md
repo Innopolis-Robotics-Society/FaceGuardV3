@@ -22,7 +22,7 @@ MVP v0 implements the prototype screens and reflects its features. It covers the
 For now, this version has limitations, such as inability to connect to the camera or Raspberry Pi. Face recognition is not implemented yet. Employee face embeddings are not captured or stored.
 
 ## **6. Link to local setup instructions**  
-[Link](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/a9553c790f8eff41e28cc19c6705d5d3e2f48315/README.md)
+[Link](../../README.md)
 
 ## **7. Repeatable smoke-check scenario**  
 
