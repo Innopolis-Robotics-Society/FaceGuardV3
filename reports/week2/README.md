@@ -38,19 +38,39 @@
 
 No links were excluded from Lychee checks
 
-## **8. Screenshots**  **[TODO - Varya]**
-reports/week2/images/
-Screenshots embedded from reports/week2/images/ (use PNG format; keep file sizes reasonable):
-- Protected default branch settings
-- Example reviewed PR/MR (must be a review by another team member, not a self-review)
-- Selected prototype and interface artifacts
-- Deployed MVP v0 or runnable artifact
+## **8. Screenshots**  
+### Protected default branch settings
+![Protected branch](images/protected_branch.png)
 
-## **9. Coverage section**  **[TODO - Varya]**
-- References the stable IDs covered by the prototype.
-- Explains the selected prototype and interface artifacts and references the stable user-story IDs represented by them.
-- Links to reports/week2/mvp-v0-report.md, which explains the MVP v0 foundation and documents the repeatable smoke-check scenario.
-- References stable user-story IDs represented by MVP v0 where applicable. For example, if MVP v0 sets up authentication infrastructure, reference the related user story (e.g., US-02: User login) even if login is not yet functional. MVP v0 is a product foundation and does not need to implement a complete user story.
+### Reviewed PR
+![Reviewed PR](images/reviewed_pr.png)
+
+### Prototype
+![Prototype](images/admin_authentification.jpg)
+
+### MVP v0
+![MVP v0](images/mvp_v0.png)
+
+## 9. Coverage section  
+
+### Prototype covers:
+- US-01: Add people to database (Add Employee page)
+- US-03: Remove people from database (Remove Employee page)
+- US-07: Temporary access (Add Employee form with access type selection)
+- US-09: Logs of all attempts (Access Logs History page)
+- US-14: View list of people with access (Employees page)
+
+The runnable MVP v0 foundation and repeatable smoke-check scenario is documented in [mvp-v0-report.md](mvp-v0-report.md).
+
+### MVP v0 covers:  
+- US-01: Add people to database (Employee add form stores data in PostgreSQL)
+- US-03: Remove people from database (Employee delete is functional)
+- US-07: Temporary access (Access type selection is implemented in the form)
+- US-09: Logs of failed attempts (Logs page reads from and writes to PostgreSQL)
+- US-14: View list of people with access (Employees page reads from PostgreSQL)
+
+Face recognition (US-02), accuracy requirements (US-05), and database 
+capacity (US-04) are not yet implemented in MVP v0 and will be addressed in MVP v1.
 
 ## 10. Customer Transcript  
 [Link](./customer-meeting-transcript.md)
