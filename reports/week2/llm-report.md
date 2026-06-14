@@ -1,0 +1,4 @@
+Initially, all the participants used AI to analyze the assignment, understand what was happening in each section, divide tasks, clarify unclear phrases, and explain the intricacies of certain requirements. 
+Each participant also used AI for educational purposes and planning: our team used AI to autocomplete code fragments to speed up the coding process by eliminating the need to rewrite similar code (the AI ​​completed the code fragment) and to learn how to work with databases, to learn Figma, studying its structure and creating compositional details, to generate complex website elements with subsequent explanations, to review material on Git – a workflow (implying syntax) and to refine reporting. 
+AI was not used in other parts of this assignment.
+No one used AI to generate submitted content for the assignment; AI was viewed as a supporting tool.
