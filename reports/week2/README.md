@@ -40,16 +40,16 @@ No links were excluded from Lychee checks
 
 ## **8. Screenshots**  
 ### Protected default branch settings
-![Protected branch](images/protected_branch.png)
+![Protected branch](images/branch-protection.png)
 
 ### Reviewed PR
-![Reviewed PR](images/reviewed_pr.png)
+![Reviewed PR](images/pr-review.png)
 
 ### Prototype
-![Prototype](images/admin_authentification.jpg)
+![Prototype](images/prototype.png)
 
 ### MVP v0
-![MVP v0](images/mvp_v0.png)
+![MVP v0](images/mvp-v0.png)
 
 ## 9. Coverage section  
 
