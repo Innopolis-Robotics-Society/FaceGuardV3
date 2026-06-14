@@ -6,6 +6,15 @@
 **2. [User Stories](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/bead97ef8bdd7b929570978b5cae5d6319fc353a/reports/week2/user-stories.md)**
    
 **3. [The Interactive Prototype]()** **[TODO - ask Maks]**
+   - [Interactive prototype in Figma (View-Only)](https://www.figma.com/site/EW7rPFjvmRSljqN4YF11s5/Untitled?node-id=0-1&t=IpdOrloTLuXGB5YM-1)
+   #### Project from the outside
+   - ![Camera](images/possible_type_of_system.jpg)
+   #### Admin panel
+   - ![Authentification](images/admin_authentification.jpg)
+   - ![Employees](images/employees_section.jpg)
+   - ![Add employee](images/add_new_employee.jpg)
+   - ![Removing employee](images/removing_employee.jpg)
+   - ![Logs history](images/logs_history_section.jpg)
 
 **4. MVP v0** **[TODO - Varya, Sofia]**
    - [MVP v0 Report](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/c631ccf32c5b5a27a034ba94c462c438a36730ab/reports/week2/mvp-v0-report.md)
