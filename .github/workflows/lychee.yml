@@ -15,4 +15,4 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --verbose --no-progress --max-redirects 10 './**/*.md'
+          args: --verbose --no-progress --max-redirects 10 --accept 100..=103,200..=299,303 './**/*.md'
