@@ -26,8 +26,9 @@ if not st.session_state.authenticated:
 page_logs = st.Page("page_logs.py",title="Access Logs History")
 page_employees = st.Page("page_employees.py",title="Employees")
 page_add_employee = st.Page("page_add_employee.py",title="Add an employee")
+page_recognition = st.Page("page_recognition.py",title="Face Recognition")
 
-pg = st.navigation([page_employees, page_add_employee, page_logs], position="sidebar")
+pg = st.navigation([page_employees, page_add_employee, page_logs, page_recognition], position="sidebar")
 pg.run()
 with st.sidebar.container(key="sidebar_bottom"):
     if st.button("Log out", use_container_width=True):

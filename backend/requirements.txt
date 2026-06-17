@@ -1,2 +1,7 @@
 streamlit
 psycopg2-binary
+opencv-python
+insightface
+onnxruntime
+numpy
+pgvector
