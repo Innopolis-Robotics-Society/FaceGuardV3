@@ -49,7 +49,7 @@ if img_file_buffer is not None:
             status_indicator.markdown("Access Denied")
             match_info.markdown("unknown")
 
-            add_log("UNKNOWN", "ACCESS_DENIED", time)
+            add_log("UNKNOWN", "ACCESS_DENIED")
             st.error("Access Denied.")
     else:
         st.warning("No face detected.")
@@ -66,16 +66,3 @@ with col_a:
 with col_b:
     if st.button("Reset Status"):
         st.rerun()
-
-st.divider()
-st.subheader("Database Status")
-
-from db.employees_db import get_all_embeddings
-embeddings = get_all_embeddings()
-st.write(f"**Faces in database:** {len(embeddings)}")
-if embeddings:
-    st.write("**Registered faces:**")
-    for emp_id, name, _ in embeddings[:]:
-        st.write(f"- {name} (ID: {emp_id})")
-    if len(embeddings) > 5:
-        st.write(f"... and {len(embeddings) - 5} more")
