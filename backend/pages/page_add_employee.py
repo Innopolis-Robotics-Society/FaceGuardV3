@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from db.employees_db import add_employees
-from recognition.recognize import app as face_app
+from recognition.recognize import get_app
 
 st.markdown("<h1 style='text-align: center;'>Add an employee</h1>", unsafe_allow_html=True)
 

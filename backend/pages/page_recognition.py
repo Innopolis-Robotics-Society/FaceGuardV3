@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from recognition.recognize import app as face_app, get_face_capture_embedding
+from recognition.recognize import get_app, get_face_capture_embedding
 from db.employees_db import find_closest_embedding
 from db.logs_db import add_log
 
