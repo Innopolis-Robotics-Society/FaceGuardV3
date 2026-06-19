@@ -1,0 +1,112 @@
+name: Course Task
+description: Create an Assignment 3 course-process task
+title: "Course Task: "
+labels:
+  - "type: course task"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for Assignment 3 administrative, reporting, evidence, review, release, demo, or documentation tasks.
+        Course Task issues do not count toward the required 15 qualifying PBIs.
+
+  - type: input
+    id: task-title
+    attributes:
+      label: Task title
+      placeholder: "Prepare Week 3 report screenshots"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: assignment-part
+    attributes:
+      label: Assignment 3 part
+      options:
+        - Part 1 - Product Backlog migration
+        - Part 2 - Repository workflow
+        - Part 3 - Product Backlog refinement
+        - Part 4 - Acceptance criteria
+        - Part 5 - Estimation
+        - Part 6 - Definition of Done
+        - Part 7 - Sprint Backlog and MVP v1 planning
+        - Part 8 - MVP v1 implementation and verification
+        - Part 9 - Sprint Review
+        - Part 10 - Roadmap
+        - Part 11 - Reflection
+        - Part 12 - Retrospective
+        - Part 13 - LLM usage report
+        - Week 3 README / Moodle PDF
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Describe the course task and the expected evidence."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: work-status
+    attributes:
+      label: Work Status
+      options:
+        - To Do
+        - Ready
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-artifacts
+    attributes:
+      label: Expected artifacts or links
+      placeholder: |
+        - reports/week3/README.md
+        - reports/week3/images/...
+        - GitHub Project link
+        - Release link
+        - Demo video link
+    validations:
+      required: false
+
+  - type: textarea
+    id: completion-checklist
+    attributes:
+      label: Completion checklist
+      placeholder: |
+        - [ ] Required file created or updated
+        - [ ] Links verified
+        - [ ] Evidence added to Week 3 report
+        - [ ] PR reviewed
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      placeholder: "Add relevant notes, risks, or remaining gaps."
+    validations:
+      required: false
