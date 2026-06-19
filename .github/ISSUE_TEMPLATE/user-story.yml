@@ -1,0 +1,143 @@
+name: User Story
+description: Create a user-story Product Backlog Item
+title: "US-XXX: "
+labels:
+  - "type: user story"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for user stories migrated from Assignment 2 or newly discovered user stories.
+        Preserve the stable ID format: US-XXX.
+
+  - type: input
+    id: stable-id
+    attributes:
+      label: Stable user-story ID
+      description: Use the stable ID from docs/user-stories.md.
+      placeholder: "US-001"
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User-story statement
+      description: Use the format "As a ..., I want ..., so that ..."
+      placeholder: "As a new student, I want to ask questions publicly, so that other students can answer them."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: moscow-priority
+    attributes:
+      label: MoSCoW priority
+      options:
+        - Must Have
+        - Should Have
+        - Could Have
+        - Won't Have
+    validations:
+      required: true
+
+  - type: dropdown
+    id: requirement-status
+    attributes:
+      label: Requirement status
+      description: Use the canonical requirement status from the course process requirements.
+      options:
+        - Active
+        - Removed
+    validations:
+      required: true
+
+  - type: dropdown
+    id: work-status
+    attributes:
+      label: Work Status
+      description: Use the current implementation status.
+      options:
+        - To Do
+        - Ready
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true
+
+  - type: input
+    id: story-points
+    attributes:
+      label: Story Points
+      placeholder: "Example: 3"
+    validations:
+      required: true
+
+  - type: input
+    id: mvp-version
+    attributes:
+      label: MVP version
+      description: Use MVP v1, MVP v2, MVP v3, or leave as not planned.
+      placeholder: "MVP v1"
+    validations:
+      required: false
+
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint milestone
+      placeholder: "Sprint 1"
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      description: The reviewer must be different from the assignee for Sprint-selected PBIs.
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Required for MVP v1 PBIs and Sprint-selected PBIs.
+      placeholder: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: linked-items
+    attributes:
+      label: Linked supporting PBIs / related issues
+      placeholder: |
+        - Supports: #...
+        - Depends on: #...
+        - Blocks: #...
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes, constraints, assumptions, and open questions
+      placeholder: |
+        Notes:
+        Constraints:
+        Assumptions:
+        Open questions:
+    validations:
+      required: false

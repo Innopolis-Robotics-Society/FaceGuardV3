@@ -1,0 +1,157 @@
+name: Other PBI
+description: Create a non-user-story Product Backlog Item
+title: "PBI: "
+labels:
+  - "type: other pbi"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for technical, infrastructure, design, deployment, testing, documentation, or other supporting Product Backlog Items.
+
+  - type: input
+    id: pbi-title
+    attributes:
+      label: PBI title
+      placeholder: "Implement question creation API"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Describe what must be built, changed, configured, tested, or documented."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pbi-type
+    attributes:
+      label: PBI type
+      options:
+        - Frontend
+        - Backend
+        - Database
+        - API
+        - Testing
+        - Deployment
+        - Documentation
+        - Design
+        - Infrastructure
+        - Security
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: moscow-priority
+    attributes:
+      label: MoSCoW priority
+      options:
+        - Must Have
+        - Should Have
+        - Could Have
+        - Won't Have
+    validations:
+      required: true
+
+  - type: dropdown
+    id: work-status
+    attributes:
+      label: Work Status
+      options:
+        - To Do
+        - Ready
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true
+
+  - type: input
+    id: story-points
+    attributes:
+      label: Story Points
+      placeholder: "Example: 2"
+    validations:
+      required: true
+
+  - type: input
+    id: mvp-version
+    attributes:
+      label: MVP version
+      placeholder: "MVP v1"
+    validations:
+      required: false
+
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint milestone
+      placeholder: "Sprint 1"
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      description: The reviewer must be different from the assignee for Sprint-selected PBIs.
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Required for MVP v1 PBIs and Sprint-selected PBIs.
+      placeholder: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: verification-plan
+    attributes:
+      label: Verification plan
+      placeholder: |
+        - Manual check:
+        - Automated test:
+        - Screenshot/log/demo evidence:
+    validations:
+      required: false
+
+  - type: textarea
+    id: linked-user-stories
+    attributes:
+      label: Linked user stories / related issues
+      placeholder: |
+        - Supports: US-XXX / #...
+        - Depends on: #...
+        - Blocks: #...
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes, constraints, assumptions, and open questions
+      placeholder: |
+        Notes:
+        Constraints:
+        Assumptions:
+        Open questions:
+    validations:
+      required: false

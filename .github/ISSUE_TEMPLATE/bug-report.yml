@@ -1,0 +1,137 @@
+name: Bug Report
+description: Report a defect or incorrect behavior
+title: "Bug: "
+labels:
+  - "type: bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for defects found during MVP v1 implementation, testing, review, or demo preparation.
+
+  - type: input
+    id: bug-summary
+    attributes:
+      label: Bug summary
+      placeholder: "Question form allows empty title"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Describe the defect and where it appears."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. Enter ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: Expected result
+      placeholder: "Describe what should happen."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-result
+    attributes:
+      label: Actual result
+      placeholder: "Describe what actually happens."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: work-status
+    attributes:
+      label: Work Status
+      options:
+        - To Do
+        - Ready
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true
+
+  - type: input
+    id: mvp-version
+    attributes:
+      label: Affected MVP version
+      placeholder: "MVP v1"
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      placeholder: "@github-username"
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      placeholder: |
+        - Screenshot:
+        - Log:
+        - Screen recording:
+        - Browser/OS:
+    validations:
+      required: false
+
+  - type: textarea
+    id: fix-acceptance-criteria
+    attributes:
+      label: Fix acceptance criteria
+      placeholder: |
+        - [ ] Given ..., when ..., then ...
+        - [ ] Given ..., when ..., then ...
+        - [ ] Regression check completed
+    validations:
+      required: false
+
+  - type: textarea
+    id: related-items
+    attributes:
+      label: Related issues or PRs
+      placeholder: |
+        - Related to: #...
+        - Blocks: #...
+        - Fix PR: #...
+    validations:
+      required: false
