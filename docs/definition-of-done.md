@@ -1,6 +1,6 @@
 # Definition of Done
 
-A Product Backlog Item (PBI) may be marked Done only when ALL of the following are satisfied:
+A Product Backlog Item (PBI) may be marked Done only when all of the following are satisfied:
 
 - [ ] All issue-specific acceptance criteria are satisfied  
 - [ ] The work is reviewed and approved by a different team member than the implementer  
