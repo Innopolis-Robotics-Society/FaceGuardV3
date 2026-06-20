@@ -11,6 +11,6 @@
 | US-10   | Liveness detection                     | Could Have      | [#49](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/49) | Active             | To Do       | —         |
 | US-11   | Recognize in a crowd                   | Could Have      | [#50](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/50) | Active             | To Do       | —         |
 | US-12   | Recognition with accessories           | Could Have      | [#51](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/51) | Active             | To Do       | —         |
-| US-13   | Prevent photo substitution             | -               | [#52](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/52) | Removed            | -           | -         |
+| US-13   | Prevent photo substitution             | —               | [#52](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/52) | Removed            | —           | —         |
 | US-14   | View list of people with access        | Should Have     | [#53](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/53) | Active             | Done        | Sprint 1  |
 | US-06   | Avoid loss of card                     | —               | [#45](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/45) | Removed            | —           | —         |
