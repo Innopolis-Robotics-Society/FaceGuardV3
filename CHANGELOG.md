@@ -4,7 +4,7 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-## 1.0.0 - 2026-06-15 - MVP v1
+## [1.0.0] - 2026-06-15 - MVP v1
 
 ### Added
 - Face recognition using InsightFace (buffalo_l model)
@@ -21,5 +21,6 @@ All notable changes to FaceGuard will be documented in this file.
 - PostgreSQL database for logs storage
 - Automatic deletion of logs older than 3 days
 - Local setup instructions in root README.md
+
 
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0
