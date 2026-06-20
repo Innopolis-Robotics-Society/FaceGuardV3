@@ -1,6 +1,10 @@
 # Changelog
+All notable changes to FaceGuard will be documented in this file.
 
-## [0.2.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v1) - 15.06.2026 - MVP v1
+## [Unreleased]
+—
+
+## [0.2.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v1) - 2026.06.15 - MVP v1
 
 ### Added
 - Face recognition using InsightFace (buffalo_l model)
@@ -8,9 +12,8 @@
 - Face embedding generation and storage in employee database
 - Face recognition test page with live camera feed and confidence score
 - Docker containerization for x86 and ARM deployment
-- Temporary access with start and end date selection
 
-## [0.1.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v0) - 08.06.2026 - MVP v0
+## [0.1.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v0) - 2026.06.08 - MVP v0
 
 ### Added
 - Authentication page for admin login with login and password
@@ -22,6 +25,3 @@
 - PostgreSQL database for logs storage (ID, name, timestamp, status)
 - Automatic deletion of logs older than 3 days
 - Local setup instructions in root README.md
-
-### Changed
-- Temporary access input changed from number of days to date range picker
