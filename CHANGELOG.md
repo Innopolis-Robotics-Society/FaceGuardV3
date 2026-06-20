@@ -4,7 +4,8 @@ All notable changes to FaceGuard will be documented in this file.
 ## [Unreleased]
 —
 
-## [0.2.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v1) - 2026.06.15 - MVP v1
+<!-- ## [0.2.0](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v1) - 2026.06.15 - MVP v1 -->
+## [0.2.0] - 2026.06.15 - MVP v1
 
 ### Added
 - Face recognition using InsightFace (buffalo_l model)
