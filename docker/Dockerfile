@@ -16,7 +16,6 @@ RUN pip install --no-cache-dir \
     numpy \
     pandas
 
-COPY backend/.streamlit/secrets.toml /app/.streamlit/secrets.toml
 COPY backend/ ./backend/
 
 EXPOSE 8501
