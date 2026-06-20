@@ -5,7 +5,7 @@
 Describe the change in 2–5 sentences.
 
 Example:
-This PR implements the question creation form for MVP v1. It adds client-side validation, connects the form to the question list, and updates the documentation for the delivered flow.
+This PR implements the question creation form for MVP v1. It adds validation, connects the feature to the existing flow, and updates the required documentation.
 
 ---
 
@@ -15,21 +15,248 @@ Closes #
 
 Related issues:
 
-- #
+* #
 
 ---
 
 ## Assignment 3 workflow evidence
 
-- [ ] This PR is linked to an issue.
-- [ ] The branch name follows `<issue-number>-short-description`.
-- [ ] The PR was created from an issue-linked branch.
-- [ ] The PR has a reviewer who is different from the assignee.
-- [ ] The PR has at least one meaningful review comment.
-- [ ] The PR has approval before merge.
-- [ ] The PR will be merged using a merge commit.
+* [ ] This PR is linked to an issue.
+* [ ] The branch name follows `<issue-number>-short-description`.
+* [ ] The PR was created from an issue-linked branch.
+* [ ] The PR has a reviewer who is different from the assignee.
+* [ ] The PR has at least one meaningful review comment.
+* [ ] The PR has approval before merge.
+* [ ] The PR will be merged using a merge commit.
 
 Branch name:
 
 ```text
 <issue-number>-short-description
+```
+
+---
+
+## Type of work
+
+Select all that apply:
+
+* [ ] User Story
+* [ ] Other PBI
+* [ ] Course Task
+* [ ] Bug Report
+* [ ] Documentation
+* [ ] Testing
+* [ ] Refactoring
+* [ ] Deployment / Release
+* [ ] Changelog update
+
+---
+
+## MVP / Sprint metadata
+
+MVP version:
+
+* [ ] MVP v1
+* [ ] MVP v2
+* [ ] MVP v3
+* [ ] Not assigned to an MVP version
+
+Sprint milestone:
+
+```text
+Sprint:
+```
+
+Assignee:
+
+```text
+@
+```
+
+Reviewer:
+
+```text
+@
+```
+
+---
+
+## What changed
+
+List the concrete changes made in this PR.
+
+*
+*
+*
+
+---
+
+## Acceptance criteria verification
+
+For every acceptance criterion from the linked issue, describe how it was verified.
+
+### AC1
+
+Issue criterion:
+
+```text
+```
+
+Verification evidence:
+
+```text
+```
+
+Status:
+
+* [ ] Verified
+* [ ] Not verified
+* [ ] Not applicable
+
+### AC2
+
+Issue criterion:
+
+```text
+```
+
+Verification evidence:
+
+```text
+```
+
+Status:
+
+* [ ] Verified
+* [ ] Not verified
+* [ ] Not applicable
+
+### AC3
+
+Issue criterion:
+
+```text
+```
+
+Verification evidence:
+
+```text
+```
+
+Status:
+
+* [ ] Verified
+* [ ] Not verified
+* [ ] Not applicable
+
+Additional acceptance criteria, if any:
+
+```text
+```
+
+---
+
+## Testing evidence
+
+### Manual testing
+
+Describe manual checks performed.
+
+```text
+```
+
+### Automated tests
+
+Describe automated tests or write `Not applicable`.
+
+```text
+```
+
+### Commands executed
+
+```bash
+```
+
+### Test result
+
+* [ ] Passed
+* [ ] Failed
+* [ ] Not applicable
+
+---
+
+## Screenshots / demo evidence
+
+Add screenshots, screen recordings, logs, or links when relevant.
+
+```text
+Screenshot:
+Demo:
+Log:
+```
+
+---
+
+## Documentation impact
+
+* [ ] README updated
+* [ ] docs updated
+* [ ] reports/week3 updated
+* [ ] No documentation change needed
+
+Files changed:
+
+```text
+```
+
+---
+
+## Changelog
+
+Select exactly one option:
+
+* [ ] Added or updated a user-visible entry in `CHANGELOG.md`.
+* [ ] Not applicable because the change is not user-visible.
+
+---
+
+## Definition of Done checklist
+
+* [ ] The linked issue is clear and traceable.
+* [ ] The implementation satisfies the acceptance criteria.
+* [ ] The change was tested.
+* [ ] The PR was reviewed by another team member.
+* [ ] Required documentation was updated.
+* [ ] `CHANGELOG.md` was updated for user-visible changes, or changelog update was marked as not applicable.
+* [ ] No secrets, private customer data, or personal information were committed.
+* [ ] The branch can be merged into the default branch.
+* [ ] The linked issue can be moved to `Done` after merge.
+
+---
+
+## Risks and limitations
+
+Describe known limitations, remaining risks, or follow-up work.
+
+```text
+```
+
+---
+
+## Reviewer notes
+
+Reviewer should check:
+
+* [ ] The linked issue exists.
+* [ ] The branch name follows the required format.
+* [ ] Acceptance criteria were verified.
+* [ ] Exactly one changelog option is selected.
+* [ ] The change matches the MVP/Sprint scope.
+* [ ] The PR contains enough evidence for Assignment 3.
+* [ ] The PR can be safely merged with a merge commit.
+
+Meaningful review comment:
+
+```text
+```
