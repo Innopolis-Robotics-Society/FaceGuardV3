@@ -48,6 +48,5 @@ The customer validated the demonstrated software increment, under the condition 
 ## Scope Changes  
 Up to this moment, no changes have occurred in the scope of the project, only minor technical details.  
   
-## Resulting Product Backlog
-[Link] (https://github.com/orgs/Innopolis-Robotics-Society/projects/5)
+## [Resulting Product Backlog](https://github.com/orgs/Innopolis-Robotics-Society/projects/5)
 
