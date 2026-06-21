@@ -1,0 +1,11 @@
+## Learning points
+The team learned that migrating the Product Backlog into a structured table reveals hidden dependencies — for example, the "Add OpenCV for image processing and InsightFace for face recognition" task directly requires the testing page and embedding generation. Story Point estimation exposed that accuracy‑related tasks (embedding averaging, accessories, liveness) were significantly underestimated compared to V0 UI work. The customer explicitly separated success rate (≥ 95%) from confidence score, which sharpened acceptance criteria. Packaging into Docker confirmed that cross‑environment portability without containers would have been a real bottleneck.
+
+## Validated assumptions
+We assumed InsightFace could be integrated into the backend without major dependency issues — confirmed: libraries are installed and the testing page displays results. We assumed a single frame was sufficient for matching — rejected by the customer: several samples with averaged embeddings are required for reliability. We assumed MVP v1 would be deployed directly on the customer’s system — rejected: the customer explicitly requested Docker as early as possible.
+
+## Friction and gaps
+Raspberry Pi 5 setup and real web‑camera connection are not yet completed — the task moved to V2, blocking on‑target testing. The temporary registration design is still in To Do: the customer wants a date range (from/to), not a number of days. The LED indication task is estimated at 20 SP, assigned only to grex861, and still in To Do. Accuracy‑parameter testing is also at 20 SP with no detailed plan. The UPS hardware question remains open.
+
+## Planned response
+In the next sprint the team will focus on V2 tasks: Raspberry Pi 5 environment setup with web‑camera (5 SP), and empirically determining the optimal number of frames for registration and recognition (13 SP). In parallel, the temporary registration design will be finalized (1 SP). Estimates for accessories recognition and liveness detection will be revisited after first metrics arrive from the real device. API documentation will be synchronized with PRs, with ownership assigned to the backend developer.
