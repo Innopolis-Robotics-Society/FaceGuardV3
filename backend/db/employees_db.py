@@ -3,6 +3,10 @@ import psycopg2.extras
 import pandas as pd
 import streamlit as st
 import numpy as np
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 def connect_to_db():
     return ps2.connect(
@@ -95,7 +99,7 @@ def get_all_embeddings():
 
 def find_closest_embedding(target_embedding, threshold=0.56):
     """Find the closest matching embedding in the database"""
-    from recognition.recognize import compare_faces
+    from faceguard.recognize import cosine_similarity
     
     embeddings_data = get_all_embeddings()
     if not embeddings_data:
@@ -105,7 +109,8 @@ def find_closest_embedding(target_embedding, threshold=0.56):
     best_similarity = 0
     
     for emp_id, name, db_embedding in embeddings_data:
-        similarity, is_match = compare_faces(target_embedding, db_embedding, threshold)
+        similarity = cosine_similarity(target_embedding, db_embedding)
+        is_match = similarity >= threshold
         if is_match and similarity > best_similarity:
             best_similarity = similarity
             best_match = (emp_id, name, similarity)

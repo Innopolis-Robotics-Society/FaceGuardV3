@@ -2,7 +2,7 @@ import os
 import numpy as np
 from insightface.app import FaceAnalysis
 
-from detect import select_closest_face, is_good_face
+from .detect import select_closest_face, is_good_face
 
 
 DEFAULT_MODEL_NAME = "buffalo_l"
