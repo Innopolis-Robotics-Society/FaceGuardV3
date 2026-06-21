@@ -4,7 +4,7 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-06-15 - MVP v1
+## [1.0.0] - 2026-06-21 - MVP v1
 
 ### Added
 - Face recognition using InsightFace (buffalo_l model)

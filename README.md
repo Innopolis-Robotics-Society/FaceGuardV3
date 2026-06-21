@@ -17,11 +17,14 @@ Open `backend/.streamlit/secrets.toml` and fill in your credentials:
 - `admin_login` - your admin username
 - `admin_password` - your admin password
 
-**3. Build and run with Docker**
+**3. Make sure Docker is running**  
+Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
+
+**4. Build and run with Docker**
 ```bash
 docker compose -f docker/docker-compose.yml build
 docker compose -f docker/docker-compose.yml up
 ```
 
-**4. Access the application**  
+**5. Access the application**  
 Open your browser at `http://localhost:8501`
