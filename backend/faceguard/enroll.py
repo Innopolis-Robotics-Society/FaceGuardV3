@@ -1,7 +1,7 @@
 import cv2
 
-from detect import draw_face_box
-from recognize import (
+from .detect import draw_face_box
+from .recognize import (
     create_face_app,
     extract_embedding_from_frame,
     average_embeddings,

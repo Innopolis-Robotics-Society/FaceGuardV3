@@ -1,14 +1,14 @@
 import argparse
 import cv2
 
-from enroll import enroll_user
-from recognize import (
+from .enroll import enroll_user
+from .recognize import (
     create_face_app,
     extract_embedding_from_frame,
     load_embedding,
     verify_embedding,
 )
-from detect import draw_face_box
+from .detect import draw_face_box
 
 
 def run_recognition(

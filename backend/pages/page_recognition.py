@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from recognition.recognize import get_app, get_face_capture_embedding
+from faceguard.recognize import create_face_app, extract_embedding_from_frame, cosine_similarity
 from db.employees_db import find_closest_embedding
 from db.logs_db import add_log
 
@@ -30,7 +30,8 @@ if img_file_buffer is not None:
     bytes_data = img_file_buffer.getvalue()
     cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
     
-    embedding = get_face_capture_embedding(cv2_img)
+    app = create_face_app()
+    embedding, face = extract_embedding_from_frame(app, cv2_img)
     
     if embedding is not None:
         match = find_closest_embedding(embedding)

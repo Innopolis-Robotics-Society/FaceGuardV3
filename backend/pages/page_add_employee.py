@@ -6,7 +6,8 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from db.employees_db import add_employees
-from recognition.recognize import get_app
+from faceguard.recognize import create_face_app, extract_embedding_from_frame, get_face_embedding
+from faceguard.detect import select_closest_face, is_good_face
 
 st.markdown("<h1 style='text-align: center;'>Add an employee</h1>", unsafe_allow_html=True)
 
@@ -16,14 +17,19 @@ embedding = None
 if camera_picture is not None:
     img_bytes = np.frombuffer(camera_picture.getvalue(), np.uint8)
     img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
-    faces = face_app.get(img)
+    
+    app = create_face_app()
+    faces = app.get(img)
+    face = select_closest_face(faces)
 
-    if len(faces) == 0:
+    if face is None:
         st.warning("No face detected.")
     elif len(faces) > 1:
         st.warning("Multiple faces detected. Please show only one face.")
+    elif not is_good_face(face, img):
+        st.warning("Face quality too low. Please ensure your face is clearly visible.")
     else:
-        embedding = faces[0].embedding
+        embedding = get_face_embedding(face)
         st.success("Face detected.")
         st.image(camera_picture)
 

@@ -1,4 +1,4 @@
-from enroll import enroll_user
+from .enroll import enroll_user
 
 
 def collect_user_face_dataset(
