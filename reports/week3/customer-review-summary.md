@@ -39,14 +39,14 @@ The customer validated the demonstrated software increment, under the condition 
 
 ## Action Points
 
-- Urgent make repository Dockerization
-- Modify form for Temporary Access
-- Re-engineer pipeline to extract 5-10 frames and make an average embedding vector
-- Test lighter model to recognize face than ONNX Runtime Buffalo-L model
-- Do a face cropping before making an embedding
+- Urgent make repository Dockerization (Issue #56)
+- Modify form for Temporary Access (Isuue #57)
+- Re-engineer pipeline to extract 5-10 frames and make an average embedding vector (Issue #59)
+- Test lighter model to recognize face than ONNX Runtime Buffalo-L model (Issue #58)
+- Do a face cropping before making an embedding (Issue #61)
 
 ## Scope Changes  
 Up to this moment, no changes have occurred in the scope of the project, only minor technical details.  
   
-## Resulting Product Backlog
+## [Resulting Product Backlog] (https://github.com/orgs/Innopolis-Robotics-Society/projects/5)
 
