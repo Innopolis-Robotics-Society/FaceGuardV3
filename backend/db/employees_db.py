@@ -27,11 +27,37 @@ def init_db():
         registration_date DATE DEFAULT CURRENT_DATE,
         status VARCHAR(50) NOT NULL DEFAULT 'Permanent',
         embedding FLOAT8[],
-        access_days INTEGER
+        start_date DATE,
+        expiration_date DATE
     );
     """
     try:
         cursor.execute(create_table_query)
+        cursor.execute("""
+            ALTER TABLE employees 
+            ADD COLUMN IF NOT EXISTS start_date DATE;
+        """)
+        cursor.execute("""
+            ALTER TABLE employees 
+            ADD COLUMN IF NOT EXISTS expiration_date DATE;
+        """)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        st.error(f"Error: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
+def delete_expired_employees():
+    connection = connect_to_db()
+    cursor = connection.cursor()
+    try:
+        cursor.execute("""
+            DELETE FROM employees 
+            WHERE status = 'Temporary' 
+            AND expiration_date < CURRENT_DATE;
+        """)
         connection.commit()
     except Exception as e:
         connection.rollback()
@@ -41,8 +67,9 @@ def init_db():
         connection.close()
 
 def load_employees():
+    delete_expired_employees()
     connection = connect_to_db()
-    query = "SELECT id, name, registration_date, status FROM employees ORDER BY id;"
+    query = "SELECT id, name, registration_date, status, start_date, expiration_date FROM employees ORDER BY id;"
     df = pd.read_sql(query, connection)
     connection.close()
     return df
@@ -60,7 +87,7 @@ def delete_employee(employee_id):
         cursor.close()
         connection.close()
 
-def add_employees(name, status, embedding=None, access_days=None):
+def add_employees(name, status, embedding=None, start_date=None, expiration_date=None):
     connection = connect_to_db()
     cursor = connection.cursor()
     cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
@@ -73,8 +100,8 @@ def add_employees(name, status, embedding=None, access_days=None):
     embedding = embedding.tolist() if embedding is not None else None
     
     cursor.execute(
-        "INSERT INTO employees (name, status, embedding, access_days) VALUES (%s, %s, %s, %s);",
-        (name, status, embedding, access_days)
+        "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
+        (name, status, embedding, start_date, expiration_date)
     )
     connection.commit()
     cursor.close()

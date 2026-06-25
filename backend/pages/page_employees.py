@@ -48,9 +48,11 @@ if df is not None:
         disabled=["id", "name", "registration_date", "status"],
         column_config={
             "id": None,
-            "status": st.column_config.SelectboxColumn("Status", options = ["Permanent", "Temporary"]),
+            "status": st.column_config.SelectboxColumn("Status", options=["Permanent", "Temporary"]),
             "name": "Employee's name",
-            "registration_date": "Registration date"
+            "registration_date": "Registration date",
+            "start_date": "Start date",
+            "expiration_date": "Expiration date"
         },
         key=table_key
     )
