@@ -39,7 +39,12 @@ jobs:
       - name: Run tests if tests directory exists
         run: |
           if [ -d tests ]; then
-            pytest tests/
+            if find tests -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+              pytest tests/
+            else
+              echo "Tests directory exists, but no pytest test files were found yet."
+              echo "Test execution will be added after Assignment 4 Part 4 and Part 7 work."
+            fi
           else
             echo "No tests directory found. Test execution will be added after Assignment 4 Part 4 and Part 7 work."
           fi
