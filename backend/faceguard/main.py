@@ -7,6 +7,7 @@ from .recognize import (
     extract_embedding_from_frame,
     load_embedding,
     verify_embedding,
+    LivenessDetector,
 )
 from .detect import draw_face_box
 
@@ -17,6 +18,7 @@ def run_recognition(
     camera_index: int = 0,
 ):
     app = create_face_app()
+    liveness_detector = LivenessDetector()
     saved_embedding = load_embedding(embedding_path)
 
     cap = cv2.VideoCapture(camera_index)
@@ -30,9 +32,9 @@ def run_recognition(
         if not ret:
             break
 
-        current_embedding, face = extract_embedding_from_frame(app, frame)
+        current_embedding, face, status = extract_embedding_from_frame(app, liveness_detector, frame)
 
-        if current_embedding is not None and face is not None:
+        if status == "real" and current_embedding is not None and face is not None:
             verified, score = verify_embedding(
                 current_embedding=current_embedding,
                 saved_embedding=saved_embedding,
@@ -47,6 +49,12 @@ def run_recognition(
                 color = (0, 0, 255)
 
             draw_face_box(frame, face, label, color=color)
+        
+        elif status == "spoof":
+            draw_face_box(frame, face, "ACCESS DENIED: SPOOF", color = (0, 0, 255))
+        
+        elif status == "bad_face":
+            draw_face_box(frame, face, "Look straight", color = (0, 255, 255))
 
         else:
             cv2.putText(
@@ -55,7 +63,7 @@ def run_recognition(
                 (30, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.8,
-                (0, 0, 255),
+                (255, 0, 0), #было (0, 0, 255)
                 2,
             )
 

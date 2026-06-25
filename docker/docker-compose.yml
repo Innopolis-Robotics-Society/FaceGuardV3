@@ -7,4 +7,5 @@ services:
       - "8501:8501"
     volumes:
       - ../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
+      - ./insightface_models:/root/.insightface/models
     restart: unless-stopped

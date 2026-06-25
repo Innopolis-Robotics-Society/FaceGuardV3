@@ -1,3 +1,5 @@
+import onnxruntime
+import cv2
 import os
 import numpy as np
 from insightface.app import FaceAnalysis
@@ -5,7 +7,75 @@ from insightface.app import FaceAnalysis
 from .detect import select_closest_face, is_good_face
 
 
-DEFAULT_MODEL_NAME = "buffalo_l"
+DEFAULT_MODEL_NAME = "buffalo_s"
+
+class LivenessDetector:
+    def __init__(self, threshold=0.50):
+        self.threshold = threshold
+        self.session = onnxruntime.InferenceSession("/root/.insightface/models/minifasnet.onnx",
+            providers=["CPUExecutionProvider"])
+
+    def analyze(self, frame: np.ndarray, bbox: np.ndarray) -> tuple[bool, float]:
+        # print(f"DEBUG: analyze() запущен. Bbox: {bbox}", flush=True)
+        x1, y1, x2, y2 = bbox.astype(int)
+        w = x2 - x1
+        h = y2 - y1
+
+        cx = x1 + w // 2
+        cy = y1 + h // 2
+        
+        size = int(max(w, h) * 2.7)
+
+        src_x1 = cx - size // 2
+        src_y1 = cy - size // 2
+        src_x2 = src_x1 + size
+        src_y2 = src_y1 + size
+
+        img_h, img_w = frame.shape[:2]
+
+        crop_x1 = max(0, src_x1)
+        crop_y1 = max(0, src_y1)
+        crop_x2 = min(img_w, src_x2)
+        crop_y2 = min(img_h, src_y2)
+
+        if crop_x2 <= crop_x1 or crop_y2 <= crop_y1:
+            return False, 0.0
+        
+        cropped = frame[crop_y1:crop_y2, crop_x1:crop_x2]
+
+        pad_left = crop_x1 - src_x1
+        pad_top = crop_y1 - src_y1
+        pad_right = src_x2 - crop_x2
+        pad_bottom = src_y2 - crop_y2
+
+        face_crop = cv2.copyMakeBorder(
+            cropped, 
+            pad_top, 
+            pad_bottom, 
+            pad_left, 
+            pad_right, 
+            borderType=cv2.BORDER_CONSTANT, 
+            value=[0, 0, 0]
+        )
+
+
+        # print(f"DEBUG: Кроп лица успешно сделан. Размер кропа: {face_crop.shape}", flush=True)
+        face_crop = cv2.resize(face_crop, (80, 80))
+        img = face_crop.astype(np.float32)
+        img = np.transpose(img, (2, 0, 1))
+        img = np.expand_dims(img, axis=0)
+
+        input_name = self.session.get_inputs()[0].name
+        raw_outputs = self.session.run(None, {input_name: img})[0][0]
+
+        exp_logits = np.exp(raw_outputs - np.max(raw_outputs))
+        probabilities = exp_logits / np.sum(exp_logits)
+
+        mock_liveness_score = float(probabilities[1])
+        is_live = mock_liveness_score >= self.threshold
+        # print(f"DEBUG: Выход модели MiniFASNet (вероятности): {probabilities}", flush=True)
+
+        return is_live, mock_liveness_score
 
 
 def create_face_app(model_name: str = DEFAULT_MODEL_NAME):
@@ -76,19 +146,23 @@ def verify_embedding(
     return verified, score
 
 
-def extract_embedding_from_frame(app, frame):
+def extract_embedding_from_frame(app, liveness_detector: LivenessDetector, frame):
     faces = app.get(frame)
     face = select_closest_face(faces)
 
     if face is None:
-        return None, None
+        return None, None, "no_face"
 
     if not is_good_face(face, frame):
-        return None, face
+        return None, face, "bad_face"
+
+    is_live, liveness_score = liveness_detector.analyze(frame, face.bbox)
+    if not is_live:
+        return None, face, "spoof"
 
     embedding = get_face_embedding(face)
 
-    return embedding, face
+    return embedding, face, "real"
 
 
 def save_embedding(path: str, embedding: np.ndarray):

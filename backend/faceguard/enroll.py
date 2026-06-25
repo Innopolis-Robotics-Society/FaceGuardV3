@@ -6,6 +6,7 @@ from .recognize import (
     extract_embedding_from_frame,
     average_embeddings,
     save_embedding,
+    LivenessDetector,
 )
 
 
@@ -15,6 +16,7 @@ def enroll_user(
     camera_index: int = 0,
 ):
     app = create_face_app()
+    liveness_detector = LivenessDetector()
 
     cap = cv2.VideoCapture(camera_index)
 
@@ -29,9 +31,9 @@ def enroll_user(
         if not ret:
             break
 
-        embedding, face = extract_embedding_from_frame(app, frame)
+        embedding, face, status = extract_embedding_from_frame(app, liveness_detector, frame)
 
-        if embedding is not None and face is not None:
+        if status == "real" and embedding is not None and face is not None:
             embeddings.append(embedding)
 
             draw_face_box(
@@ -40,6 +42,10 @@ def enroll_user(
                 f"Collecting: {len(embeddings)}/{target_count}",
                 color=(0, 255, 0),
             )
+        elif status == "spoof":
+            draw_face_box(frame, face, "SPOOFING ATTEMPT", color = (0, 0, 255))
+        elif status == "bad_face":
+            draw_face_box(frame, face, "Bad angle/blur", color = (0, 255, 255))
         else:
             cv2.putText(
                 frame,
