@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from faceguard.recognize import create_face_app, extract_embedding_from_frame, cosine_similarity
+from faceguard.recognize import create_face_app, extract_embedding_from_frame, cosine_similarity, LivenessDetector
 from db.employees_db import find_closest_embedding
 from db.logs_db import add_log
 
@@ -31,9 +31,11 @@ if img_file_buffer is not None:
     cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
     
     app = create_face_app()
-    embedding, face = extract_embedding_from_frame(app, cv2_img)
+    liveness_detector = LivenessDetector()
+
+    embedding, face, status = extract_embedding_from_frame(app, liveness_detector, cv2_img)
     
-    if embedding is not None:
+    if status == "real" and embedding is not None:
         match = find_closest_embedding(embedding)
         
         if match:
@@ -52,6 +54,13 @@ if img_file_buffer is not None:
 
             add_log("UNKNOWN", "ACCESS_DENIED")
             st.error("Access Denied.")
+    elif status == "spoof":
+        status_indicator.markdown("<span style='color:red; font-weight:bold'>SPOOF DETECTED</span>", unsafe_allow_html=True)
+        match_info.markdown("Security Alert")
+        add_log("UNKNOWN", "SPOOF_ATTEMPT")
+        st.error("Access Denied: 2D Photo Attack Detected!")
+    elif status == "bad_face":
+        st.warning("Please look straight at the camera. Face is blurred or angled.")
     else:
         st.warning("No face detected.")
 
