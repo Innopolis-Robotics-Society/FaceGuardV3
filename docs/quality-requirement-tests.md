@@ -8,7 +8,7 @@
 **Test Type**: Automated performance
 **Test Location**: `tests/quality/test_recognition_performance.py`
 **CI Job**: Not configured yet
-**Status**: Planned 
+**Status**: Implemented
 
 ### Purpose
 
