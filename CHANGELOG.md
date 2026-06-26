@@ -4,7 +4,7 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-06-28  
+## [1.2.0] - 2026-06-28  
 
 ### Added
 - Liveness Detection to prevent spoofing via photos or videos
@@ -36,4 +36,4 @@ All notable changes to FaceGuard will be documented in this file.
 
 
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
-/* [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v1.0.0...v2.0.0? */
+/* [1.2.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v1.0.0...v1.2.0? */
