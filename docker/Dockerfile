@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install --no-cache-dir \
     streamlit \
+    streamlit-webrtc \
     psycopg2-binary \
     opencv-python \
     insightface \
