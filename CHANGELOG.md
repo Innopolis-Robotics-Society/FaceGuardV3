@@ -4,7 +4,20 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-06-21 - MVP v1
+## [2.0.0] - 2026-06-28  
+
+### Added
+- Liveness Detection to prevent spoofing via photos or videos
+- Deployment to Raspberry Pi 5 and connection to the web-camera
+- Camera selector on the Recognition page and Add Employee page
+
+### Changed
+- Replaced buffalo_l model with a lightweight alternative for faster recognition and improved UI responsiveness
+- Temporary registration now uses start and expiration date pickers instead of a number-of-days input
+- Recognition page and Add Employee page: switched from single photo capture to video frame extraction
+- Recognition session now starts with a Start button on the Recognition page
+
+## [1.0.0] - 2026-06-21  
 
 ### Added
 - Face recognition using InsightFace (buffalo_l model)
@@ -23,4 +36,5 @@ All notable changes to FaceGuard will be documented in this file.
 - Local setup instructions in root README.md
 
 
-[1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0
+[1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
+[2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
