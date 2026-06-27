@@ -16,4 +16,6 @@ env/
 .vscode/
 .idea/
 *.swp
-*.swo
+*.swodocker/insightface_models/
+
+docker/insightface_models/buffalo_s/
