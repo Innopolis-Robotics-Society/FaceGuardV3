@@ -50,7 +50,7 @@ This QRT uses prepared image or frame fixtures instead of a live USB camera. Rea
 **Test Type**: Automated security
 **Test Location**: `tests/quality/test_photo_spoofing_rejection.py`
 **CI Job**: Not configured yet
-**Status**: Planned 
+**Status**: Implemented
 
 ### Purpose
 
@@ -97,7 +97,7 @@ If full liveness detection is not implemented during Assignment 4, this QRT vali
 **Test Type**: Automated integration / architecture 
 **Test Location**: `tests/quality/test_inference_provider_contract.py`
 **CI Job**: Not configured yet
-**Status**: Planned (Implemented / Passing)
+**Status**: Implemented
 
 
 ### Purpose
@@ -132,4 +132,3 @@ The test result will be preserved through the CI pipeline and linked from `repor
 ### Limitations
 
 This QRT verifies software modularity through provider substitution. It does not measure recognition accuracy of a real production model.
-

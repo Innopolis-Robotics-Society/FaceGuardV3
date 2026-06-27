@@ -1,6 +1,3 @@
-import cv2
-
-
 def get_bbox_area(face) -> float:
     x1, y1, x2, y2 = face.bbox
     return float((x2 - x1) * (y2 - y1))
@@ -72,6 +69,8 @@ def is_good_face(
 
 
 def draw_face_box(frame, face, text: str, color=(0, 255, 0)):
+    import cv2
+
     if face is None:
         return frame
 
