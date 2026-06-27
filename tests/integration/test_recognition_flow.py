@@ -14,7 +14,11 @@ class FakeRecognitionProvider(FaceProviderInterface):
         if self.embedding is None:
             return None, None, self.status_code
 
-        return normalize_embedding(self.embedding), {"bbox": [5, 5, 40, 40]}, self.status_code
+        return (
+            normalize_embedding(self.embedding),
+            {"bbox": [5, 5, 40, 40]},
+            self.status_code,
+        )
 
 
 def test_recognition_flow_grants_access_for_matching_provider_embedding():
@@ -43,9 +47,7 @@ def test_recognition_flow_rejects_low_similarity_provider_embedding():
     database_embedding = normalize_embedding(
         np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32)
     )
-    provider = FakeRecognitionProvider(
-        np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float32)
-    )
+    provider = FakeRecognitionProvider(np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float32))
 
     access_granted, status_code, name, score = process_access_attempt(
         frame=fake_frame,

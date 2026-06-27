@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  repository-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Устанавливаем все зависимости, включая пакеты для тестов
+          pip install -r backend/requirements.txt
+
+      - name: Formatting check (Black)
+        run: |
+          black --check backend tests
+
+      - name: Source-code linting (Flake8)
+        run: |
+          flake8 backend tests --count --show-source --statistics --max-line-length=120
+
+      - name: Additional QA check (Bandit)
+        run: |
+          bandit -r backend
+
+      - name: Run automated tests (Unit, Integration, QRT) and Line coverage
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest tests/ --cov=backend/faceguard --cov-report=term-missing

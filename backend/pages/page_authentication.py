@@ -7,7 +7,10 @@ col1, col2, col3 = st.columns([1, 4, 1])
 
 if not st.session_state.authenticated:
     with col2:
-        st.markdown("<h1 style='text-align: center;'>Authentication</h1>", unsafe_allow_html=True)
+        st.markdown(
+            "<h1 style='text-align: center;'>Authentication</h1>",
+            unsafe_allow_html=True,
+        )
         login = st.text_input("Enter login:")
         password = st.text_input("Enter password:", type="password")
 
@@ -16,19 +19,24 @@ if not st.session_state.authenticated:
             login_button = st.button("Log in", use_container_width=True)
 
         if login_button:
-            if password == st.secrets["admin_password"] and login == st.secrets["admin_login"]:
+            if (
+                password == st.secrets["admin_password"]
+                and login == st.secrets["admin_login"]
+            ):
                 st.session_state.authenticated = True
                 st.rerun()
             else:
                 st.error("Wrong login or password")
         st.stop()
 
-page_logs = st.Page("page_logs.py",title="Access Logs History")
-page_employees = st.Page("page_employees.py",title="Employees")
-page_add_employee = st.Page("page_add_employee.py",title="Add an employee")
-page_recognition = st.Page("page_recognition.py",title="Face Recognition")
+page_logs = st.Page("page_logs.py", title="Access Logs History")
+page_employees = st.Page("page_employees.py", title="Employees")
+page_add_employee = st.Page("page_add_employee.py", title="Add an employee")
+page_recognition = st.Page("page_recognition.py", title="Face Recognition")
 
-pg = st.navigation([page_employees, page_add_employee, page_logs, page_recognition], position="sidebar")
+pg = st.navigation(
+    [page_employees, page_add_employee, page_logs, page_recognition], position="sidebar"
+)
 pg.run()
 with st.sidebar.container(key="sidebar_bottom"):
     if st.button("Log out", use_container_width=True):

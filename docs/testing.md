@@ -12,23 +12,23 @@
 
 | Test type | Scope | Command or CI check | Latest result | Evidence |
 |---|---|---|---|---|
-| Unit tests | Mathematical logic and business rules | `PYTHONPATH=. pytest tests/unit/ -v` | 17 passed | Local run |
-| Integration tests | Provider mocking and pipeline flow | `PYTHONPATH=. pytest tests/integration/ -v` | 3 passed | Local run |
-| Automated QRTs | QR-001, QR-002, QR-003 | `PYTHONPATH=. pytest tests/quality/ -v` | 8 passed | Local run |
+| Unit tests | Mathematical logic and business rules | `PYTHONPATH=. pytest tests/unit/ -v` | 17 passed | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
+| Integration tests | Provider mocking and pipeline flow | `PYTHONPATH=. pytest tests/integration/ -v` | 3 passed | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
+| Automated QRTs | QR-001, QR-002, QR-003 | `PYTHONPATH=. pytest tests/quality/ -v` | 8 passed | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
 
 ## CI and QA Check Status
 
 | Gate or check | Required for Done? | Latest protected-branch status | Evidence |
 |---|---|---|---|
-| Linting | Yes | Pending CI setup | Pending CI setup |
-| Formatting or type checking | Yes | Pending CI setup | Pending CI setup |
-| Additional QA check | Yes | Passing | Local `bandit -r backend` run |
+| Linting | Yes | Passing | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
+| Formatting or type checking | Yes | Passing | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
+| Additional QA check | Yes | Passing | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) |
 
 ## Additional QA Check Rationale
 
 | QA objective or risk | Additional QA check | Scope | Latest result | Evidence | Limitations or follow-up |
 |---|---|---|---|---|---|
-| Silent exception swallowing and insecure code patterns can mask critical failures or expose the system to exploits. | Static Application Security Testing (SAST) with Bandit. | `backend/` source code. | Passing: 0 issues identified | Local `bandit -r backend` run | Bandit only analyzes Python source code. It does not scan Docker image vulnerabilities or C-level dependency flaws. |
+| Silent exception swallowing and insecure code patterns can mask critical failures or expose the system to exploits. | Static Application Security Testing (SAST) with Bandit. | `backend/` source code. | Passing: 0 issues identified | [CI Run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28292800771) | Bandit only analyzes Python source code. It does not scan Docker image vulnerabilities or C-level dependency flaws. |
 
 ## Manual Evidence That Does Not Count as QRT
 

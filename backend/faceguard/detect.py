@@ -11,7 +11,7 @@ def select_closest_face(faces):
 
 
 def clamp_bbox(bbox, frame_shape, padding: int = 0):
-    #frame.shape = (height, width, channels)
+    # frame.shape = (height, width, channels)
     frame_h, frame_w = frame_shape[:2]
 
     x1, y1, x2, y2 = bbox.astype(int)

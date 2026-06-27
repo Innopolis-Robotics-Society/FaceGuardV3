@@ -1,24 +1,27 @@
 import os
+
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
-import numpy as np
-from backend.faceguard.interfaces import FaceProviderInterface
+import numpy as np  # noqa: E402
+from backend.faceguard.interfaces import FaceProviderInterface  # noqa: E402
 
-from backend.faceguard.detect import select_closest_face, is_good_face
-
+from backend.faceguard.detect import select_closest_face, is_good_face  # noqa: E402
 
 DEFAULT_MODEL_NAME = "buffalo_s"
+
 
 class LivenessDetector:
     def __init__(self, threshold=0.50):
         import onnxruntime
 
         self.threshold = threshold
-        self.session = onnxruntime.InferenceSession("/root/.insightface/models/minifasnet.onnx",
-            providers=["CPUExecutionProvider"])
+        self.session = onnxruntime.InferenceSession(
+            "/root/.insightface/models/minifasnet.onnx",
+            providers=["CPUExecutionProvider"],
+        )
 
     def analyze(self, frame: np.ndarray, bbox: np.ndarray) -> tuple[bool, float]:
         import cv2
@@ -30,7 +33,7 @@ class LivenessDetector:
 
         cx = x1 + w // 2
         cy = y1 + h // 2
-        
+
         size = int(max(w, h) * 2.7)
 
         src_x1 = cx - size // 2
@@ -47,7 +50,7 @@ class LivenessDetector:
 
         if crop_x2 <= crop_x1 or crop_y2 <= crop_y1:
             return False, 0.0
-        
+
         cropped = frame[crop_y1:crop_y2, crop_x1:crop_x2]
 
         pad_left = crop_x1 - src_x1
@@ -56,15 +59,14 @@ class LivenessDetector:
         pad_bottom = src_y2 - crop_y2
 
         face_crop = cv2.copyMakeBorder(
-            cropped, 
-            pad_top, 
-            pad_bottom, 
-            pad_left, 
-            pad_right, 
-            borderType=cv2.BORDER_CONSTANT, 
-            value=[0, 0, 0]
+            cropped,
+            pad_top,
+            pad_bottom,
+            pad_left,
+            pad_right,
+            borderType=cv2.BORDER_CONSTANT,
+            value=[0, 0, 0],
         )
-
 
         # print(f"DEBUG: Кроп лица успешно сделан. Размер кропа: {face_crop.shape}", flush=True)
         face_crop = cv2.resize(face_crop, (80, 80))
@@ -123,7 +125,7 @@ def get_face_embedding(face) -> np.ndarray:
 
 
 def average_embeddings(embeddings: list[np.ndarray]) -> np.ndarray:
-   # Avg. many face embeddings into one reference embedding
+    # Avg. many face embeddings into one reference embedding
     if len(embeddings) == 0:
         raise ValueError("Cannot average empty embedding list")
 
@@ -155,7 +157,9 @@ def verify_embedding(
     return verified, score
 
 
-def extract_embedding_from_frame(app, liveness_detector: LivenessDetector | np.ndarray, frame=None):
+def extract_embedding_from_frame(
+    app, liveness_detector: LivenessDetector | np.ndarray, frame=None
+):
     two_argument_call = frame is None
 
     if two_argument_call:
@@ -210,7 +214,7 @@ class InsightFaceProvider(FaceProviderInterface):
     def __init__(self, app, liveness_detector):
         self.app = app
         self.liveness_detector = liveness_detector
-        
+
     def extract_embedding(self, frame: np.ndarray):
         embedding, face = extract_embedding_from_frame(self.app, frame)
         status_code = "real" if embedding is not None else "no_face"

@@ -32,7 +32,9 @@ def run_recognition(
         if not ret:
             break
 
-        current_embedding, face, status = extract_embedding_from_frame(app, liveness_detector, frame)
+        current_embedding, face, status = extract_embedding_from_frame(
+            app, liveness_detector, frame
+        )
 
         if status == "real" and current_embedding is not None and face is not None:
             verified, score = verify_embedding(
@@ -49,12 +51,12 @@ def run_recognition(
                 color = (0, 0, 255)
 
             draw_face_box(frame, face, label, color=color)
-        
+
         elif status == "spoof":
-            draw_face_box(frame, face, "ACCESS DENIED: SPOOF", color = (0, 0, 255))
-        
+            draw_face_box(frame, face, "ACCESS DENIED: SPOOF", color=(0, 0, 255))
+
         elif status == "bad_face":
-            draw_face_box(frame, face, "Look straight", color = (0, 255, 255))
+            draw_face_box(frame, face, "Look straight", color=(0, 255, 255))
 
         else:
             cv2.putText(
@@ -63,7 +65,7 @@ def run_recognition(
                 (30, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.8,
-                (255, 0, 0), #было (0, 0, 255)
+                (255, 0, 0),  # было (0, 0, 255)
                 2,
             )
 
