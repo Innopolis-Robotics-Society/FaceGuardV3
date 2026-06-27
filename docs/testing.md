@@ -1,106 +1,37 @@
 # Testing and QA Checks
 
-## Testing Strategy
+## Critical Modules and Coverage
 
-FaceGuardV3 uses automated unit, integration, and quality requirement tests to
-check the core recognition pipeline without depending on physical deployment
-hardware. The test suite uses controlled fake frames, fake recognition
-providers, mock recognizers, and deterministic embedding vectors so it can run
-locally or in a CI/Docker test environment.
+| Critical module | Why critical | Required line coverage | Current line coverage | Evidence |
+|---|---|---:|---:|---|
+| `backend/faceguard/recognize.py` | Core facial recognition mathematical logic, embedding comparison, and spoof detection thresholding. | 30% | 49% | Local `pytest --cov` run |
+| `backend/faceguard/detect.py` | Bounding box clamping, face geometry validation, and closest face selection. | 30% | 85% | Local `pytest --cov` run |
+| `backend/faceguard/business_logic.py` | Access control decision making, routing statuses (`spoof`, `no_face`, `real`). | 30% | 67% | Local `pytest --cov` run |
 
-## Critical Modules
+## Automated Test Status
 
-- `backend.faceguard.recognize`: embedding normalization, similarity scoring,
-  verification, and embedding averaging.
-- `backend.faceguard.detect`: face selection, bounding box clamping, cropping,
-  and basic face quality checks.
-- `backend.faceguard.business_logic`: access decision handling for valid,
-  missing, spoofed, bad-quality, and low-similarity recognition results.
-- `backend.faceguard.interfaces`: provider contract used to inject fake or real
-  recognition implementations.
+| Test type | Scope | Command or CI check | Latest result | Evidence |
+|---|---|---|---|---|
+| Unit tests | Mathematical logic and business rules | `PYTHONPATH=. pytest tests/unit/ -v` | 17 passed | Local run |
+| Integration tests | Provider mocking and pipeline flow | `PYTHONPATH=. pytest tests/integration/ -v` | 3 passed | Local run |
+| Automated QRTs | QR-001, QR-002, QR-003 | `PYTHONPATH=. pytest tests/quality/ -v` | 8 passed | Local run |
 
-## Unit Tests
+## CI and QA Check Status
 
-Unit tests are stored in `tests/unit/`.
+| Gate or check | Required for Done? | Latest protected-branch status | Evidence |
+|---|---|---|---|
+| Linting | Yes | Pending CI setup | Pending CI setup |
+| Formatting or type checking | Yes | Pending CI setup | Pending CI setup |
+| Additional QA check | Yes | Passing | Local `bandit -r backend` run |
 
-- `tests/unit/test_recognize.py` covers `normalize_embedding()`,
-  `cosine_similarity()`, `verify_embedding()`, `average_embeddings()`, and
-  zero-vector handling.
-- `tests/unit/test_detect.py` covers `select_closest_face()`, `clamp_bbox()`,
-  `crop_face()`, and `is_good_face()`.
-- `tests/unit/test_business_logic.py` covers `process_access_attempt()` for
-  matching embeddings, rejected `no_face`, `spoof`, and `bad_face` statuses, and
-  low-similarity embeddings.
+## Additional QA Check Rationale
 
-Run unit tests:
+| QA objective or risk | Additional QA check | Scope | Latest result | Evidence | Limitations or follow-up |
+|---|---|---|---|---|---|
+| Silent exception swallowing and insecure code patterns can mask critical failures or expose the system to exploits. | Static Application Security Testing (SAST) with Bandit. | `backend/` source code. | Passing: 0 issues identified | Local `bandit -r backend` run | Bandit only analyzes Python source code. It does not scan Docker image vulnerabilities or C-level dependency flaws. |
 
-```bash
-PYTHONPATH=. pytest tests/unit/ -v
-```
+## Manual Evidence That Does Not Count as QRT
 
-## Integration Tests
-
-Integration tests are stored in `tests/integration/`.
-
-`tests/integration/test_recognition_flow.py` verifies the recognition decision
-flow using a fake frame, a fake recognition provider, the real
-`process_access_attempt()` function, and the real embedding verification path
-through business logic.
-
-Run integration tests:
-
-```bash
-PYTHONPATH=. pytest tests/integration/ -v
-```
-
-## Full Test Suite
-
-Run all tests, including quality requirement tests:
-
-```bash
-PYTHONPATH=. pytest tests/ -v
-```
-
-## Coverage
-
-The project uses `pytest-cov` for line coverage. The Assignment 4 Part 7 target
-is at least 30% line coverage for each of these modules:
-
-- `backend/faceguard/recognize.py`
-- `backend/faceguard/detect.py`
-- `backend/faceguard/business_logic.py`
-
-Run coverage:
-
-```bash
-PYTHONPATH=. pytest tests/ --cov=backend/faceguard --cov-report=term-missing
-```
-
-## Bandit Security Scan
-
-Bandit is used as an additional static QA check for common Python security
-issues in the backend code.
-
-Run Bandit:
-
-```bash
-bandit -r backend
-```
-
-## Local Execution Commands
-
-```bash
-PYTHONPATH=. pytest tests/unit/ -v
-PYTHONPATH=. pytest tests/integration/ -v
-PYTHONPATH=. pytest tests/ -v
-PYTHONPATH=. pytest tests/ --cov=backend/faceguard --cov-report=term-missing
-bandit -r backend
-```
-
-## Limitations
-
-These tests do not require a real camera, Raspberry Pi, GPIO pins, a real ONNX
-liveness model, a real InsightFace model, private face images, or customer
-data. Hardware behavior, live camera image quality, production model accuracy,
-and real printed-photo presentation attacks must still be validated separately
-on the target deployment setup.
+| Evidence | Scope | Result | Follow-up PBI or issue |
+|---|---|---|---|
+| Live USB Camera UAT | Physical presentation of printed photos and real camera recognition behavior | Pending hardware test | N/A |
