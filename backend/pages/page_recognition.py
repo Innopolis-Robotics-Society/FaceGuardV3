@@ -28,10 +28,12 @@ with col3:
     similarity_display = st.empty()
     similarity_display.markdown("### Similarity\n-")
 
+@st.cache_resource
+def get_models():
+    return create_face_app(), LivenessDetector(threshold=0.40)
 class RecognitionVideoProcessor(VideoProcessorBase):
     def __init__(self):
-        self.app = create_face_app()
-        self.liveness_detector = LivenessDetector()
+        self.app, self.liveness_detector = get_models()
         self.lock = threading.Lock()
         
         self.status = "No face detected"
@@ -56,7 +58,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
 
     def _process_loop(self):
         while self.is_running:
-            time.sleep(1.0)
+            time.sleep(1)
             
             with self.lock:
                 if self.current_frame is None:
@@ -65,7 +67,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                 
             current_time = time.time()
             
-            if current_time - self.last_frame_time > 5.0:
+            if current_time - self.last_frame_time > 30.0:
                 self.is_running = False
                 break
                 
@@ -152,10 +154,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
         with self.lock:
             self.current_frame = img
             self.last_frame_time = time.time()
-            
-            if self.last_face is not None:
-                draw_face_box(img, self.last_face, self.last_draw_text, color=self.last_draw_color)
-                
+        
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 ctx = webrtc_streamer(
@@ -165,22 +164,24 @@ ctx = webrtc_streamer(
         "video": {
             "width": {"min": 640, "ideal": 1280},
             "height": {"min": 480, "ideal": 720},
-            "frameRate": {"ideal": 1, "max": 2} 
+            "frameRate": {"ideal": 1, "max": 1}
         }, 
         "audio": False
     },
     rtc_configuration={
         "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    }
+    },
+    async_processing=True
 )
 
 if ctx.state.playing:
     while ctx.state.playing:
-        if ctx.video_processor:
-            with ctx.video_processor.lock:
-                status = ctx.video_processor.status
-                name = ctx.video_processor.name
-                similarity = ctx.video_processor.similarity
+        vp = ctx.video_processor
+        if vp:
+            with vp.lock:
+                status = vp.status
+                name = vp.name
+                similarity = vp.similarity
                 
             if status == "Access Granted":
                 status_indicator.markdown(f"### Status\n<span style='color:green; font-weight:bold'>{status}</span>", unsafe_allow_html=True)
