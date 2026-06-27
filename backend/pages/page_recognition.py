@@ -6,6 +6,7 @@ import os
 import av
 import threading
 import time
+import logging
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -14,6 +15,8 @@ from faceguard.recognize import create_face_app, extract_embedding_from_frame, L
 from faceguard.detect import draw_face_box
 from db.employees_db import find_closest_embedding
 from db.logs_db import add_log
+
+logger = logging.getLogger(__name__)
 
 st.markdown("<h1 style='text-align: center;'>Face Recognition Access Control</h1>", unsafe_allow_html=True)
 
@@ -95,7 +98,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                     self.last_logged_name = name
                                     self.last_logged_status = "ACCESS_GRANTED"
                                 except Exception:
-                                    pass
+                                    logger.warning("Failed to write access granted log", exc_info=True)
                         else:
                             self.status = "Access Denied"
                             self.name = "Unknown"
@@ -113,7 +116,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                     self.last_logged_name = "UNKNOWN"
                                     self.last_logged_status = "ACCESS_DENIED"
                                 except Exception:
-                                    pass
+                                    logger.warning("Failed to write access denied log", exc_info=True)
                                     
                     elif status_code == "spoof":
                         self.status = "SPOOF DETECTED"
@@ -131,7 +134,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                 self.last_logged_name = "UNKNOWN"
                                 self.last_logged_status = "SPOOF_ATTEMPT"
                             except Exception:
-                                pass
+                                logger.warning("Failed to write spoof attempt log", exc_info=True)
                                 
                     elif status_code == "bad_face":
                         self.status = "Please look straight at the camera"

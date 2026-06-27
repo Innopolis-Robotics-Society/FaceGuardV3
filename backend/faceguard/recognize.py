@@ -1,5 +1,3 @@
-import onnxruntime
-import cv2
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -16,11 +14,15 @@ DEFAULT_MODEL_NAME = "buffalo_s"
 
 class LivenessDetector:
     def __init__(self, threshold=0.50):
+        import onnxruntime
+
         self.threshold = threshold
         self.session = onnxruntime.InferenceSession("/root/.insightface/models/minifasnet.onnx",
             providers=["CPUExecutionProvider"])
 
     def analyze(self, frame: np.ndarray, bbox: np.ndarray) -> tuple[bool, float]:
+        import cv2
+
         # print(f"DEBUG: analyze() запущен. Bbox: {bbox}", flush=True)
         x1, y1, x2, y2 = bbox.astype(int)
         w = x2 - x1
@@ -153,23 +155,35 @@ def verify_embedding(
     return verified, score
 
 
-def extract_embedding_from_frame(app, liveness_detector: LivenessDetector, frame):
+def extract_embedding_from_frame(app, liveness_detector: LivenessDetector | np.ndarray, frame=None):
+    two_argument_call = frame is None
+
+    if two_argument_call:
+        frame = liveness_detector
+        liveness_detector = None
+
+    def result(embedding, face, status_code):
+        if two_argument_call:
+            return embedding, face
+        return embedding, face, status_code
+
     faces = app.get(frame)
     face = select_closest_face(faces)
 
     if face is None:
-        return None, None, "no_face"
+        return result(None, None, "no_face")
 
     if not is_good_face(face, frame):
-        return None, face, "bad_face"
+        return result(None, face, "bad_face")
 
-    is_live, liveness_score = liveness_detector.analyze(frame, face.bbox)
-    if not is_live:
-        return None, face, "spoof"
+    if liveness_detector is not None:
+        is_live, liveness_score = liveness_detector.analyze(frame, face.bbox)
+        if not is_live:
+            return result(None, face, "spoof")
 
     embedding = get_face_embedding(face)
 
-    return embedding, face, "real"
+    return result(embedding, face, "real")
 
 
 def save_embedding(path: str, embedding: np.ndarray):
