@@ -27,7 +27,7 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.
+**Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.  
 **Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)
 
 ---
@@ -60,7 +60,7 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.
+**Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.  
 **Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
 
 ---
@@ -116,7 +116,7 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry
+**Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry  
 **Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)
 
 ---
@@ -142,7 +142,7 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:** Add filtering by date range
+**Comments:** Add filtering by date range  
 **Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)
 
 ---
@@ -170,7 +170,7 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:** Very good!
+**Comments:** Very good!  
 **Resulting PBIs:** -
 
 ---
@@ -197,5 +197,5 @@
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:**  Very good!
+**Comments:**  Very good!  
 **Resulting PBIs:** -
