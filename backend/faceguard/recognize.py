@@ -7,9 +7,9 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 import numpy as np
-from insightface.app import FaceAnalysis
+from backend.faceguard.interfaces import FaceProviderInterface
 
-from .detect import select_closest_face, is_good_face
+from backend.faceguard.detect import select_closest_face, is_good_face
 
 
 DEFAULT_MODEL_NAME = "buffalo_s"
@@ -84,6 +84,8 @@ class LivenessDetector:
 
 
 def create_face_app(model_name: str = DEFAULT_MODEL_NAME):
+    from insightface.app import FaceAnalysis
+
     app = FaceAnalysis(
         name=model_name,
         providers=["CPUExecutionProvider"],
@@ -188,3 +190,14 @@ def load_embedding(path: str) -> np.ndarray:
     embedding = np.load(path)
 
     return normalize_embedding(embedding)
+
+
+class InsightFaceProvider(FaceProviderInterface):
+    def __init__(self, app, liveness_detector):
+        self.app = app
+        self.liveness_detector = liveness_detector
+        
+    def extract_embedding(self, frame: np.ndarray):
+        embedding, face = extract_embedding_from_frame(self.app, frame)
+        status_code = "real" if embedding is not None else "no_face"
+        return embedding, face, status_code

@@ -15,12 +15,15 @@ RUN pip install --no-cache-dir \
     insightface \
     onnxruntime \
     numpy \
-    pandas
+    pandas \
+    pytest
 
 COPY backend/ ./backend/
+COPY tests/ ./tests/
 
 EXPOSE 8501
 ENV STREAMLIT_SERVER_HEADLESS=true
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+ENV PYTHONPATH=/app
 
 CMD ["streamlit", "run", "backend/pages/page_authentication.py"]
