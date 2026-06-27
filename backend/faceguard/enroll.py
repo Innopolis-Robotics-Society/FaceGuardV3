@@ -31,7 +31,9 @@ def enroll_user(
         if not ret:
             break
 
-        embedding, face, status = extract_embedding_from_frame(app, liveness_detector, frame)
+        embedding, face, status = extract_embedding_from_frame(
+            app, liveness_detector, frame
+        )
 
         if status == "real" and embedding is not None and face is not None:
             embeddings.append(embedding)
@@ -43,9 +45,9 @@ def enroll_user(
                 color=(0, 255, 0),
             )
         elif status == "spoof":
-            draw_face_box(frame, face, "SPOOFING ATTEMPT", color = (0, 0, 255))
+            draw_face_box(frame, face, "SPOOFING ATTEMPT", color=(0, 0, 255))
         elif status == "bad_face":
-            draw_face_box(frame, face, "Bad angle/blur", color = (0, 255, 255))
+            draw_face_box(frame, face, "Bad angle/blur", color=(0, 255, 255))
         else:
             cv2.putText(
                 frame,

@@ -1,11 +1,15 @@
 import streamlit as st
-import base64
-import pandas as pd
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from db.employees_db import connect_to_db, init_db, load_employees, delete_employee, add_employees
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from db.employees_db import (  # noqa: E402
+    init_db,
+    load_employees,
+    delete_employee,
+)
+
 st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=True)
 init_db()
 df = load_employees()
@@ -18,11 +22,13 @@ if selected_status != "All":
 if "table_version" not in st.session_state:
     st.session_state["table_version"] = 0
 
+
 def reset_table():
     old_key = f"employees_table_{st.session_state['table_version']}"
     if old_key in st.session_state:
         del st.session_state[old_key]
     st.session_state["table_version"] += 1
+
 
 @st.dialog("Confirm deletion")
 def confirm_delete():
@@ -38,7 +44,8 @@ def confirm_delete():
         if st.button("No"):
             reset_table()
             st.rerun()
-            
+
+
 if df is not None:
     df.insert(0, "Select", False)
     table_key = f"employees_table_{st.session_state['table_version']}"
@@ -48,15 +55,17 @@ if df is not None:
         disabled=["id", "name", "registration_date", "status"],
         column_config={
             "id": None,
-            "status": st.column_config.SelectboxColumn("Status", options=["Permanent", "Temporary"]),
+            "status": st.column_config.SelectboxColumn(
+                "Status", options=["Permanent", "Temporary"]
+            ),
             "name": "Employee's name",
             "registration_date": "Registration date",
             "start_date": "Start date",
-            "expiration_date": "Expiration date"
+            "expiration_date": "Expiration date",
         },
-        key=table_key
+        key=table_key,
     )
-    selected_rows = edited_df[edited_df["Select"] == True]
+    selected_rows = edited_df[edited_df["Select"]]
     if not selected_rows.empty:
         col_cancel, col_delete, _ = st.columns([1, 1, 4])
         with col_cancel:

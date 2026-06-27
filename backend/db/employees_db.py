@@ -6,7 +6,8 @@ import numpy as np
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
 
 def connect_to_db():
     return ps2.connect(
@@ -14,8 +15,9 @@ def connect_to_db():
         database=st.secrets["database"],
         user=st.secrets["user"],
         password=st.secrets["password"],
-        sslmode="require"
-)
+        sslmode="require",
+    )
+
 
 def init_db():
     connection = connect_to_db()
@@ -34,11 +36,11 @@ def init_db():
     try:
         cursor.execute(create_table_query)
         cursor.execute("""
-            ALTER TABLE employees 
+            ALTER TABLE employees
             ADD COLUMN IF NOT EXISTS start_date DATE;
         """)
         cursor.execute("""
-            ALTER TABLE employees 
+            ALTER TABLE employees
             ADD COLUMN IF NOT EXISTS expiration_date DATE;
         """)
         connection.commit()
@@ -49,13 +51,14 @@ def init_db():
         cursor.close()
         connection.close()
 
+
 def delete_expired_employees():
     connection = connect_to_db()
     cursor = connection.cursor()
     try:
         cursor.execute("""
-            DELETE FROM employees 
-            WHERE status = 'Temporary' 
+            DELETE FROM employees
+            WHERE status = 'Temporary'
             AND expiration_date < CURRENT_DATE;
         """)
         connection.commit()
@@ -66,6 +69,7 @@ def delete_expired_employees():
         cursor.close()
         connection.close()
 
+
 def load_employees():
     delete_expired_employees()
     connection = connect_to_db()
@@ -73,6 +77,7 @@ def load_employees():
     df = pd.read_sql(query, connection)
     connection.close()
     return df
+
 
 def delete_employee(employee_id):
     connection = connect_to_db()
@@ -87,6 +92,7 @@ def delete_employee(employee_id):
         cursor.close()
         connection.close()
 
+
 def add_employees(name, status, embedding=None, start_date=None, expiration_date=None):
     connection = connect_to_db()
     cursor = connection.cursor()
@@ -96,21 +102,24 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
         cursor.close()
         connection.close()
         return
-    
+
     embedding = embedding.tolist() if embedding is not None else None
-    
+
     cursor.execute(
         "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
-        (name, status, embedding, start_date, expiration_date)
+        (name, status, embedding, start_date, expiration_date),
     )
     connection.commit()
     cursor.close()
     connection.close()
 
+
 def get_all_embeddings():
     connection = connect_to_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, embedding FROM employees WHERE embedding IS NOT NULL")
+    cursor.execute(
+        "SELECT id, name, embedding FROM employees WHERE embedding IS NOT NULL"
+    )
 
     rows = cursor.fetchall()
     cursor.close()
@@ -121,25 +130,26 @@ def get_all_embeddings():
         if row[2]:
             embedding_array = np.array(row[2])
             embeddings.append((row[0], row[1], embedding_array))
-    
+
     return embeddings
+
 
 def find_closest_embedding(target_embedding, threshold=0.56):
     """Find the closest matching embedding in the database"""
     from faceguard.recognize import cosine_similarity
-    
+
     embeddings_data = get_all_embeddings()
     if not embeddings_data:
         return None
-    
+
     best_match = None
     best_similarity = 0
-    
+
     for emp_id, name, db_embedding in embeddings_data:
         similarity = cosine_similarity(target_embedding, db_embedding)
         is_match = similarity >= threshold
         if is_match and similarity > best_similarity:
             best_similarity = similarity
             best_match = (emp_id, name, similarity)
-    
+
     return best_match
