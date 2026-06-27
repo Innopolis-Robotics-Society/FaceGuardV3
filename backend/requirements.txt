@@ -3,3 +3,5 @@ insightface
 onnxruntime
 numpy
 pytest
+pytest-cov
+bandit
