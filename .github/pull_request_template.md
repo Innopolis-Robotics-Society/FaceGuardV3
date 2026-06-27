@@ -19,7 +19,7 @@ Related issues:
 
 ---
 
-## Assignment 3 workflow evidence
+## Assignment 4 workflow evidence
 
 * [ ] This PR is linked to an issue.
 * [ ] The branch name follows `<issue-number>-short-description`.
@@ -202,7 +202,7 @@ Log:
 
 * [ ] README updated
 * [ ] docs updated
-* [ ] reports/week3 updated
+* [ ] reports/week4 updated
 * [ ] No documentation change needed
 
 Files changed:
@@ -222,16 +222,20 @@ Select exactly one option:
 ---
 
 ## Definition of Done checklist
-
 * [ ] The linked issue is clear and traceable.
 * [ ] The implementation satisfies the acceptance criteria.
-* [ ] The change was tested.
+* [ ] The change was tested (unit and/or integration tests pass).
+* [ ] Automated unit tests pass and critical modules maintain ≥ 30% line coverage.
 * [ ] The PR was reviewed by another team member.
-* [ ] Required documentation was updated.
-* [ ] `CHANGELOG.md` was updated for user-visible changes, or changelog update was marked as not applicable.
-* [ ] No secrets, private customer data, or personal information were committed.
+* [ ] Required documentation was updated (README, docs/).
+* [ ] `CHANGELOG.md` was updated for user-visible changes, or marked not applicable.
+* [ ] No secrets, credentials, or real/non-sanitized employee data were committed.
+* [ ] If a Docker container is affected, it builds and runs successfully.
+* [ ] For changes affecting the recognition pipeline, manual verification on the test page is performed and recorded.
+* [ ] Relevant QRTs pass in CI (if applicable).
+* [ ] CI pipeline passes, including linting, type/format check, tests, coverage, and QA checks.
 * [ ] The branch can be merged into the default branch.
-* [ ] The linked issue can be moved to `Done` after merge.
+* [ ] The linked issue can be moved to Done after merge.
 
 ---
 
@@ -253,7 +257,7 @@ Reviewer should check:
 * [ ] Acceptance criteria were verified.
 * [ ] Exactly one changelog option is selected.
 * [ ] The change matches the MVP/Sprint scope.
-* [ ] The PR contains enough evidence for Assignment 3.
+* [ ] The PR contains enough evidence for Assignment 4.
 * [ ] The PR can be safely merged with a merge commit.
 
 Meaningful review comment:
