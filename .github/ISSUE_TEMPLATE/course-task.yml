@@ -1,5 +1,5 @@
 name: Course Task
-description: Create an Assignment 3 course-process task
+description: Create an Assignment 4 course-process task
 title: "Course Task: "
 labels:
   - "type: course task"
@@ -7,21 +7,21 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for Assignment 3 administrative, reporting, evidence, review, release, demo, or documentation tasks.
+        Use this template for Assignment 4 administrative, reporting, evidence, review, release, demo, or documentation tasks.
         Course Task issues do not count toward the required 15 qualifying PBIs.
 
   - type: input
     id: task-title
     attributes:
       label: Task title
-      placeholder: "Prepare Week 3 report screenshots"
+      placeholder: "Prepare Week 4 report screenshots"
     validations:
       required: true
 
   - type: dropdown
     id: assignment-part
     attributes:
-      label: Assignment 3 part
+      label: Assignment 4 part
       options:
         - Part 1 - Product Backlog migration
         - Part 2 - Repository workflow
@@ -36,7 +36,7 @@ body:
         - Part 11 - Reflection
         - Part 12 - Retrospective
         - Part 13 - LLM usage report
-        - Week 3 README / Moodle PDF
+        - Week 4 README / Moodle PDF
         - Other
     validations:
       required: true
@@ -83,8 +83,8 @@ body:
     attributes:
       label: Expected artifacts or links
       placeholder: |
-        - reports/week3/README.md
-        - reports/week3/images/...
+        - reports/week4/README.md
+        - reports/week4/images/...
         - GitHub Project link
         - Release link
         - Demo video link
@@ -98,7 +98,7 @@ body:
       placeholder: |
         - [ ] Required file created or updated
         - [ ] Links verified
-        - [ ] Evidence added to Week 3 report
+        - [ ] Evidence added to Week 4 report
         - [ ] PR reviewed
     validations:
       required: false
