@@ -109,7 +109,7 @@ All 28 tests pass. Overall line coverage across the `faceguard` package is **41%
 ## 23-25. CI Pipeline
 
 - [CI pipeline](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions)
-- [Latest protected-default-branch CI run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28308225264)
+- [Latest protected-default-branch CI run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28327569211)
 - ![Branch protection](images/branch_protection.png)
 
 ## 26. QA Check Screenshots
@@ -215,18 +215,17 @@ Screenshots are stored in:
 ```text
 reports/week4/images/
 ```
-![Sprint milestone](images/sprint_milestone.png)
-![Latest CI run](images/ci_run.png)
-![Branch protection](images/branch_protection.png)
-![Coverage](images/coverage.png)
-![QA check](images/qa_check.png)
-![Release](images/release.png)
-![PR example](images/pr_example.png)
+- ![Sprint milestone](images/sprint_milestone.png)
+- ![Latest CI run](images/ci_run.png)
+- ![Branch protection](images/branch_protection.png)
+- ![Coverage](images/coverage.png)
+- ![QA check](images/qa_check.png)
+- ![Release](images/release.png)
+- ![PR example](images/pr_example.png)
 
 ## 42. Additional Screenshots
-![Product Backlog](images/product_backlog.png)
-Direct link: [Product Backlog board](https://github.com/orgs/Innopolis-Robotics-Society/projects/5)
-![Sprint Backlog](images/sprint_backlog.png)
-Direct link: [Sprint Backlog board](https://github.com/orgs/Innopolis-Robotics-Society/projects/6)
-![Recognition page](images/recognition.png)
-![Add Employee page](images/add_employee.png)
+- ![Product Backlog](images/product_backlog.png)
+- ![Sprint Backlog](images/sprint_backlog.png)  
+ **Face is blurred for privacy reasons.**
+- ![Recognition page](images/recognition.png)
+- ![Add Employee page](images/add_employee.png)
