@@ -24,7 +24,7 @@
 
 **Limitation**: Uses controlled fake inputs instead of a live USB camera.
 
-**CI Job**: Not configured yet
+**CI Job**: pytest tests/quality/ runs automatically on every PR and push to main
 
 **Status**: Implemented
 
@@ -44,7 +44,7 @@
 
 **Limitation**: Uses controlled mock recognizers and embeddings instead of physical printed-photo attacks with a live camera.
 
-**CI Job**: Not configured yet
+**CI Job**: pytest tests/quality/ runs automatically on every PR and push to main
 
 **Status**: Implemented
 
@@ -64,6 +64,6 @@
 
 **Limitation**: Uses a mock provider instead of executing the real InsightFace model, ONNX liveness detector, camera input, or GPIO hardware.
 
-**CI Job**: Not configured yet
+**CI Job**: pytest tests/quality/ runs automatically on every PR and push to main
 
 **Status**: Implemented
