@@ -6,14 +6,13 @@ During the meeting, the video and audio were recorded. Due to unexpected problem
 
 **Date**: 27.06.2026  
 **Participants**:  
-| name | username | role |
-| --- | --- | --- |
-| Maksim Beketov | ixkci | interviewer |
-| Sofia Sokolova | s0ftach | recorder |
-| Varvara Orekhova | oebarbie | observer |
-| Maksim Barannikov | Exckernels | note taker |
-| Alexander Bondarenko | grex861 | note taker|
-| Artyom Tuzov | artyomzifir | customer |
+| GitHub username | role |
+| --- | --- |
+| ixkci | interviewer |
+| s0ftach | recorder |
+| oebarbie | observer |
+| Exckernels | note taker |
+| grex861 | note taker|
 
 **Format:** Online. UAT was conducted during this online Sprint Review session. Because of the remote format, the customer was not able to perform the UAT, so the team demonstrated each UAT scenario to the customer and confirmed acceptance.
 
