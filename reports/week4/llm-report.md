@@ -2,16 +2,17 @@
 
 Our team used AI tools as a supporting tool in the following areas:
 
+- Educational purposes  
+- Structuring testing documentation  
+- Preparing issue and PR descriptions
 - Clarifying Assignment 4 requirements
+- Planning task execution in step-by-step format
 - Formulating acceptance criteria and Definition of Done
 - Designing presentation structure and documentation layout
-- Debugging pytest and Docker errors
-- Preparing issue and PR descriptions
-- Structuring testing documentation
 - Checking work for compliance with assignment requirements
-- Suggesting optimization approaches and possible quality requirement implementations
 - Verifying setup on Raspberry Pi 5
-- Planning task execution in step-by-step format
+- Debugging pytest and Docker errors
 - Analyzing and comparing lightweight face recognition models
+- Suggesting optimization approaches and possible quality requirement implementations
 
-AI was not used in other parts of this assignment. AI was used as a supporting tool and no one used AI to generate submitted content for the assignment.
+All final decisions, implementation work, pull requests, reviews, approvals, and submitted artifacts were completed and verified by the team. AI was used as a supporting tool only and was not used to generate submitted content directly.
