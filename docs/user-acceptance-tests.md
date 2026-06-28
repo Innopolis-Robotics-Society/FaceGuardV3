@@ -26,7 +26,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.  
 **Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)
 
@@ -59,7 +59,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.   
 **Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.  
 **Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
 
@@ -87,7 +87,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** All good.
 **Resulting PBIs:** -
 
@@ -115,7 +115,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry  
 **Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)
 
@@ -141,7 +141,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add filtering by date range  
 **Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)
 
@@ -169,7 +169,7 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Very good!  
 **Resulting PBIs:** -
 
@@ -196,6 +196,6 @@
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:**  Very good!  
 **Resulting PBIs:** -
