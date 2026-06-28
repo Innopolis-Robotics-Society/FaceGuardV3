@@ -3,7 +3,7 @@
 **Date:** 2026-06-27  
 **Participants:** Development team, Customer
 
-Before recording, we requested the permission, and the client agreed to record and publish. 
+Before recording started, the team requested permission to record the meeting and to publish a sanitized English transcript in the public repository. The customer agreed to both. Since UAT was conducted during the same session, the recording permission covers both the Sprint Review and UAT execution.
 
 **(00:00)**  
 **Interviewer:** All permissions have been granted. I suggest we start checking what we have already done. I can say that we also tested it on the Raspberry Pi last night, everything worked and loaded correctly. For now we are testing locally. We have not reached the lab yet, as the Raspberry Pi is currently in use.
