@@ -10,6 +10,7 @@ Our team used AI tools as a supporting tool in the following areas:
 - Formulating acceptance criteria and Definition of Done
 - Designing presentation structure and documentation layout
 - Checking work for compliance with assignment requirements
+- Translating the meeting transcript from Russian to English
 - Verifying setup on Raspberry Pi 5
 - Debugging pytest and Docker errors
 - Analyzing and comparing lightweight face recognition models
