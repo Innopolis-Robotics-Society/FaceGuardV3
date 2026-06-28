@@ -4,7 +4,7 @@
 **Participants:** Development team, Customer
 
 **(00:00)**  
-**Interviewer:** All permissions have been granted. I suggest we start checking what we have already done. I can say that we also tested it on the Raspberry Pi last night — everything worked and loaded correctly. For now we are testing locally. We have not reached the lab yet, as the Raspberry Pi is currently in use.
+**Interviewer:** All permissions have been granted. I suggest we start checking what we have already done. I can say that we also tested it on the Raspberry Pi last night, everything worked and loaded correctly. For now we are testing locally. We have not reached the lab yet, as the Raspberry Pi is currently in use.
 
 **(01:06)**  
 **Interviewer:** I launched everything. We register, enter the password. We verify that everything loads correctly and the password matches. We now have the list of employees. I will delete myself right away.
@@ -16,22 +16,22 @@
 **Customer:** Okay.
 
 **(01:58)**  
-**Interviewer:** Okay. Let's start — does the employee page satisfy what you want, or not?
+**Interviewer:** Okay. Let's start. Does the employee page satisfy what you want, or not?
 
 **(02:19)**  
 **Customer:** Can I change names and status here?
 
 **(02:46)**  
-**Interviewer:** We cannot change names and status at the moment — to do that, the user would need to be re-registered. The username is set at registration and stays assigned to that entry.
+**Interviewer:** We cannot change names and status at the moment, to do that, the user would need to be re-registered. The username is set at registration and stays assigned to that entry.
 
 **(03:28)**  
-**Customer:** Ideally, you should be able to change the name after registration and also change the status — for example, from temporary to permanent and vice versa. Otherwise, it looks good.
+**Customer:** Ideally, you should be able to change the name after registration and also change the status, for example, from temporary to permanent and vice versa. Otherwise, it looks good.
 
 **(03:35)**  
-**Interviewer:** Noted, we will fix that. I suggest we move on to registration. Here we can select a camera — I only have one, a local one. We enter the username, for example, Maxim. We have already taken into account your feedback regarding temporary registration.
+**Interviewer:** Noted, we will fix that. I suggest we move on to registration. Here we can select a camera. I only have one, a local one. We enter the username, for example, Maxim. We have already taken into account your feedback regarding temporary registration.
 
 **(04:08)**  
-**Interviewer:** Now it works with dates — a start date and an end date. Let's set the end to tomorrow. We are starting the registration session. We also took into account your feedback about using multiple frames. We collect 30 frames and generate an average embedding from them.
+**Interviewer:** Now it works with dates: a start date and an end date. Let's set the end to tomorrow. We are starting the registration session. We also took into account your feedback about using multiple frames. We collect 30 frames and generate an average embedding from them.
 
 **(04:30)**  
 **Interviewer:** The session will load now. During registration, we need to turn our head a little so the system captures as much variation as possible.
@@ -43,7 +43,7 @@
 **Customer:** Okay, but I would like date control down to minutes, not just days.
 
 **(05:41)**  
-**Interviewer:** Understood. I can also show permanent registration — it is not much different from temporary. If a user registers without glasses, they can still be recognized when wearing glasses.
+**Interviewer:** Understood. I can also show permanent registration. It is not much different from temporary. If a user registers without glasses, they can still be recognized when wearing glasses.
 
 **(06:29)**  
 **Customer:** By the way, what happens if I try to register the same person twice?
@@ -52,16 +52,16 @@
 **Interviewer:** There will just be two entries for that person. For example, I have a temporary entry with glasses and a permanent one without. The system will most likely switch between recognizing one version of me and the other. We can actually test that now with face recognition. We start the session and select the camera.
 
 **(07:22)**  
-**Interviewer:** We start the recognition session. At first it may show access denied because the first frame is still being processed — after that everything works fine.
+**Interviewer:** We start the recognition session. At first it may show access denied because the first frame is still being processed, after that everything works fine.
 
 **(07:41)**  
 **Interviewer:** So right now it recognizes me without glasses. If I put on glasses, it will probably recognize the other version of me.
 
 **(07:53)**  
-**Customer:** Nice to have in the future — a check that the person is already in the system. If you have time, it would be great to implement that.
+**Customer:** Nice to have a check that the person is already in the system. If you have time, it would be great to implement that.
 
 **(07:58)**  
-**Interviewer:** Good, we will add a check so that a person already in the system cannot be registered twice. I will also mention the frame rate — the system is under a lot of load, and we know the Raspberry Pi has limited performance. The video stream on the site has some stuttering. This is intentional, to reduce the load, since the recognition session runs in the background anyway. It is not important to see the stream in real time — running it at full quality would be too heavy for the Raspberry Pi.
+**Interviewer:** Good, we will add a check so that a person already in the system cannot be registered twice. I will also mention the frame rate, the system is under a lot of load, and we know the Raspberry Pi has limited performance. The video stream on the site has some stuttering. This is intentional, to reduce the load, since the recognition session runs in the background anyway. It is not important to see the stream in real time, running it at full quality would be too heavy for the Raspberry Pi.
 
 **(08:46)**  
 **Interviewer:** Right now it is optimized so that it can run for at least two hours. Let me show you Spoof Detection. I have a photo here.
@@ -73,7 +73,7 @@
 **Customer:** Great, you managed to implement anti-spoofing after all.
 
 **(09:45)**  
-**Interviewer:** We did, although it took quite a bit of time. We also implemented live recognition — you no longer need to press the Take Photo button manually.
+**Interviewer:** We did, although it took quite a bit of time. We also implemented live recognition, you no longer need to press the Take Photo button manually.
 
 **(09:57)**  
 **Customer:** What FPS is planned for the Raspberry Pi?
@@ -83,7 +83,7 @@
 
 **(10:22)**  
 **Customer:** So, 1 FPS?  
-**Interviewer:** More or less, yes — 1 FPS, because it cannot handle more than that. At higher frame rates, the video quality drops significantly and the face can no longer be recognized reliably.
+**Interviewer:** More or less, yes, 1 FPS, because it cannot handle more than that. At higher frame rates, the video quality drops significantly and the face can no longer be recognized reliably.
 
 **(10:39)**  
 **Customer:** Have you tested it?
@@ -102,13 +102,13 @@
 **Interviewer:** We will try to find ways to optimize further.
 
 **(11:54)**  
-**Customer:** Try to find the upper bound. I would still like it to fit within 3 to 5 seconds, ideally less — but well done anyway.
+**Customer:** Try to find the upper bound. I would still like it to fit within 3 to 5 seconds, ideally less, but well done anyway.
 
 **(11:57)**  
-**Interviewer:** There is a significant delay when the request is sent from the backend. The recognition itself is a bit faster. We tried to reduce all possible load — we also removed the face bounding box overlay in recognition to reduce the processing load on the Raspberry Pi.
+**Interviewer:** There is a significant delay when the request is sent from the backend. The recognition itself is a bit faster. We tried to reduce all possible load. We also removed the face bounding box overlay in recognition to reduce the processing load on the Raspberry Pi.
 
 **(12:26)**  
-**Interviewer:** We also switched to a lightweight recognition model, because the buffalo-l model was much slower — it used to take up to eight seconds. The analysis step was taking most of the time. We will keep trying to improve it so the Raspberry Pi does not overload.
+**Interviewer:** We also switched to a lightweight recognition model, because the buffalo-l model was much slower, it used to take up to eight seconds. The analysis step was taking most of the time. We will keep trying to improve it so the Raspberry Pi does not overload.
 
 **(13:03)**  
 **Customer:** Okay, are there lighter models available? Are there any documented tests or comparisons?  
@@ -118,11 +118,11 @@
 **Interviewer:** I can go to the logs page. Here are the different statuses.
 
 **(14:22)**  
-**Interviewer:** We will clean this up later — it is still under development. Right now a log is created for every recognition event. By the end of development, we will remove the redundant ACCESS_GRANTED entries that appear when a person stands in front of the camera for a long time.
+**Interviewer:** We will clean this up later, it is still under development. Right now a log is created for every recognition event. By the end of development, we will remove the redundant ACCESS_GRANTED entries that appear when a person stands in front of the camera for a long time.
 
 **(14:49)**  
 **Customer:** Will there be search and filtering for the logs?  
-**Interviewer:** There is already sorting and search — it is above the status column.
+**Interviewer:** There is already sorting and search, it is above the status column.
 
 **(15:37)**  
 **Interviewer:** I also suggest testing the case when the user is not registered. I will go to the employees tab and delete myself.
@@ -150,24 +150,24 @@
 **Interviewer:** I think we have covered all the pages. Are there any other additions?
 
 **(18:23)**  
-**Customer:** Probably not for now — I have said everything I found.
+**Customer:** Probably not for now.I have said everything I found.
 
 **(18:30)**  
 **Interviewer:** In that case, thank you. We have reviewed all the user-facing functionality.
 
 **(18:58)**  
-**Interviewer:** This week we achieved the Sprint Goal: we deployed the system on Raspberry Pi 5, switched to a lightweight model, implemented automatic recognition without a button press, and added Spoof Detection. I also want to highlight the quality improvements made this sprint. We set up the CI pipeline with automated tests — all 28 tests passed and coverage is at 41% for the faceguard package. CI also includes linting, formatting checks, and a Bandit security scan. These checks are now mandatory for every PR and will remain active in all following sprints.
+**Interviewer:** This week we achieved the Sprint Goal: we deployed the system on Raspberry Pi 5, switched to a lightweight model, implemented automatic recognition without a button press, and added Spoof Detection. I also want to highlight the quality improvements made this sprint. We set up the CI pipeline with automated tests. All 28 tests passed and coverage is at 41% for the faceguard package. CI also includes linting, formatting checks, and a Bandit security scan. These checks are now mandatory for every PR and will remain active in all following sprints.
 
 **(19:23)**  
 **Customer:** Hardware question: have you already worked with the Raspberry Pi GPIO?  
 **Interviewer:** What do you mean exactly? Have we tested the full system on the Raspberry Pi?
 
 **(20:10)**  
-**Customer:** I mean, have you started developing the feature that signals the system state — access granted, denied, or registration — using an LED and a motor?  
+**Customer:** I mean, have you started developing the feature that signals the system state: access granted, denied, or registration, using an LED and a motor?  
 **Interviewer:** Understood. We have started work on the LED integration and plan to work on it more thoroughly next week, along with the motor.
 
 **(21:03)**  
-**Interviewer:** This week we installed the lightweight model, connected the entire system to it, and fixed the issue where video recognition would crash after a minute due to dropped frames. We fixed that and worked on maintaining a consistent image quality. We also improved Spoof Detection — it was not working correctly before, but now it reliably detects when someone tries to deceive the system using a photo on a phone. We also addressed the registration feedback and generally sped up the process.
+**Interviewer:** This week we installed the lightweight model, connected the entire system to it, and fixed the issue where video recognition would crash after a minute due to dropped frames. We fixed that and worked on maintaining a consistent image quality. We also improved Spoof Detection, it was not working correctly before, but now it reliably detects when someone tries to deceive the system using a photo on a phone. We also addressed the registration feedback and generally sped up the process.
 
 **(21:58)**  
 **Interviewer:** We will continue to optimize so that the video stream does not lag too much and recognition runs a bit faster.
@@ -188,7 +188,7 @@
 **Interviewer:** Understood.
 
 **(23:17)**  
-**Interviewer:** Regarding the camera placement — is any additional lighting planned? There is a risk that the image could be too dark or grayish, which could reduce recognition quality.  
+**Interviewer:** Regarding the camera placement, is any additional lighting planned? There is a risk that the image could be too dark or grayish, which could reduce recognition quality.  
 **Customer:** It depends on your tests. If the system needs it, I can provide a set of electronics to set it up.
 
 **(24:03)**  
@@ -199,7 +199,7 @@
 
 **(24:53)**  
 **Interviewer:** What still needs to be improved? Of the remaining risks: performance on the Raspberry Pi does not yet consistently meet the 3-second target, and LED and motor integration is planned for the next sprint. Are there any other suggestions?  
-**Customer:** I like everything — I have already given more detailed comments. You are doing great!
+**Customer:** I like everything. I have already given more detailed comments. You are doing great!
 
 **(25:01)**  
 **Interviewer:** Thank you. I have no further questions. If any of the team members have questions, feel free to ask.
@@ -208,7 +208,7 @@
 **Team Member:** I have one question about the resistors for the LEDs. Is everything already available in the lab?
 
 **(25:44)**  
-**Customer:** Yes, everything is there — we will find what we need.  
+**Customer:** Yes, everything is there, we will find what we need.  
 **Team Member:** Perfect, thank you. No more questions from me.
 
 **(25:51)**  
