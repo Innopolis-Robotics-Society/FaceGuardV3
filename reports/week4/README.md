@@ -81,9 +81,22 @@ All the feedback received on the previous meeting was addressed in this Sprint.
 | QR-002 | Resistance to Static Photo Spoofing | Security - authenticity | System must reject at least 9 out of 10 static photo spoofing attempts |
 | QR-003 | Recognition Model Modularity | Maintainability - modularity | Recognition model must be replaceable without changing the application pipeline |
 
-## 19. Testing Status  
+## 19. Testing Status
 
-Testing status summary, including critical modules and per-module line coverage status.
+All 28 tests pass. Overall line coverage across the `faceguard` package is **41%**, above the 30% target.
+
+| Module | Stmts | Miss | Cover | Status |
+|---|---|---|---|---|
+| backend/faceguard/business_logic.py | 18 | 6 | 67% | Above threshold |
+| backend/faceguard/detect.py | 46 | 7 | 85% | Above threshold |
+| backend/faceguard/recognize.py | 123 | 63 | 49% | Above threshold |
+| backend/faceguard/interfaces.py | 6 | 1 | 83% | Above threshold |
+| backend/faceguard/enroll.py | 37 | 37 | 0% | Not covered |
+| backend/faceguard/main.py | 51 | 51 | 0% | Not covered |
+| backend/faceguard/dataset.py | 3 | 3 | 0% | Not covered |
+| **TOTAL** | **284** | **168** | **41%** | Above threshold |
+
+**Critical modules**: `business_logic.py`, `detect.py`, and `recognize.py` are identified as critical modules and all exceed the 30% coverage threshold. `enroll.py`, `main.py`, and `dataset.py` have 0% coverage. `main.py` is the Streamlit UI entry point which is not unit-testable directly.
 
 ## 20-22. Test Links
 
@@ -94,8 +107,8 @@ Testing status summary, including critical modules and per-module line coverage 
 ## 23-25. CI Pipeline
 
 - [CI pipeline](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions)
-- [Latest protected-default-branch CI run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/)
-![Branch protection](images/branch_protection.png)
+- [Latest protected-default-branch CI run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28308225264)
+- ![Branch protection](images/branch_protection.png)
 
 ## 26. QA Check Screenshots
 
@@ -113,11 +126,11 @@ The Assignment 4 tests, CI checks, quality requirement tests, and Definition of 
 ## 28. SemVer release 
 [Release 2.0.0 - MVP v2](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v2.0.0)
 
-## 29. Release and Changelog
+## 29. Changelog
 [CHANGELOG.md](../../CHANGELOG.md)
 
 ## 30. Demo Video
-[MVP v2 demo video](https://drive.google.com/file/d/1WeqOz5-CdQawEzLJqm_BUHD-Plo9eSof/view?usp=sharing)
+[MVP v2 demo video](https://drive.google.com/file/d/1xrwax_yv3N_cNq_ARo6OVEaXLstwC0-J/view?usp=drive_link)
 
 ## 31. Presentation
 [Presentation](https://drive.google.com/file/d/1rYBW_qT74htfvdqdye2SOPuVrmqIiQJ8/view?usp=drive_link)
@@ -189,7 +202,7 @@ The public publication was permitted.
 
 | Team member | GitHub username | Issues | PRs/MRs | Review activity | Contribution |
 |---|---|---|---|---|---|
-| Sofia Sokolova | @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#89](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/89), [#97](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/97), [#101](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/101), [#103](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/103), [#112](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/112), [#119](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/119), [#120](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/120), [#121](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/121), [#122](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/122), [#123](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/123), [#124](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/124) | [#98](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/98), [#99](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/99), [#102](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/102), [#108](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/108), [#118](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/118) | Backend, Testing, Documentation, Presentation |
+| Sofia Sokolova | @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57), [#128](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/128) | [#89](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/89), [#97](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/97), [#101](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/101), [#103](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/103), [#112](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/112), [#119](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/119), [#120](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/120), [#121](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/121), [#122](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/122), [#123](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/123), [#124](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/124) | [#98](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/98), [#99](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/99), [#102](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/102), [#108](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/108), [#118](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/118) | Backend, Testing, Documentation, Presentation |
 | Varvara Orekhova | @oebarbie | [#46](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/46) | [#89](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/89), [#108](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/108), [#110](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/110) | [#98](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/98), [#103](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/103), [#119](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/119), [#120](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/120), [#122](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/122), [#123](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/123), [#124](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/124) | Backend, Documentation, H/W setup |
 | Maksim Barannikov | @Exckernels | [#92](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/92), [#93](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/93), [#94](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/94), [#100](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/100), [#104](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/104), [#106](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/106) | [#90](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/90), [#92](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/92), [#96](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/96), [#99](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/99), [#107](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/107) | [#110](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/110) | Backend, Testing, Documentation, H/W setup |
 | Maksim Beketov | @ixkci | [#49](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/49), [#58](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/58), [#59](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/59), [#86](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/86), [#87](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/87), [#96](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/96) | [#98](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/98), [#102](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/102) | [#90](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/90), [#92](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/92), [#97](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/97), [#101](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/101) | Backend, Testing, H/W setup |
@@ -197,7 +210,11 @@ The public publication was permitted.
 | Pavel Dudinov | @tyajhelo | — | — | [#112](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/112), [#121](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/121) | Documentation |
 
 ## 41. Screenshots
+Screenshots are stored in:
 
+```text
+reports/week3/images/
+```
 ![Sprint milestone](images/sprint_milestone.png)
 ![Latest CI run](images/ci_run.png)
 ![Branch protection](images/branch_protection.png)
