@@ -161,19 +161,38 @@ Additional acceptance criteria, if any:
 
 ### Manual testing
 
-Describe manual checks performed.
+For each scenario tested, describe: what was done, the expected result, and the actual result.
+Include edge cases and error/boundary conditions where relevant.
 
 ```text
+Scenario 1:
+  Steps:
+  Expected:
+  Actual:
+
+Scenario 2:
+  Steps:
+  Expected:
+  Actual:
 ```
 
 ### Automated tests
 
-Describe automated tests or write `Not applicable`.
+List the test files or test suites that cover this change.
+State which critical modules are affected and confirm their line coverage meets ≥ 30%.
+Write `Not applicable` only if no source code was changed.
 
 ```text
+Test files / suites:
+
+Critical modules affected:
+
+Line coverage on critical modules: % (attach CI report or paste summary)
 ```
 
 ### Commands executed
+
+Paste the exact commands used to run tests locally or reference the CI job.
 
 ```bash
 ```
@@ -222,6 +241,7 @@ Select exactly one option:
 ---
 
 ## Definition of Done checklist
+
 * [ ] The linked issue is clear and traceable.
 * [ ] The implementation satisfies the acceptance criteria.
 * [ ] The change was tested (unit and/or integration tests pass).
@@ -252,13 +272,24 @@ Describe known limitations, remaining risks, or follow-up work.
 
 Reviewer should check:
 
-* [ ] The linked issue exists.
-* [ ] The branch name follows the required format.
-* [ ] Acceptance criteria were verified.
+**Workflow and traceability**
+* [ ] The linked issue exists and is traceable.
+* [ ] The branch name follows `<issue-number>-short-description`.
 * [ ] Exactly one changelog option is selected.
 * [ ] The change matches the MVP/Sprint scope.
-* [ ] The PR contains enough evidence for Assignment 5.
-* [ ] The PR can be safely merged with a merge commit.
+* [ ] The PR will be merged using a merge commit.
+
+**Evidence quality**
+* [ ] Each acceptance criterion has specific, observable verification evidence (not just "it works").
+* [ ] Manual testing describes concrete scenarios with expected and actual results, including edge cases.
+* [ ] Automated test output or CI coverage report is included and confirms ≥ 30% line coverage on critical modules.
+* [ ] Screenshots, logs, or a demo recording are present where the change has a visible or behavioral effect.
+* [ ] The testing evidence is sufficient to confirm the AC is met — not merely that tests were run.
+
+**Code and CI**
+* [ ] The CI pipeline passes (lint, type/format check, tests, coverage, QA checks).
+* [ ] No secrets, credentials, or sensitive data are present in the diff.
+* [ ] The PR can be safely merged into the default branch.
 
 Meaningful review comment:
 
