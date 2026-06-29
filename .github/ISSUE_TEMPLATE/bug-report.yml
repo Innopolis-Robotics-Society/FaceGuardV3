@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for defects found during MVP v1 implementation, testing, review, or demo preparation.
+        Use this template for defects found during MVP v2 implementation, testing, review, or demo preparation.
   - type: input
     id: bug-summary
     attributes:
@@ -84,7 +84,7 @@ body:
     id: mvp-version
     attributes:
       label: Affected MVP version
-      placeholder: "MVP v1"
+      placeholder: "MVP v2"
     validations:
       required: false
   - type: input
