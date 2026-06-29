@@ -5,7 +5,7 @@
 Describe the change in 2–5 sentences.
 
 Example:
-This PR implements the question creation form for MVP v1. It adds validation, connects the feature to the existing flow, and updates the required documentation.
+This PR implements the question creation form for MVP v2. It adds validation, connects the feature to the existing flow, and updates the required documentation.
 
 ---
 
@@ -19,7 +19,7 @@ Related issues:
 
 ---
 
-## Assignment 4 workflow evidence
+## Assignment 5 workflow evidence
 
 * [ ] This PR is linked to an issue.
 * [ ] The branch name follows `<issue-number>-short-description`.
@@ -257,7 +257,7 @@ Reviewer should check:
 * [ ] Acceptance criteria were verified.
 * [ ] Exactly one changelog option is selected.
 * [ ] The change matches the MVP/Sprint scope.
-* [ ] The PR contains enough evidence for Assignment 4.
+* [ ] The PR contains enough evidence for Assignment 5.
 * [ ] The PR can be safely merged with a merge commit.
 
 Meaningful review comment:
