@@ -7,9 +7,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for user stories migrated from Assignment 2 or newly discovered user stories.
+        Use this template for user stories in Sprint 3 or newly discovered user stories.
         Preserve the stable ID format: US-XXX.
-
   - type: input
     id: stable-id
     attributes:
@@ -18,7 +17,6 @@ body:
       placeholder: "US-001"
     validations:
       required: true
-
   - type: textarea
     id: user-story
     attributes:
@@ -27,7 +25,6 @@ body:
       placeholder: "As a new student, I want to ask questions publicly, so that other students can answer them."
     validations:
       required: true
-
   - type: dropdown
     id: moscow-priority
     attributes:
@@ -39,7 +36,6 @@ body:
         - Won't Have
     validations:
       required: true
-
   - type: dropdown
     id: requirement-status
     attributes:
@@ -50,7 +46,6 @@ body:
         - Removed
     validations:
       required: true
-
   - type: dropdown
     id: work-status
     attributes:
@@ -64,7 +59,6 @@ body:
         - Done
     validations:
       required: true
-
   - type: input
     id: story-points
     attributes:
@@ -72,24 +66,21 @@ body:
       placeholder: "Example: 3"
     validations:
       required: true
-
   - type: input
     id: mvp-version
     attributes:
       label: MVP version
       description: Use MVP v1, MVP v2, MVP v3, or leave as not planned.
-      placeholder: "MVP v1"
+      placeholder: "MVP v2"
     validations:
       required: false
-
   - type: input
     id: sprint
     attributes:
       label: Sprint milestone
-      placeholder: "Sprint 1"
+      placeholder: "Sprint 3"
     validations:
       required: false
-
   - type: input
     id: assignee
     attributes:
@@ -97,7 +88,6 @@ body:
       placeholder: "@github-username"
     validations:
       required: false
-
   - type: input
     id: reviewer
     attributes:
@@ -106,19 +96,17 @@ body:
       placeholder: "@github-username"
     validations:
       required: false
-
   - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Required for MVP v1 PBIs and Sprint-selected PBIs.
+      description: Required. Specify observable and testable criteria. Given/When/Then format is recommended.
       placeholder: |
         - [ ] Given ..., when ..., then ...
         - [ ] Given ..., when ..., then ...
         - [ ] Given ..., when ..., then ...
     validations:
-      required: false
-
+      required: true
   - type: textarea
     id: linked-items
     attributes:
@@ -129,7 +117,6 @@ body:
         - Blocks: #...
     validations:
       required: false
-
   - type: textarea
     id: notes
     attributes:

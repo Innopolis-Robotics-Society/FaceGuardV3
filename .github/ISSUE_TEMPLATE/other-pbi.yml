@@ -8,7 +8,6 @@ body:
     attributes:
       value: |
         Use this template for technical, infrastructure, design, deployment, testing, documentation, or other supporting Product Backlog Items.
-
   - type: input
     id: pbi-title
     attributes:
@@ -16,7 +15,6 @@ body:
       placeholder: "Implement question creation API"
     validations:
       required: true
-
   - type: textarea
     id: description
     attributes:
@@ -24,7 +22,6 @@ body:
       placeholder: "Describe what must be built, changed, configured, tested, or documented."
     validations:
       required: true
-
   - type: dropdown
     id: pbi-type
     attributes:
@@ -43,7 +40,6 @@ body:
         - Other
     validations:
       required: true
-
   - type: dropdown
     id: moscow-priority
     attributes:
@@ -55,7 +51,6 @@ body:
         - Won't Have
     validations:
       required: true
-
   - type: dropdown
     id: work-status
     attributes:
@@ -68,7 +63,6 @@ body:
         - Done
     validations:
       required: true
-
   - type: input
     id: story-points
     attributes:
@@ -76,23 +70,20 @@ body:
       placeholder: "Example: 2"
     validations:
       required: true
-
   - type: input
     id: mvp-version
     attributes:
       label: MVP version
-      placeholder: "MVP v1"
+      placeholder: "MVP v2"
     validations:
       required: false
-
   - type: input
     id: sprint
     attributes:
       label: Sprint milestone
-      placeholder: "Sprint 1"
+      placeholder: "Sprint 3"
     validations:
       required: false
-
   - type: input
     id: assignee
     attributes:
@@ -100,7 +91,6 @@ body:
       placeholder: "@github-username"
     validations:
       required: false
-
   - type: input
     id: reviewer
     attributes:
@@ -109,19 +99,17 @@ body:
       placeholder: "@github-username"
     validations:
       required: false
-
   - type: textarea
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: Required for MVP v1 PBIs and Sprint-selected PBIs.
+      description: Required. Specify observable and testable criteria. Given/When/Then format is recommended.
       placeholder: |
         - [ ] Given ..., when ..., then ...
         - [ ] Given ..., when ..., then ...
         - [ ] Given ..., when ..., then ...
     validations:
-      required: false
-
+      required: true
   - type: textarea
     id: verification-plan
     attributes:
@@ -132,7 +120,6 @@ body:
         - Screenshot/log/demo evidence:
     validations:
       required: false
-
   - type: textarea
     id: linked-user-stories
     attributes:
@@ -143,7 +130,6 @@ body:
         - Blocks: #...
     validations:
       required: false
-
   - type: textarea
     id: notes
     attributes:
