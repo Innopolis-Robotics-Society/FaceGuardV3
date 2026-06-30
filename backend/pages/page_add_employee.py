@@ -5,7 +5,6 @@ from datetime import date
 import av
 import threading
 import time
-import streamlit.components.v1 as components  # noqa: F401
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
