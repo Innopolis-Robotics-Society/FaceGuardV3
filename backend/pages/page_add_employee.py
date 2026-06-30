@@ -5,10 +5,11 @@ from datetime import date
 import av
 import threading
 import time
+import streamlit.components.v1 as components
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from db.employees_db import add_employees  # noqa: E402
+from db.employees_db import add_employees, find_closest_embedding  # noqa: E402
 
 from faceguard.recognize import (  # noqa: E402
     create_face_app,
@@ -123,11 +124,12 @@ ctx = webrtc_streamer(
     },
     rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
 )
-
+success_placeholder = st.empty()
+error_placeholder = st.empty()
+try_placeholder = st.empty()
+progress_bar = st.progress(0)
+status_indicator = st.empty()
 if ctx.video_processor:
-    progress_bar = st.progress(0)
-    status_indicator = st.empty()
-
     while ctx.state.playing:
         with ctx.video_processor.lock:
             embeddings_count = len(ctx.video_processor.embeddings)
@@ -141,44 +143,59 @@ if ctx.video_processor:
             st.session_state["enroll_embedding"] = average_embeddings(
                 collected_embeddings
             )
-            st.success("Face data successfully collected!")
+            success_placeholder.success("Face data successfully collected!")
             break
 
         time.sleep(0.1)
 
 embedding = st.session_state.get("enroll_embedding", None)
-
-
-name = st.text_input("Enter a name:")
-
-access_type = st.radio("Access type:", ["Permanent", "Temporary"])
-
-start_date = None
-expiration_date = None
-
-if access_type == "Temporary":
-    col1, col2 = st.columns(2)
-    with col1:
-        start_date = st.date_input(
-            "Start date:", value=date.today(), min_value=date.today()
-        )
-    with col2:
-        expiration_date = st.date_input(
-            "Expiration date:", value=date.today(), min_value=date.today()
-        )
-
-    if expiration_date < start_date:
-        st.error("Expiration date must be after start date.")
-
-if st.button("Save"):
-    if embedding is None:
-        st.error("No face detected. Please capture a face.")
-    elif not name:
-        st.error("Please enter a name.")
-    elif access_type == "Temporary" and (not start_date or not expiration_date):
-        st.error("Please set both start and expiration dates for temporary access.")
+if embedding is not None:
+    match = find_closest_embedding(embedding)
+    if match:
+        error_placeholder.error(f"Face already exists for {match[1]}")
+        if try_placeholder.button("Try again"):
+            with ctx.video_processor.lock:
+                ctx.video_processor.embeddings = []
+                ctx.video_processor.status = "Initializing camera..."
+                ctx.video_processor.last_face = None
+            st.session_state["enroll_embedding"] = None
+            success_placeholder.empty()
+            error_placeholder.empty()
+            try_placeholder.empty()
+            progress_bar.empty()
+            status_indicator.empty()
+            st.rerun()
     else:
-        add_employees(name, access_type, embedding, start_date, expiration_date)
-        st.success("Saved!")
-        st.session_state["enroll_embedding"] = None
-        st.switch_page("page_employees.py")
+        name = st.text_input("Enter a name:")
+
+        access_type = st.radio("Access type:", ["Permanent", "Temporary"])
+
+        start_date = None
+        expiration_date = None
+
+        if access_type == "Temporary":
+            col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input(
+                    "Start date:", value=date.today(), min_value=date.today()
+                )
+            with col2:
+                expiration_date = st.date_input(
+                    "Expiration date:", value=date.today(), min_value=date.today()
+                )
+
+            if expiration_date < start_date:
+                st.error("Expiration date must be after start date.")
+
+        if st.button("Save"):
+            if embedding is None:
+                st.error("No face detected. Please capture a face.")
+            elif not name:
+                st.error("Please enter a name.")
+            elif access_type == "Temporary" and (not start_date or not expiration_date):
+                st.error("Please set both start and expiration dates for temporary access.")
+            else:
+                add_employees(name, access_type, embedding, start_date, expiration_date)
+                st.success("Saved!")
+                st.session_state["enroll_embedding"] = None
+                st.switch_page("page_employees.py")
