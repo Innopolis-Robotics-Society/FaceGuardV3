@@ -1,14 +1,16 @@
 import streamlit as st
+import pandas as pd
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from db.employees_db import (  # noqa: E402
+from db.employees_db import ( # noqa: E402
     init_db,
     load_employees,
     delete_employee,
 )
+from db.logs_db import get_last_entry # noqa: E402
 
 st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=True)
 init_db()
@@ -48,11 +50,14 @@ def confirm_delete():
 
 if df is not None:
     df.insert(0, "Select", False)
+    df["last_entry"] = df["name"].apply(get_last_entry)
+    df["last_entry"] = pd.to_datetime(df["last_entry"], errors="coerce")
+    df["last_entry"] = df["last_entry"].dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow")
     table_key = f"employees_table_{st.session_state['table_version']}"
     edited_df = st.data_editor(
         df,
         hide_index=True,
-        disabled=["id", "name", "registration_date", "status"],
+        disabled=["id", "name", "registration_date", "status", "last_entry"],
         column_config={
             "id": None,
             "status": st.column_config.SelectboxColumn(
@@ -62,6 +67,9 @@ if df is not None:
             "registration_date": "Registration date",
             "start_date": "Start date",
             "expiration_date": "Expiration date",
+            "last_entry" : st.column_config.DatetimeColumn(
+                "Last access time", format="YYYY-MM-DD HH:mm:ss", disabled=True
+            )
         },
         key=table_key,
     )

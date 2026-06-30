@@ -1,3 +1,4 @@
+docker/insightface_models/buffalo_s.zip
 backend/faceguard/data/*.npy
 backend/.streamlit/secrets.toml
 __pycache__/

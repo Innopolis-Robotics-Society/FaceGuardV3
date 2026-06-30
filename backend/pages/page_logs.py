@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import sys
 import os
 
@@ -14,8 +15,12 @@ st.markdown(
 )
 
 logs = get_all_logs()
+df = pd.DataFrame(logs)
+if not df.empty:
+    df["time"] = (pd.to_datetime(df["time"]).dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow").dt.tz_localize(None))
+
 st.dataframe(
-    logs,
+    df,
     column_order=["id", "name", "time", "status"],
     use_container_width=True,
     hide_index=True,

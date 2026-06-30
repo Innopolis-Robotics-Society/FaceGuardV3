@@ -66,3 +66,12 @@ def delete_old_logs():
         with conn.cursor() as cur:
             cur.execute("DELETE FROM logs WHERE time < NOW() - INTERVAL '3 days'")
         conn.commit()
+
+def get_last_entry(employee_name):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT time FROM logs WHERE name = %s ORDER BY time DESC LIMIT 1", (employee_name,))
+            row = cur.fetchone()
+    if row:
+        return row[0]
+    return None
