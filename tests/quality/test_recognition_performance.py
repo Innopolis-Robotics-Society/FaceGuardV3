@@ -2,7 +2,10 @@ import numpy as np
 from time import perf_counter
 from backend.faceguard.business_logic import process_access_attempt
 from backend.faceguard.interfaces import FaceProviderInterface
-from backend.faceguard.recognize import extract_embedding_from_frame, normalize_embedding
+from backend.faceguard.recognize import (
+    extract_embedding_from_frame,
+    normalize_embedding,
+)
 
 
 class FakeFace:
