@@ -4,6 +4,18 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-05  
+
+### Added
+- LEDs integration to show the system's response
+- The ability to edit employee name and status after registration
+- Time of employee's last entry to the employees list
+- A duplicate name check when registering a new employee
+- Filtering by date range in access logs
+
+### Changed
+- Desgin for temporary access changed to use exact time in addition to date
+
 ## [2.0.0] - 2026-06-28  
 
 ### Added
@@ -38,3 +50,4 @@ All notable changes to FaceGuard will be documented in this file.
 
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
+[2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
