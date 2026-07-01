@@ -228,16 +228,3 @@ if ctx.state.playing:
                 similarity_display.markdown("### Similarity\n-")
 
         time.sleep(0.1)
-
-# test button (delete later)
-st.divider()
-st.subheader("Test")
-
-col_a, col_b = st.columns(2)
-with col_a:
-    if st.button("Test Status"):
-        st.info("Trigger a test recognition.")
-
-with col_b:
-    if st.button("Reset Status"):
-        st.rerun()
