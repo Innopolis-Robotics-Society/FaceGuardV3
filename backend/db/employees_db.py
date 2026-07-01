@@ -29,20 +29,12 @@ def init_db():
         registration_date DATE DEFAULT CURRENT_DATE,
         status VARCHAR(50) NOT NULL DEFAULT 'Permanent',
         embedding FLOAT8[],
-        start_date DATE,
-        expiration_date DATE
+        start_date TIMESTAMP,
+        expiration_date TIMESTAMP
     );
     """
     try:
         cursor.execute(create_table_query)
-        cursor.execute("""
-            ALTER TABLE employees
-            ADD COLUMN IF NOT EXISTS start_date DATE;
-        """)
-        cursor.execute("""
-            ALTER TABLE employees
-            ADD COLUMN IF NOT EXISTS expiration_date DATE;
-        """)
         connection.commit()
     except Exception as e:
         connection.rollback()
@@ -59,7 +51,7 @@ def delete_expired_employees():
         cursor.execute("""
             DELETE FROM employees
             WHERE status = 'Temporary'
-            AND expiration_date < CURRENT_DATE;
+            AND expiration_date < NOW();
         """)
         connection.commit()
     except Exception as e:
