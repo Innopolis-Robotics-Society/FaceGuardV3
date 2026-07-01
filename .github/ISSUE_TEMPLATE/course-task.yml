@@ -21,7 +21,7 @@ body:
     attributes:
       label: Assignment 5 part
       options:
-        - Part 1 - Refine Product Backlog and plan Sprint 5
+        - Part 1 - Refine Product Backlog and plan Sprint 3
         - Part 2 - Respond to customer feedback on MVP v1
         - Part 3 - Document the development process and configuration management
         - Part 4 - Document the architecture
@@ -54,7 +54,7 @@ body:
         - To Do
         - Ready
         - In Progress
-        - In Review
+        - Review
         - Done
     validations:
       required: true
