@@ -14,17 +14,21 @@
 
 **Verification method**: Automated performance CI check.
 
-**Test data, setup, or environment**: Standard CI/Docker test environment. The test uses controlled fake frame, fake face app, fake face result, and fake liveness detector instead of live hardware.
+**Test data, setup, or environment**: Standard CI/Docker test environment. The test uses a controlled fake frame, fake face app, and fake face result instead of live hardware.
 
 **Automated command or CI check**: `pytest tests/quality/test_recognition_performance.py`
 
-**Expected measurable result**: The test executes the recognition pipeline and passes only if a valid access decision is produced in `<= 3.0` seconds. It fails if the execution time exceeds 3.0 seconds, crashes, or produces no decision.
+**Expected measurable result**: The test verifies two levels of the pipeline:
+1. Embedding extraction from a detected face completes in `<= 3.0` seconds.
+2. The full access-decision pipeline (capture -> extract -> compare against the database -> decision), as described in the QR-001 scenario, also completes in `<= 3.0` seconds and produces a valid access decision.
+
+The test fails if either step exceeds 3.0 seconds, crashes, or fails to produce a decision.
 
 **Evidence link**: Latest protected default-branch CI run after CI integration.
 
-**Limitation**: Uses controlled fake inputs instead of a live USB camera.
+**Limitation**: Uses controlled fake inputs instead of a live USB camera; the fake face-detection app returns instantly, so this measures pipeline/business-logic overhead rather than actual ML model inference latency.
 
-**CI Job**: pytest tests/quality/ runs automatically on every PR and push to main
+**CI Job**: `pytest tests/quality/` runs automatically on every PR and push to main
 
 **Status**: Implemented
 

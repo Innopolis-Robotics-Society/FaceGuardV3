@@ -55,7 +55,7 @@ body:
         - To Do
         - Ready
         - In Progress
-        - In Review
+        - Review
         - Done
     validations:
       required: true
