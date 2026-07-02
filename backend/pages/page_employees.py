@@ -9,6 +9,7 @@ from db.employees_db import ( # noqa: E402
     init_db,
     load_employees,
     delete_employee,
+    update_employee,
 )
 from db.logs_db import get_last_entry # noqa: E402
 
@@ -16,7 +17,7 @@ st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=
 init_db()
 df = load_employees()
 statuses = ["All"] + df["status"].unique().tolist()
-selected_status = st.selectbox("Filter by status", statuses)
+selected_status = st.selectbox("Filter by status", statuses, key="status_filter")
 
 if selected_status != "All":
     df = df[df["status"] == selected_status]
@@ -30,6 +31,49 @@ def reset_table():
     if old_key in st.session_state:
         del st.session_state[old_key]
     st.session_state["table_version"] += 1
+
+
+@st.dialog("Edit employee")
+def edit_employee_dialog(row):
+    from datetime import date, time, datetime
+    name = st.text_input("Name:", value=row["name"])
+    status = st.radio("Access type:", ["Permanent", "Temporary"],
+                      index=0 if row["status"] == "Permanent" else 1)
+
+    start_dt = None
+    expiration_dt = None
+
+    if status == "Temporary":
+        col1, col2 = st.columns(2)
+        existing_start = row.get("start_date")
+        existing_exp = row.get("expiration_date")
+        default_start = existing_start if pd.notna(existing_start) else datetime.now()
+        default_exp = existing_exp if pd.notna(existing_exp) else datetime.now()
+        with col1:
+            start_date = st.date_input("Start date:", value=default_start.date() if hasattr(default_start, 'date') else date.today())
+            start_time = st.time_input("Start time:", value=default_start.time() if hasattr(default_start, 'time') else time(0, 0), step=60)
+        with col2:
+            expiration_date = st.date_input("Expiration date:", value=default_exp.date() if hasattr(default_exp, 'date') else date.today())
+            expiration_time = st.time_input("Expiration time:", value=default_exp.time() if hasattr(default_exp, 'time') else time(23, 59), step=60)
+        start_dt = datetime.combine(start_date, start_time)
+        expiration_dt = datetime.combine(expiration_date, expiration_time)
+        if expiration_dt <= start_dt:
+            st.error("Expiration must be after start date and time.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Save"):
+            if not name:
+                st.error("Name cannot be empty.")
+            elif status == "Temporary" and expiration_dt <= start_dt:
+                st.error("Please fix the access dates before saving.")
+            else:
+                update_employee(row["id"], name, status, start_dt, expiration_dt)
+                st.session_state["status_filter"] = "All"
+                st.rerun()
+    with col2:
+        if st.button("Cancel"):
+            st.rerun()
 
 
 @st.dialog("Confirm deletion")
@@ -75,11 +119,14 @@ if df is not None:
     )
     selected_rows = edited_df[edited_df["Select"]]
     if not selected_rows.empty:
-        col_cancel, col_delete, _ = st.columns([1, 1, 4])
+        col_cancel, col_edit, col_delete, _ = st.columns([1, 1, 1, 3])
         with col_cancel:
             if st.button("Cancel"):
                 reset_table()
                 st.rerun()
+        with col_edit:
+            if st.button("Edit") and len(selected_rows) == 1:
+                edit_employee_dialog(selected_rows.iloc[0])
         with col_delete:
             if st.button("Delete"):
                 confirm_delete()
