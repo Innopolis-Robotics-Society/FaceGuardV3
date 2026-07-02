@@ -51,6 +51,7 @@ def delete_expired_employees():
         cursor.execute("""
             DELETE FROM employees
             WHERE status = 'Temporary'
+            AND expiration_date IS NOT NULL
             AND expiration_date < NOW();
         """)
         connection.commit()
@@ -69,6 +70,23 @@ def load_employees():
     df = pd.read_sql(query, connection)
     connection.close()
     return df
+
+
+def update_employee(employee_id, name, status, start_date=None, expiration_date=None):
+    connection = connect_to_db()
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
+            (name, status, start_date, expiration_date, int(employee_id))
+        )
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        st.error(f"Error: {e}")
+    finally:
+        cursor.close()
+        connection.close()
 
 
 def delete_employee(employee_id):
