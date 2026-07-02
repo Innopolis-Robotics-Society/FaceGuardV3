@@ -47,8 +47,13 @@ def get_connection():
 def add_log(name: str, status: str):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO logs (name, status) VALUES (%s, %s)", (name, status)
+            cur.execute("""
+                        INSERT INTO logs (name, status)
+                        SELECT %s, %s
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM logs WHERE name = %s AND status = %s AND time > NOW() - INTERVAL '1 minute'
+                        )
+                        """, (name, status, name, status)
             )
         conn.commit()
 
