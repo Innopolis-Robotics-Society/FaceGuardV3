@@ -111,7 +111,7 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
         st.error("Employee with this name already exists")
         cursor.close()
         connection.close()
-        return
+        return False
 
     embedding = embedding.tolist() if embedding is not None else None
 
@@ -122,24 +122,34 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
     connection.commit()
     cursor.close()
     connection.close()
+    return True
 
 
 def get_all_embeddings():
     connection = connect_to_db()
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT id, name, embedding FROM employees WHERE embedding IS NOT NULL"
+        "SELECT id, name, embedding, status, start_date, expiration_date FROM employees WHERE embedding IS NOT NULL"
     )
 
     rows = cursor.fetchall()
     cursor.close()
     connection.close()
 
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
     embeddings = []
     for row in rows:
-        if row[2]:
-            embedding_array = np.array(row[2])
-            embeddings.append((row[0], row[1], embedding_array))
+        emp_id, name, embedding, status, start_date, expiration_date = row
+        if not embedding:
+            continue
+        if status == "Temporary":
+            if start_date and now < start_date:
+                continue
+            if expiration_date and now > expiration_date:
+                continue
+        embeddings.append((emp_id, name, np.array(embedding)))
 
     return embeddings
 
