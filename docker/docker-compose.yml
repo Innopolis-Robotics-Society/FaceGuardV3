@@ -6,6 +6,10 @@ services:
     ports:
       - "8501:8501"
     volumes:
+      - ../backend:/app/backend
+      - ../tests:/app/tests
       - ../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
       - ./insightface_models:/root/.insightface/models
+    tty: true
+    stdin_open: true
     restart: unless-stopped
