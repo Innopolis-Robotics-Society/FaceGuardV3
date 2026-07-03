@@ -37,3 +37,28 @@
 **Linked quality requirement tests:** [QRT-003](quality-requirement-tests.md#qrt-003-inference-provider-contract-modularity)
 
 **Linked ADR:** [ADR-001: Introduce a Face Recognition Provider Abstraction](architecture/adr/ADR-001-face-recognition-provider-abstraction.md)
+
+---
+
+## QR-004: Temporary Access Window Enforcement
+
+**ISO/IEC 25010 sub-characteristic:** Functional Correctness
+
+**Scenario:** When a registered employee with Temporary access status attempts
+recognition under normal deployment operation, regardless of whether an
+admin has recently opened the Employees page, the access-control decision
+module shall grant access only when the current time is within the
+employee's configured [start_date, expiration_date] window (inclusive), and
+shall deny access outside that window in 100% of automated test cases.
+
+**Why this matters:** Temporary access is a security boundary, not a
+convenience feature — an employee whose access has expired (or has not yet
+started) must not be recognized, independent of unrelated admin activity
+such as viewing the Employees page. This was found to be a real defect:
+get_all_embeddings() did not filter by expiration/start date, so expired
+temporary employees could still be granted access until an admin happened
+to reload the Employees page.
+
+**Linked quality requirement tests:** [QRT-004](quality-requirement-tests.md#qrt-004-temporary-access-window-enforcement)
+
+**Linked ADR:** -
