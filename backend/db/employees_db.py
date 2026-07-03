@@ -78,7 +78,7 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
     try:
         cursor.execute(
             "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
-            (name, status, start_date, expiration_date, int(employee_id))
+            (name, status, start_date, expiration_date, int(employee_id)),
         )
         connection.commit()
     except Exception as e:
@@ -137,6 +137,7 @@ def get_all_embeddings():
     connection.close()
 
     from datetime import date
+
     today = date.today()
     embeddings = []
     for row in rows:
@@ -145,11 +146,15 @@ def get_all_embeddings():
             continue
         if status == "Temporary":
             if start_date:
-                start = start_date.date() if hasattr(start_date, 'date') else start_date
+                start = start_date.date() if hasattr(start_date, "date") else start_date
                 if start > today:
                     continue
             if expiration_date:
-                exp = expiration_date.date() if hasattr(expiration_date, 'date') else expiration_date
+                exp = (
+                    expiration_date.date()
+                    if hasattr(expiration_date, "date")
+                    else expiration_date
+                )
                 if exp < today:
                     continue
         embeddings.append((emp_id, name, np.array(embedding)))

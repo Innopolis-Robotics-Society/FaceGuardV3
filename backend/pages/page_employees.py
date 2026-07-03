@@ -36,9 +36,13 @@ def reset_table():
 @st.dialog("Edit employee")
 def edit_employee_dialog(row):
     from datetime import date, time, datetime
+
     name = st.text_input("Name:", value=row["name"])
-    status = st.radio("Access type:", ["Permanent", "Temporary"],
-                      index=0 if row["status"] == "Permanent" else 1)
+    status = st.radio(
+        "Access type:",
+        ["Permanent", "Temporary"],
+        index=0 if row["status"] == "Permanent" else 1,
+    )
 
     start_dt = None
     expiration_dt = None
@@ -50,11 +54,37 @@ def edit_employee_dialog(row):
         default_start = existing_start if pd.notna(existing_start) else datetime.now()
         default_exp = existing_exp if pd.notna(existing_exp) else datetime.now()
         with col1:
-            start_date = st.date_input("Start date:", value=default_start.date() if hasattr(default_start, 'date') else date.today())
-            start_time = st.time_input("Start time:", value=default_start.time() if hasattr(default_start, 'time') else time(0, 0), step=60)
+            start_date = st.date_input(
+                "Start date:",
+                value=(
+                    default_start.date()
+                    if hasattr(default_start, "date")
+                    else date.today()
+                ),
+            )
+            start_time = st.time_input(
+                "Start time:",
+                value=(
+                    default_start.time()
+                    if hasattr(default_start, "time")
+                    else time(0, 0)
+                ),
+                step=60,
+            )
         with col2:
-            expiration_date = st.date_input("Expiration date:", value=default_exp.date() if hasattr(default_exp, 'date') else date.today())
-            expiration_time = st.time_input("Expiration time:", value=default_exp.time() if hasattr(default_exp, 'time') else time(23, 59), step=60)
+            expiration_date = st.date_input(
+                "Expiration date:",
+                value=(
+                    default_exp.date() if hasattr(default_exp, "date") else date.today()
+                ),
+            )
+            expiration_time = st.time_input(
+                "Expiration time:",
+                value=(
+                    default_exp.time() if hasattr(default_exp, "time") else time(23, 59)
+                ),
+                step=60,
+            )
         start_dt = datetime.combine(start_date, start_time)
         expiration_dt = datetime.combine(expiration_date, expiration_time)
         if expiration_dt <= start_dt:
