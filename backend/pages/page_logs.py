@@ -17,7 +17,12 @@ st.markdown(
 logs = get_all_logs()
 df = pd.DataFrame(logs)
 if not df.empty:
-    df["time"] = (pd.to_datetime(df["time"]).dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow").dt.tz_localize(None))
+    df["time"] = (
+        pd.to_datetime(df["time"])
+        .dt.tz_localize("UTC")
+        .dt.tz_convert("Europe/Moscow")
+        .dt.tz_localize(None)
+    )
 
 st.dataframe(
     df,
