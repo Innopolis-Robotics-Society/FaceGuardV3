@@ -27,7 +27,7 @@ filter_criteria = st.date_input(
 if not df.empty:
     df["time"] = (pd.to_datetime(df["time"]).dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow").dt.tz_localize(None))
     if len(filter_criteria) == 2:
-        df = df[(df["time"] > (pd.Timestamp(filter_criteria[0]) - datetime.timedelta(days=1))) & (df["time"] < (pd.Timestamp(filter_criteria[1] + datetime.timedelta(days=1))))]
+        df = df[(df["time"] > pd.Timestamp(filter_criteria[0])) & (df["time"] < (pd.Timestamp(filter_criteria[1] + datetime.timedelta(days=1))))]
 st.dataframe(
     df,
     column_order=["id", "name", "time", "status"],
