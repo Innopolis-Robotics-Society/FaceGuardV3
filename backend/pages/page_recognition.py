@@ -97,7 +97,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = f"{name} ({similarity * 100:.1f}%)"
                             self.last_draw_color = (0, 255, 0)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != name
@@ -120,7 +119,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = "Access Denied"
                             self.last_draw_color = (0, 0, 255)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != "UNKNOWN"
@@ -144,7 +142,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "SPOOF DETECTED"
                         self.last_draw_color = (0, 0, 255)
-
                         if (
                             current_time - self.last_log_time > self.log_cooldown
                             or self.last_logged_status != "SPOOF_ATTEMPT"
