@@ -9,8 +9,6 @@ from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import leds  # noqa: E402
-
 from faceguard.recognize import (  # noqa: E402
     create_face_app,
     extract_embedding_from_frame,
@@ -90,7 +88,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
 
                 with self.lock:
                     if status_code == "real" and embedding is not None:
-                        leds.start_recognizing()
                         match = find_closest_embedding(embedding)
                         if match:
                             emp_id, name, similarity = match
@@ -100,8 +97,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = f"{name} ({similarity * 100:.1f}%)"
                             self.last_draw_color = (0, 255, 0)
-
-                            leds.access_granted()
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != name
@@ -124,8 +119,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = "Access Denied"
                             self.last_draw_color = (0, 0, 255)
-
-                            leds.access_denied()
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != "UNKNOWN"
@@ -149,8 +142,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "SPOOF DETECTED"
                         self.last_draw_color = (0, 0, 255)
-
-                        leds.access_denied()
                         if (
                             current_time - self.last_log_time > self.log_cooldown
                             or self.last_logged_status != "SPOOF_ATTEMPT"
@@ -172,13 +163,11 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "Look straight"
                         self.last_draw_color = (0, 255, 255)
-                        leds.bad_frame()
                     else:
                         self.status = "No face detected"
                         self.name = "Unknown"
                         self.similarity = 0.0
                         self.last_face = None
-                        leds.all_off()
             except Exception as e:
                 print(f"Error in background processing: {e}")
 

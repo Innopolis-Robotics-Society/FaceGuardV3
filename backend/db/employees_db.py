@@ -136,19 +136,22 @@ def get_all_embeddings():
     cursor.close()
     connection.close()
 
-    from datetime import datetime, timezone
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-
+    from datetime import date
+    today = date.today()
     embeddings = []
     for row in rows:
         emp_id, name, embedding, status, start_date, expiration_date = row
         if not embedding:
             continue
         if status == "Temporary":
-            if start_date and now < start_date:
-                continue
-            if expiration_date and now > expiration_date:
-                continue
+            if start_date:
+                start = start_date.date() if hasattr(start_date, 'date') else start_date
+                if start > today:
+                    continue
+            if expiration_date:
+                exp = expiration_date.date() if hasattr(expiration_date, 'date') else expiration_date
+                if exp < today:
+                    continue
         embeddings.append((emp_id, name, np.array(embedding)))
 
     return embeddings
