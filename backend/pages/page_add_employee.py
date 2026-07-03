@@ -209,7 +209,7 @@ if embedding is not None:
             else:
                 final_start = start_dt if access_type == "Temporary" else None
                 final_expiration = expiration_dt if access_type == "Temporary" else None
-                add_employees(name, access_type, embedding, final_start, final_expiration)
-                st.success("Saved!")
-                st.session_state["enroll_embedding"] = None
-                st.switch_page("page_employees.py")
+                if add_employees(name, access_type, embedding, final_start, final_expiration):
+                    st.success("Saved!")
+                    st.session_state["enroll_embedding"] = None
+                    st.switch_page("page_employees.py")
