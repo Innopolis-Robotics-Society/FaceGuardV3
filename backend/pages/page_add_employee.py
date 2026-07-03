@@ -5,7 +5,6 @@ from datetime import date
 import av
 import threading
 import time
-import streamlit.components.v1 as components
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -193,7 +192,9 @@ if embedding is not None:
             elif not name:
                 st.error("Please enter a name.")
             elif access_type == "Temporary" and (not start_date or not expiration_date):
-                st.error("Please set both start and expiration dates for temporary access.")
+                st.error(
+                    "Please set both start and expiration dates for temporary access."
+                )
             else:
                 add_employees(name, access_type, embedding, start_date, expiration_date)
                 st.success("Saved!")

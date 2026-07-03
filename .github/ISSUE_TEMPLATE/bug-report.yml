@@ -76,10 +76,26 @@ body:
         - To Do
         - Ready
         - In Progress
-        - In Review
+        - Review
         - Done
     validations:
       required: true
+  - type: input
+    id: story-points
+    attributes:
+      label: Story Points
+      description: Required once this bug fix is selected for a Sprint. Use the Modified Fibonacci scale (1, 2, 3, 5, 8, 13, 20, 40, 100).
+      placeholder: "Example: 2"
+    validations:
+      required: false
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint milestone
+      description: Required once this bug fix is selected for a Sprint.
+      placeholder: "Sprint 3"
+    validations:
+      required: false
   - type: input
     id: mvp-version
     attributes:
@@ -98,6 +114,7 @@ body:
     id: reviewer
     attributes:
       label: Reviewer
+      description: The reviewer must be different from the assignee for Sprint-selected bug fixes.
       placeholder: "@github-username"
     validations:
       required: false

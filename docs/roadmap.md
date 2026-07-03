@@ -10,7 +10,7 @@
   - [#PBI: Add a page for testing face recognition](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/55),
   - [#PBI: Containerize the application](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/56)
 
-## Sprint 2 (MVP v2) — June 22–28, 2026
+## Sprint 2 (MVP v1) — June 22–28, 2026
 - **Milestone:** [Sprint 2](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/2)
 - **Sprint Goal:** Improve recognition speed and reliability by switching to a lightweight model, enabling video-based face enrollment, adding liveness detection, and deploying to Raspberry Pi 5.  
 - **Focus:** Hardware integration, Raspberry Pi, camera, liveness detection, recognition speed
@@ -23,14 +23,23 @@
   - [#PBI: Set up Raspberry Pi 5 environment and connect it to web-camera](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/58),
   - [#PBI: Change design for temporary registration](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57)
 
-## Sprint 3 (MVP v3) — June 29 – July 5, 2026
-- **Milestone:** TBD
-- **Sprint Goal:** TBD
-- **Focus:** LEDs connection, recognition accuracy
-- **Items:** TBD
+## Sprint 3 (MVP v2) — June 29 – July 5, 2026
+- **Milestone:** [Sprint 3](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/3)  
+- **Sprint Goal:** Improve system visibility through status LED indicators and deliver customer-requested improvements from the last review.  
+- **Focus:** LEDs connection, employee management improvements from customer feedback  
+- **Items:**
+  - [#Bug: excessive addition of logs](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/144)
+  - [#PBI: Add a check to see if a person is already registered in the system](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115),
+  - [#PBI: Remove test section from the recognition page](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/152),
+  - [#US-008: Notification](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/47),
+  - [#PBI: Set up LEDs](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/60),
+  - [#PBI: Change employee's name and status after registration](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113),
+  - [#PBI: Add the time of the employee's last entry](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114),
+  - [#PBI: Add filtering logs by date range](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116),
+  - [#PBI: Change the provision of temporary access](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117),
 
-## Sprint 4 (MVP v4) — July 6-12, 2026
+## Sprint 4 (MVP v2) — July 6-12, 2026
 - **Milestone:** TBD
 - **Sprint Goal:** TBD
-- **Focus:** Accessories
+- **Focus:** Accessories, recognition accuracy
 - **Items:** TBD
