@@ -1,6 +1,15 @@
 # Architecture Documentation
 
-TODO placeholder for Assignment 5 Part 4.
+## Architecture Decision Records
+
+The ADRs capture the main architectural decisions that connect the current
+FaceGuardV3 implementation to the quality requirements:
+
+- [ADR-001: Introduce a Face Recognition Provider Abstraction](adr/ADR-001-face-recognition-provider-abstraction.md) supports the Static View by defining the `FaceProviderInterface` boundary between business logic and the recognition provider. It supports QR-003 by allowing provider swaps to be tested without changing the access-decision flow.
+- [ADR-002: Reject Access Based on Provider Status Code Before Embedding Comparison](adr/ADR-002-reject-on-status-code-before-embedding-match.md) supports the Dynamic View by fixing the order of the recognition flow: provider status is checked before embedding comparison. It supports QR-002 by making spoof/no-face rejection part of the backend access decision.
+- [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md) supports the Dynamic and Deployment Views by keeping recognition in the local FaceGuard application process for the current single-entry-point deployment. It supports QR-001 by keeping response-time measurement focused on the direct capture, extraction, comparison, and decision path.
+
+Together, these decisions match the current architecture shown below: Streamlit application runs in a local application container and coordinates camera input, recognition, PostgreSQL-backed embedding lookup, logging, and hardware outputs. The ADRs document why recognition is behind a provider contract, why non-real provider statuses are rejected before identity matching, and why the current response-time target is handled in-process rather than through external queues or inference services.
 
 ## Static View
 
