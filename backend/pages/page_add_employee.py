@@ -198,8 +198,10 @@ if embedding is not None:
                 st.error("No face detected. Please capture a face.")
             elif not name:
                 st.error("Please enter a name.")
-            elif access_type == "Temporary" and expiration_dt <= start_dt:
-                st.error("Please fix the access dates before saving.")
+            elif access_type == "Temporary" and (not start_date or not expiration_date):
+                st.error(
+                    "Please set both start and expiration dates for temporary access."
+                )
             else:
                 final_start = start_dt if access_type == "Temporary" else None
                 final_expiration = expiration_dt if access_type == "Temporary" else None

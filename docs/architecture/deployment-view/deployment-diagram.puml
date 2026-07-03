@@ -1,0 +1,46 @@
+@startuml deployment-view
+skinparam componentStyle rectangle
+skinparam node {
+    BackgroundColor white
+    BorderColor black
+}
+
+node "Admin Workstation" <<Physical Device>> as PC {
+    component "Web Browser" as Browser
+}
+
+node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
+    node "Camera" <<Hardware>> as Cam
+    node "LEDs & Door Relay" <<Hardware (GPIO)>> as DoorCtrl
+
+    node "Docker Engine" as Docker {
+        component "faceguard:latest" <<Docker Container>> as FaceGuardApp {
+            artifact "Streamlit App"
+            artifact "InsightFace Model"
+        }
+    }
+    
+    folder "Local Storage" as Storage {
+        file "secrets.toml" as Secrets
+        folder "insightface_models" as Models
+    }
+    
+    FaceGuardApp ..> Secrets : " Mounts (ro)"
+    FaceGuardApp ..> Models : " Mounts"
+    
+    ' Physical connections inside the Pi
+    FaceGuardApp --> Cam : " Captures Stream (USB/CSI)"
+    FaceGuardApp --> DoorCtrl : " Controls via GPIO"
+}
+
+cloud "AWS (us-east-1)" <<Cloud Provider>> as AWS {
+    node "Neon.tech" <<Managed DB Service>> as Neon {
+        database "neondb" <<PostgreSQL>> as DB
+    }
+}
+
+' Network Connections
+Browser --> FaceGuardApp : " HTTP :8501 (Admin UI)"
+FaceGuardApp --> DB : " TCP/IP :5432 (psycopg2)"
+
+@enduml

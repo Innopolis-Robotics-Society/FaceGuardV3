@@ -1,0 +1,49 @@
+@startuml
+skinparam componentStyle rectangle
+
+actor Admin
+actor Employee
+
+package "Lab Entrance (Edge)" {
+    component "Camera" as Cam
+    component "Door & LED Controller" as DoorCtrl <<Planned>>
+}
+
+package "Web Application Layer" {
+    component "Streamlit Application" as WebApp <<UI & Logic Orchestrator>>
+}
+
+package "ML & Processing Subsystem" {
+    component "Face Recognition Module" as FaceRec <<InsightFace>>
+}
+
+package "Database Server" {
+    database "PostgreSQL" as DB
+}
+
+' Interfaces
+interface "Video Stream" as IVideo
+interface "SQL Interface" as ISQL
+interface "Hardware Control" as IHW
+
+' Actor interactions
+Admin --> WebApp : Uses (Web UI)
+Employee --> Cam : Looks at
+
+' Ball and Socket Connections
+Cam - IVideo
+WebApp -( IVideo : " Requires"
+
+DB - ISQL
+WebApp -( ISQL : " Requires (psycopg2)"
+    
+DoorCtrl - IHW
+WebApp -( IHW : " Requires (Commands)"
+
+interface "Internal Python Interface" as IFace
+
+' Internal components
+FaceRec - IFace
+WebApp -( IFace : " Requires"
+
+@enduml
