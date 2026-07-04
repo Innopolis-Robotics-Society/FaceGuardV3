@@ -5,13 +5,13 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from db.employees_db import ( # noqa: E402
+from db.employees_db import (  # noqa: E402
     init_db,
     load_employees,
     delete_employee,
     update_employee,
 )
-from db.logs_db import get_last_entry # noqa: E402
+from db.logs_db import get_last_entry  # noqa: E402
 
 st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=True)
 init_db()
@@ -36,9 +36,13 @@ def reset_table():
 @st.dialog("Edit employee")
 def edit_employee_dialog(row):
     from datetime import date, time, datetime
+
     name = st.text_input("Name:", value=row["name"])
-    status = st.radio("Access type:", ["Permanent", "Temporary"],
-                      index=0 if row["status"] == "Permanent" else 1)
+    status = st.radio(
+        "Access type:",
+        ["Permanent", "Temporary"],
+        index=0 if row["status"] == "Permanent" else 1,
+    )
 
     start_dt = None
     expiration_dt = None
@@ -50,11 +54,37 @@ def edit_employee_dialog(row):
         default_start = existing_start if pd.notna(existing_start) else datetime.now()
         default_exp = existing_exp if pd.notna(existing_exp) else datetime.now()
         with col1:
-            start_date = st.date_input("Start date:", value=default_start.date() if hasattr(default_start, 'date') else date.today())
-            start_time = st.time_input("Start time:", value=default_start.time() if hasattr(default_start, 'time') else time(0, 0), step=60)
+            start_date = st.date_input(
+                "Start date:",
+                value=(
+                    default_start.date()
+                    if hasattr(default_start, "date")
+                    else date.today()
+                ),
+            )
+            start_time = st.time_input(
+                "Start time:",
+                value=(
+                    default_start.time()
+                    if hasattr(default_start, "time")
+                    else time(0, 0)
+                ),
+                step=60,
+            )
         with col2:
-            expiration_date = st.date_input("Expiration date:", value=default_exp.date() if hasattr(default_exp, 'date') else date.today())
-            expiration_time = st.time_input("Expiration time:", value=default_exp.time() if hasattr(default_exp, 'time') else time(23, 59), step=60)
+            expiration_date = st.date_input(
+                "Expiration date:",
+                value=(
+                    default_exp.date() if hasattr(default_exp, "date") else date.today()
+                ),
+            )
+            expiration_time = st.time_input(
+                "Expiration time:",
+                value=(
+                    default_exp.time() if hasattr(default_exp, "time") else time(23, 59)
+                ),
+                step=60,
+            )
         start_dt = datetime.combine(start_date, start_time)
         expiration_dt = datetime.combine(expiration_date, expiration_time)
         if expiration_dt <= start_dt:
@@ -96,7 +126,9 @@ if df is not None:
     df.insert(0, "Select", False)
     df["last_entry"] = df["name"].apply(get_last_entry)
     df["last_entry"] = pd.to_datetime(df["last_entry"], errors="coerce")
-    df["last_entry"] = df["last_entry"].dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow")
+    df["last_entry"] = (
+        df["last_entry"].dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow")
+    )
     table_key = f"employees_table_{st.session_state['table_version']}"
     edited_df = st.data_editor(
         df,
@@ -111,9 +143,9 @@ if df is not None:
             "registration_date": "Registration date",
             "start_date": "Start date",
             "expiration_date": "Expiration date",
-            "last_entry" : st.column_config.DatetimeColumn(
+            "last_entry": st.column_config.DatetimeColumn(
                 "Last access time", format="YYYY-MM-DD HH:mm:ss", disabled=True
-            )
+            ),
         },
         key=table_key,
     )

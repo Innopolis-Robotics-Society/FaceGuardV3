@@ -9,8 +9,6 @@ from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import leds  # noqa: E402
-
 from faceguard.recognize import (  # noqa: E402
     create_face_app,
     extract_embedding_from_frame,
@@ -102,7 +100,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = f"{name} ({similarity * 100:.1f}%)"
                             self.last_draw_color = (0, 255, 0)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != name
@@ -126,7 +123,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = "Access Denied"
                             self.last_draw_color = (0, 0, 255)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != "UNKNOWN"
@@ -151,7 +147,6 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "SPOOF DETECTED"
                         self.last_draw_color = (0, 0, 255)
-
                         if (
                             current_time - self.last_log_time > self.log_cooldown
                             or self.last_logged_status != "SPOOF_ATTEMPT"
@@ -242,16 +237,3 @@ if ctx.state.playing:
                 similarity_display.markdown("### Similarity\n-")
 
         time.sleep(0.1)
-
-# test button (delete later)
-st.divider()
-st.subheader("Test")
-
-col_a, col_b = st.columns(2)
-with col_a:
-    if st.button("Test Status"):
-        st.info("Trigger a test recognition.")
-
-with col_b:
-    if st.button("Reset Status"):
-        st.rerun()

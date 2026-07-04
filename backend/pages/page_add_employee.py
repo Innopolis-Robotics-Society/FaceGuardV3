@@ -5,12 +5,10 @@ import av
 import threading
 import time as time_module
 from datetime import date, time, datetime
-import streamlit.components.v1 as components
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from db.employees_db import add_employees, find_closest_embedding  # noqa: E402
-import leds  # noqa: E402
 
 from faceguard.recognize import (  # noqa: E402
     create_face_app,
@@ -77,7 +75,6 @@ class EnrollVideoProcessor(VideoProcessorBase):
                 with self.lock:
                     if status_code == "real" and embedding is not None:
                         self.embeddings.append(embedding)
-                        leds.registration_active()
                         self.status = (
                             f"Collecting embeddings: {len(self.embeddings)}/30"
                         )
@@ -89,11 +86,9 @@ class EnrollVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "Look straight"
                         self.last_draw_color = (0, 255, 255)
-                        leds.bad_frame()
                     else:
                         self.status = "No face detected"
                         self.last_face = None
-                        leds.all_off()
             except Exception as e:
                 print(f"Background thread error: {e}")
 
@@ -147,7 +142,6 @@ if ctx.video_processor:
             st.session_state["enroll_embedding"] = average_embeddings(
                 collected_embeddings
             )
-            leds.registration_done()
             success_placeholder.success("Face data successfully collected!")
             break
 
@@ -191,7 +185,9 @@ if embedding is not None:
                 expiration_date = st.date_input(
                     "Expiration date:", value=date.today(), min_value=date.today()
                 )
-                expiration_time = st.time_input("Expiration time:", value=time(23, 59), step=60)
+                expiration_time = st.time_input(
+                    "Expiration time:", value=time(23, 59), step=60
+                )
 
             start_dt = datetime.combine(start_date, start_time)
             expiration_dt = datetime.combine(expiration_date, expiration_time)
@@ -204,12 +200,16 @@ if embedding is not None:
                 st.error("No face detected. Please capture a face.")
             elif not name:
                 st.error("Please enter a name.")
-            elif access_type == "Temporary" and expiration_dt <= start_dt:
-                st.error("Please fix the access dates before saving.")
+            elif access_type == "Temporary" and (not start_date or not expiration_date):
+                st.error(
+                    "Please set both start and expiration dates for temporary access."
+                )
             else:
                 final_start = start_dt if access_type == "Temporary" else None
                 final_expiration = expiration_dt if access_type == "Temporary" else None
-                if add_employees(name, access_type, embedding, final_start, final_expiration):
+                if add_employees(
+                    name, access_type, embedding, final_start, final_expiration
+                ):
                     st.success("Saved!")
                     st.session_state["enroll_embedding"] = None
                     st.switch_page("page_employees.py")

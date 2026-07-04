@@ -158,7 +158,7 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
         )
         cursor.execute(
             "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
-            (name, status, start_date, expiration_date, int(employee_id))
+            (name, status, start_date, expiration_date, int(employee_id)),
         )
         connection.commit()
     except Exception as e:
@@ -221,6 +221,7 @@ def get_all_embeddings():
 
     now = _current_access_time()
 
+    today = date.today()
     embeddings = []
     for row in rows:
         emp_id, name, embedding, status, start_date, expiration_date = row

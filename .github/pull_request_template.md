@@ -48,6 +48,7 @@ Select all that apply:
 * [ ] Documentation
 * [ ] Testing
 * [ ] Refactoring
+* [ ] Architecture / ADR
 * [ ] Deployment / Release
 * [ ] Changelog update
 
@@ -221,12 +222,24 @@ Log:
 
 * [ ] README updated
 * [ ] docs updated
-* [ ] reports/week4 updated
+* [ ] docs/architecture/README.md (and/or static/dynamic/deployment view) updated
+* [ ] ADR created or updated in docs/architecture/adr/
+* [ ] docs/development-process.md updated
+* [ ] docs/user-acceptance-tests.md updated with new/changed scenario(s)
+* [ ] Hosted documentation site updated (or not affected)
+* [ ] reports/week5 updated
 * [ ] No documentation change needed
 
 Files changed:
 
 ```text
+```
+
+If an ADR was created or updated, state its ID and which quality requirement(s) it addresses:
+
+```text
+ADR ID:
+Quality requirement(s) addressed:
 ```
 
 ---
@@ -251,9 +264,14 @@ Select exactly one option:
 * [ ] `CHANGELOG.md` was updated for user-visible changes, or marked not applicable.
 * [ ] No secrets, credentials, or real/non-sanitized employee data were committed.
 * [ ] If a Docker container is affected, it builds and runs successfully.
-* [ ] For changes affecting the recognition pipeline, manual verification on the test page is performed and recorded.
-* [ ] Relevant QRTs pass in CI (if applicable).
-* [ ] CI pipeline passes, including linting, type/format check, tests, coverage, and QA checks.
+* [ ] For changes affecting the recognition pipeline, manual verification on the test page is performed and recorded in this PR description.
+* [ ] Relevant QRTs pass in CI (if applicable), referenced by their stable ID (QRT-001, QRT-002, QRT-003, or later-added QRTs).
+* [ ] CI pipeline passes, including linting, format check, tests, coverage, and the additional QA check (Bandit).
+* [ ] Relevant architecture documentation (`docs/architecture/README.md`, static/dynamic/deployment views) is satisfied by this change, or explicitly marked not applicable.
+* [ ] If this change introduces, changes, or reverses an architecture decision, an ADR was created or updated with a stable `ADR-NNN` ID and identifies the quality requirement(s) it addresses.
+* [ ] If a quality requirement was affected or introduced, `docs/quality-requirements.md` links it to the relevant ADR(s).
+* [ ] If this change adds or changes user-facing functionality, `docs/user-acceptance-tests.md` was updated with new/changed scenario(s), or marked not applicable.
+* [ ] If maintained documentation changed, the hosted documentation site reflects it, or is explicitly marked not affected.
 * [ ] The branch can be merged into the default branch.
 * [ ] The linked issue can be moved to Done after merge.
 
@@ -286,8 +304,12 @@ Reviewer should check:
 * [ ] Screenshots, logs, or a demo recording are present where the change has a visible or behavioral effect.
 * [ ] The testing evidence is sufficient to confirm the AC is met — not merely that tests were run.
 
+**Architecture**
+* [ ] If the change affects the system's structure, an ADR or architecture documentation update is present, or its absence is explicitly justified.
+* [ ] Any new/updated ADR has a stable ID, a clear decision, and states which quality requirement(s) it addresses.
+
 **Code and CI**
-* [ ] The CI pipeline passes (lint, type/format check, tests, coverage, QA checks).
+* [ ] The CI pipeline passes (lint, format check, tests, coverage, Bandit).
 * [ ] No secrets, credentials, or sensitive data are present in the diff.
 * [ ] The PR can be safely merged into the default branch.
 

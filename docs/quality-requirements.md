@@ -8,6 +8,8 @@
 
 **Linked quality requirement tests:** [QRT-001](quality-requirement-tests.md#qrt-001-recognition-pipeline-response-time)
 
+**Linked ADR:** [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md)
+
 ---
 
 ## QR-002: Resistance to Static Photo Spoofing
@@ -20,6 +22,8 @@
 
 **Linked quality requirement tests:** [QRT-002](quality-requirement-tests.md#qrt-002-static-photo-spoofing-rejection)
 
+**Linked ADR:** [ADR-002: Reject Access Based on Provider Status Code Before Embedding Comparison](architecture/adr/ADR-002-reject-on-status-code-before-embedding-match.md)
+
 ---
 
 ## QR-003: Recognition Model Modularity
@@ -31,3 +35,5 @@
 **Why this matters:** The MVP showed that a heavy recognition model can freeze the system. The architecture must avoid hard-wiring the application to one specific recognition library. A provider abstraction reduces regression risk and allows future speed or accuracy improvements without rewriting unrelated application logic.
 
 **Linked quality requirement tests:** [QRT-003](quality-requirement-tests.md#qrt-003-inference-provider-contract-modularity)
+
+**Linked ADR:** [ADR-001: Introduce a Face Recognition Provider Abstraction](architecture/adr/ADR-001-face-recognition-provider-abstraction.md)
