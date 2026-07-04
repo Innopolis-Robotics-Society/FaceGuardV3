@@ -35,10 +35,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)  
 
-**Result:** Passed or Failed  
+**Result:** Passed
 **Executed by:** Customer (role: admin)  
-**Comments:**  
-**Resulting PBIs:**   
+**Comments:**  The system shall be faster.  
+**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
 
 ---
@@ -79,10 +79,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Result:** Passed
+**Executed by:** Customer (role: admin)  
+**Comments:** The system shall be faster.  
+**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
 
 ---
@@ -145,10 +145,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
+**Result:** Passed
 **Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Comments:** All good.
+**Resulting PBIs:** -  
 
 
 ---
@@ -183,10 +183,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Result:** Passed
+**Executed by:** Customer (role: admin)  
+**Comments:** Works well.  
+**Resulting PBIs:** -  
 
 
 ---
@@ -225,10 +225,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The recognition shall run in the background.  
+**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
 
 ---
@@ -266,10 +266,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The recognition shall run in the background.  
+**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
 
 ---
@@ -300,10 +300,10 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
+**Result:** Passed
 **Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Comments:** -  
+**Resulting PBIs:** -  
 
 ---
 ## UAT-009: Register an already registered employee
@@ -328,9 +328,9 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-03)
 
-**Result:** Passed or Failed
+**Result:** Passed  
 **Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Comments:**  Works correctly.  
+**Resulting PBIs:**  -  
 
 ---
