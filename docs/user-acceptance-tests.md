@@ -35,7 +35,7 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)  
 
-**Result:** Passed
+**Result:** Passed  
 **Executed by:** Customer (role: admin)  
 **Comments:**  The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
@@ -74,7 +74,7 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.   
 **Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.  
-**Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
+**Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
@@ -111,8 +111,8 @@
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
-**Comments:** All good.
-**Resulting PBIs:** -
+**Comments:** All good.  
+**Resulting PBIs:** -  
 
 ---
 
@@ -145,9 +145,9 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** All good.
+**Result:** Passed  
+**Executed by:** Customer (role: admin)   
+**Comments:** All good.  
 **Resulting PBIs:** -  
 
 
@@ -183,7 +183,7 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
+**Result:** Passed  
 **Executed by:** Customer (role: admin)  
 **Comments:** Works well.  
 **Resulting PBIs:** -  
@@ -226,7 +226,7 @@
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)  
+**Executed by:** Customer (role: admin)    
 **Comments:** The recognition shall run in the background.  
 **Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
@@ -329,7 +329,7 @@
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)
+**Executed by:** Customer (role: admin)  
 **Comments:**  Works correctly.  
 **Resulting PBIs:**  -  
 
