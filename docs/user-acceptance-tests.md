@@ -300,9 +300,9 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Great job!  
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Great job!   
 **Resulting PBIs:** -  
 
 ---
