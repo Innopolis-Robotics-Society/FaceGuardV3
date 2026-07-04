@@ -13,7 +13,7 @@ try:
     BLUE = gpiozero.LED(27)
     RED = gpiozero.LED(22)
     GPIO_AVAILABLE = True
-except Exception:
+except Exception:  # nosec B110
     pass
 
 
