@@ -3,6 +3,9 @@ services:
     image: ixkci/faceguard:latest
     ports:
       - "8501:8501"
+    environment:
+      TZ: Europe/Moscow
+      PGTZ: Europe/Moscow
     devices:
       - /dev/video0:/dev/video0
       # /dev/gpiomem is required for hardware LED access on Raspberry Pi

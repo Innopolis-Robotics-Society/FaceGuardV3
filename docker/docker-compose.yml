@@ -5,6 +5,9 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "8501:8501"
+    environment:
+      TZ: Europe/Moscow
+      PGTZ: Europe/Moscow
     volumes:
       - ../backend:/app/backend
       - ../tests:/app/tests

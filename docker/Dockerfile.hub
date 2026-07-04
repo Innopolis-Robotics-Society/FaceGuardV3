@@ -1,12 +1,13 @@
 FROM python:3.10-slim
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libgl1 \
     libglib2.0-0 \
     libgomp1 \
     build-essential \
     python3-dev \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir numpy pandas psycopg2-binary
