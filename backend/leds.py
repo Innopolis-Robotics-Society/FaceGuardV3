@@ -65,7 +65,6 @@ def start_recognizing():
 # Stop yellow blinking when recognition stops
 def stop_recognizing():
     print("[LED] stop_recognizing")
-    global blink_stop
     if not GPIO_AVAILABLE:
         return
     blink_stop.set()

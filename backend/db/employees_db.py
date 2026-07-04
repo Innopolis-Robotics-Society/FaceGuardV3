@@ -221,7 +221,6 @@ def get_all_embeddings():
 
     now = _current_access_time()
 
-    today = date.today()
     embeddings = []
     for row in rows:
         emp_id, name, embedding, status, start_date, expiration_date = row
