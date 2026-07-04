@@ -8,6 +8,6 @@ services:
       # /dev/gpiomem is required for hardware LED access on Raspberry Pi
       - /dev/gpiomem:/dev/gpiomem
     volumes:
-      - ./backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
+      - ../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
       - ./insightface_models:/root/.insightface/models
     restart: unless-stopped
