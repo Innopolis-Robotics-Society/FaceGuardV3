@@ -8,12 +8,14 @@ GPIO_AVAILABLE = False
 
 try:
     import gpiozero
+
     YELLOW = gpiozero.LED(17)
     BLUE = gpiozero.LED(27)
     RED = gpiozero.LED(22)
     GPIO_AVAILABLE = True
 except Exception:
     pass
+
 
 def all_leds_off():
     if not GPIO_AVAILABLE:
@@ -22,6 +24,7 @@ def all_leds_off():
     BLUE.off()
     RED.off()
 
+
 def solid(led, duration):
     if not GPIO_AVAILABLE:
         return
@@ -29,6 +32,7 @@ def solid(led, duration):
     led.on()
     time.sleep(duration)
     led.off()
+
 
 def blink(led, stop_event, interval=0.5):
     if not GPIO_AVAILABLE:
@@ -39,8 +43,10 @@ def blink(led, stop_event, interval=0.5):
         led.off()
         time.sleep(interval)
 
+
 blink_stop = threading.Event()
 blink_thread = None
+
 
 # Blink yellow while recognition is in progress
 def start_recognizing():
@@ -55,6 +61,7 @@ def start_recognizing():
     )
     blink_thread.start()
 
+
 # Stop yellow blinking when recognition stops
 def stop_recognizing():
     print("[LED] stop_recognizing")
@@ -64,12 +71,14 @@ def stop_recognizing():
     blink_stop.set()
     all_leds_off()
 
+
 # ACCESS GRANTED
 # Stop yellow blinking, turn solid blue for 5 seconds
 def access_granted():
     print("[LED] access_granted: solid blue 5s")
     stop_recognizing()
     threading.Thread(target=solid, args=(BLUE, 5), daemon=True).start()
+
 
 # ACCESS DENIED
 # Stop yellow blinking, turn solid red for 5 seconds
@@ -78,11 +87,13 @@ def access_denied():
     stop_recognizing()
     threading.Thread(target=solid, args=(RED, 5), daemon=True).start()
 
+
 # Turn solid yellow for 5 seconds (poor lighting or blurry frame)
 def bad_frame():
     print("[LED] bad_frame: solid yellow 5s")
     stop_recognizing()
     threading.Thread(target=solid, args=(YELLOW, 5), daemon=True).start()
+
 
 # All LEDs are on during registration
 def registration_active():
@@ -94,9 +105,11 @@ def registration_active():
     BLUE.on()
     RED.on()
 
+
 # All LEDs on for 3 seconds after registration, then off
 def registration_done():
     print("[LED] registration_done: all LEDs 3s then off")
+
     def run():
         if not GPIO_AVAILABLE:
             return
@@ -106,7 +119,9 @@ def registration_done():
         RED.on()
         time.sleep(3)
         all_leds_off()
+
     threading.Thread(target=run, daemon=True).start()
+
 
 # Turn all LEDs off (no face detected)
 def all_off():
