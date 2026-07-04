@@ -79,8 +79,8 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)  
+**Result:** Passed  
+**Executed by:** Customer (role: admin)   
 **Comments:** The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
