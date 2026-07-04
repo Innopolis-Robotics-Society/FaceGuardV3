@@ -14,6 +14,7 @@ from faceguard.recognize import (  # noqa: E402
     extract_embedding_from_frame,
     LivenessDetector,
 )
+import leds  # noqa: E402
 from db.employees_db import find_closest_embedding  # noqa: E402
 from db.logs_db import add_log  # noqa: E402
 

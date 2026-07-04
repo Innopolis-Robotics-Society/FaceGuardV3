@@ -7,6 +7,8 @@ import time as time_module
 from datetime import date, time, datetime
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
+import leds  # noqa: E402
+
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from db.employees_db import add_employees, find_closest_embedding  # noqa: E402
 
@@ -75,6 +77,7 @@ class EnrollVideoProcessor(VideoProcessorBase):
                 with self.lock:
                     if status_code == "real" and embedding is not None:
                         self.embeddings.append(embedding)
+                        leds.registration_active()
                         self.status = (
                             f"Collecting embeddings: {len(self.embeddings)}/30"
                         )
@@ -89,6 +92,7 @@ class EnrollVideoProcessor(VideoProcessorBase):
                     else:
                         self.status = "No face detected"
                         self.last_face = None
+                        leds.all_off()
             except Exception as e:
                 print(f"Background thread error: {e}")
 
@@ -142,6 +146,7 @@ if ctx.video_processor:
             st.session_state["enroll_embedding"] = average_embeddings(
                 collected_embeddings
             )
+            leds.registration_done()
             success_placeholder.success("Face data successfully collected!")
             break
 
