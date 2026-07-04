@@ -33,7 +33,7 @@
 **Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)  
+### Execution: Sprint Review & UAT Session (2026-07-04)  
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
@@ -77,7 +77,7 @@
 **Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
@@ -143,7 +143,7 @@
 **Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)
@@ -181,7 +181,7 @@
 **Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)  
@@ -223,7 +223,7 @@
 **Resulting PBIs:** -
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
@@ -264,7 +264,7 @@
 **Resulting PBIs:** -
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
@@ -298,11 +298,11 @@
 - The table with updated fields is displayed
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed
 **Executed by:** Customer (role: admin)
-**Comments:** -  
+**Comments:** Great job!  
 **Resulting PBIs:** -  
 
 ---
@@ -326,7 +326,7 @@
 - The button "Try again" is displayed and after pressing, resets the registration
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-03)
+### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)
