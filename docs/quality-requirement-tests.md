@@ -74,39 +74,6 @@ The test fails if either step exceeds 3.0 seconds, crashes, or fails to produce 
 
 **Status**: Implemented
 
-## QRT-004: Temporary Access Window Enforcement
-
-**Linked quality requirement:** `QR-004`
-
-**Verification method:** Automated unit test on the pure business-rule
-function, plus a mocked-DB test on the data-access layer.
-
-**Test data, setup, or environment:** Standard CI test environment. No real
-database is used — connect_to_db() is mocked; test fixtures provide rows
-representing permanent, active-temporary, expired-temporary, and
-not-yet-started-temporary employees with a fixed now timestamp for
-determinism.
-
-**Automated command or CI check:** pytest tests/unit/test_employees_db.py
-
-**Expected measurable result:** is_temporary_access_valid() returns True
-only for permanent employees and temporary employees within their
-[start_date, expiration_date] window; get_all_embeddings() excludes any
-temporary employee outside that window from the results used for
-recognition matching.
-
-**Evidence link:** Latest protected default-branch CI run.
-
-**Limitation:** Uses a mocked cursor rather than a real PostgreSQL instance,
-so it verifies the Python-level filtering logic but not PostgreSQL-specific
-behavior (e.g. timezone handling at the DB driver level). No live-DB
-integration test exists yet for this path.
-
-**CI Job:** pytest tests/ runs automatically on every PR and push to main
-
-**Status:** Implemented
-
----
 
 ## QRT-004: Temporary Access Window Enforcement
 
