@@ -1,19 +1,16 @@
 services:
   faceguard:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ixkci/faceguard:latest
     ports:
       - "8501:8501"
     environment:
       TZ: Europe/Moscow
       PGTZ: Europe/Moscow
+    devices:
+      - /dev/video0:/dev/video0
+      # /dev/gpiomem is required for hardware LED access on Raspberry Pi
+      - /dev/gpiomem:/dev/gpiomem
     volumes:
-      - ../backend:/app/backend
-      - ../tests:/app/tests
       - ../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
       - ./insightface_models:/root/.insightface/models
-    tty: true
-    stdin_open: true
-    command: streamlit run backend/pages/page_authentication.py
     restart: unless-stopped

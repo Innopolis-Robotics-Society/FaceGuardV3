@@ -14,6 +14,7 @@ from faceguard.recognize import (  # noqa: E402
     extract_embedding_from_frame,
     LivenessDetector,
 )
+import leds  # noqa: E402
 from db.employees_db import find_closest_embedding  # noqa: E402
 from db.logs_db import add_log  # noqa: E402
 
@@ -88,6 +89,9 @@ class RecognitionVideoProcessor(VideoProcessorBase):
 
                 with self.lock:
                     if status_code == "real" and embedding is not None:
+                        if self.last_logged_status != "RECOGNIZING":
+                            leds.start_recognizing()
+                            self.last_logged_status = "RECOGNIZING"
                         match = find_closest_embedding(embedding)
                         if match:
                             emp_id, name, similarity = match
@@ -102,6 +106,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                 or self.last_logged_name != name
                                 or self.last_logged_status != "ACCESS_GRANTED"
                             ):
+                                leds.access_granted()
                                 try:
                                     add_log(name, "ACCESS_GRANTED")
                                     self.last_log_time = current_time
@@ -124,6 +129,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                 or self.last_logged_name != "UNKNOWN"
                                 or self.last_logged_status != "ACCESS_DENIED"
                             ):
+                                leds.access_denied()
                                 try:
                                     add_log("UNKNOWN", "ACCESS_DENIED")
                                     self.last_log_time = current_time
@@ -146,6 +152,7 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             current_time - self.last_log_time > self.log_cooldown
                             or self.last_logged_status != "SPOOF_ATTEMPT"
                         ):
+                            leds.access_denied()
                             try:
                                 add_log("UNKNOWN", "SPOOF_ATTEMPT")
                                 self.last_log_time = current_time
@@ -163,11 +170,17 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "Look straight"
                         self.last_draw_color = (0, 255, 255)
+                        if self.last_logged_status != "BAD_FACE":
+                            leds.bad_frame()
+                            self.last_logged_status = "BAD_FACE"
                     else:
                         self.status = "No face detected"
                         self.name = "Unknown"
                         self.similarity = 0.0
                         self.last_face = None
+                        if self.last_logged_status != "NO_FACE":
+                            leds.all_off()
+                            self.last_logged_status = "NO_FACE"
             except Exception as e:
                 print(f"Error in background processing: {e}")
 
