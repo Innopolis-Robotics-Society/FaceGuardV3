@@ -130,6 +130,8 @@ def test_init_db_runs_date_to_timestamp_migration(monkeypatch):
     assert connection.closed is True
 
 
+# --- New: tests on the actual public functions, not just the helpers ---
+
 
 def test_get_all_embeddings_excludes_expired_and_not_yet_started(monkeypatch):
     """Regression test for bug 1 (expired access still granted) and bug 3
