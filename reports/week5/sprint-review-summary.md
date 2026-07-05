@@ -13,7 +13,7 @@ During the meeting, the video was recorded. Before recording started, the team r
 | oebarbie | observer |
 | Exckernels | note taker |
 
-**Format:** Ofline.
+**Format:** Offline.
 
 ## Sprint Goal
 
