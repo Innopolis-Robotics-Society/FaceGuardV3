@@ -32,4 +32,4 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          pytest tests/ --cov=backend/faceguard --cov-report=term-missing --cov-fail-under=30
+          pytest tests/ --cov=backend --cov-report=term-missing --cov-fail-under=30
