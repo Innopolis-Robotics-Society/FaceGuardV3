@@ -114,21 +114,17 @@ The system is a monolithic Streamlit application running in a Docker container o
 ## 25-27. CI Pipeline
 
 - [CI pipeline](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions)
-- [Latest protected-default-branch CI run] [TODO]
-- [Release 2.1.0 - MVP v2](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v2.1.0) [TODO]
+- [Latest protected-default-branch CI run](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/actions/runs/28753638876)
+- [Release 2.1.0 - MVP v2](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v2.1.0)
 
 ## 28. Changelog
 [CHANGELOG.md](../../CHANGELOG.md)
 
 ## 29. Demo Video
-[TODO]
-[MVP v2 demo video]
+[MVP v2 demo video](https://drive.google.com/file/d/1eVihp2Zj8FnBWGSYasfcuhC0Qlz2X8xe/view?usp=sharing)
 
 ## 30. UAT Results Summary
-[TODO]
-User acceptance testing was conducted during an online Sprint Review session on June 27, 2026. 
-Due to the remote format, the team demonstrated each UAT scenario to the customer, 
-who observed, provided feedback, and confirmed acceptance. All 7 UAT scenarios passed.
+User acceptance testing was conducted during an online Sprint Review session on July 4, 2026.
 
 | UAT scenario ID | Scenario | Result |
 |---|---|---|
@@ -139,15 +135,13 @@ who observed, provided feedback, and confirmed acceptance. All 7 UAT scenarios p
 | UAT-005 | View the access logs | Passed |
 | UAT-006 | Automatic recognition of a registered employee | Passed |
 | UAT-007 | Rejection of an unregistered person | Passed |
+| UAT-008 | Edit the name or status of an employee | Passed |
+| UAT-009 | Register an already registered employee | Passed |
 
-All seven scenarios passed. No failures were recorded.
+All nine scenarios passed. No failures were recorded.
 
 **Most important feedback received:**
-- Add a duplicate name check when registering a new employee
-- Change temporary access to use exact time in addition to date
-- Add ability to edit employee name and status after registration
-- Add time of employee's last entry to the employees list
-- Add filtering by date range in access logs
+- Increase the speed of system's response
 
 ## 31. Link to the hosted documentation site
 [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)
@@ -189,16 +183,15 @@ The runnable product is not publicly hosted, as the customer explicitly requeste
 3. Increase the speed of the system's response
 
 ## 40. Contribution Traceability
-[TODO]
 
 | GitHub username | Issues | PRs/MRs | Review activity | Contribution |
 |---|---|---|---|---|
-| @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#89](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/89) | [#98](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/98) | Backend, Testing, Documentation, Presentation |
-| @oebarbie |  |  |  | Backend, Documentation, H/W setup |
-| @Exckernels |  |  |  | Backend, Testing, Documentation, LEDs setup |
-| @ixkci |  |  |  | Backend, Testing |
-| @grex861 |  |  |  | LEDs setup, Documentation |
-| @tyajhelo |  |  |  | Documentation |
+| @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#140](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/140), [#159](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/159) | [#143](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/143) | Backend, Testing, Documentation, CI/CD |
+| @oebarbie | [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113) | [#146](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/146), [#148](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/148), [#175](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/175) | [#140](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/140) | Documentation, Project Management |
+| @Exckernels | [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114) | [#174](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/174) | [#159](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/159) | Backend, Testing, Documentation, LEDs setup |
+| @ixkci | [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115), [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116), [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117) | [#181](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/181) | [#175](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/175) | Backend, Testing, Docker setup |
+| @grex861 |  | [#183](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/183) |  | LEDs setup, Documentation |
+| @tyajhelo |  | [#184](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/184) |  | Documentation |
 
 ## 41. Screenshots
 Screenshots are stored in:
