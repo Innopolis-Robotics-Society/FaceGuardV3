@@ -149,7 +149,7 @@ All nine scenarios passed. No failures were recorded.
 
 ## 32. Customer Review Transcript
 The public publication was permitted.  
-[Customer Review Transcript.md](customer-review-transcript.md)
+[Customer Review Transcript.md](sprint-review-transcript.md)
 
 ## 33. Explicit of deviations
 The runnable product is not publicly hosted, as the customer explicitly requested a local deployment on Raspberry Pi. The runnable artifact is the repository with Docker setup instructions. The hosted documentation site at `https://innopolis-robotics-society.github.io/FaceGuardV3/` covers the documentation requirement.
@@ -201,7 +201,7 @@ Screenshots are stored in:
 reports/week5/images/
 ```
 - ![Sprint milestone](images/sprint_milestone.png)
-- ![Board or project workflow view]((images/board.png))
+- ![Board or project workflow view](images/board.png))
 - ![Latest CI run](images/ci_run.png)
 - ![SemVer release](images/release.png)
 - ![PR example](images/pr_example.png)
