@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 175-hosting-documentation
 
 permissions:
   contents: write
