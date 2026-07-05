@@ -8,6 +8,8 @@
 
 - QR-003: Recognition Model Modularity
 
+- QR-004: Temporary Access Window Enforcement
+
 ## QRT-001: Recognition Pipeline Response Time
 
 **Linked quality requirement**: `QR-001`
@@ -103,3 +105,40 @@ integration test exists yet for this path.
 **CI Job:** pytest tests/ runs automatically on every PR and push to main
 
 **Status:** Implemented
+
+---
+
+## QRT-004: Temporary Access Window Enforcement
+
+**Linked quality requirement**: `QR-004`
+
+**Verification method**: Automated unit test on the pure business-rule
+functions, plus a mocked-DB test on the data-access layer.
+
+**Test data, setup, or environment**: Standard CI test environment. No real
+database is used — `connect_to_db()` is mocked; test fixtures provide rows
+representing permanent, active-temporary, expired-temporary, and
+not-yet-started-temporary employees with a fixed `now` timestamp for
+determinism. Legacy `date`-typed (pre-migration) values are also covered.
+
+**Automated command or CI check**: `pytest tests/unit/test_temporary_access.py`
+
+**Expected measurable result**: `_temporary_access_is_active()` returns
+`True` only when the current time is within `[start_date, expiration_date]`
+inclusive (or for non-Temporary status), correctly handling both
+`datetime` and legacy `date` inputs. `_normalize_access_window()` converts
+`date` inputs to full-day `datetime` bounds before writes.
+`get_all_embeddings()` excludes any temporary employee outside the active
+window from the results used for recognition matching. `add_employees()`
+returns `False` and skips the INSERT when a duplicate name exists.
+
+**Evidence link**: Latest protected default-branch CI run.
+
+**Limitation**: Uses a mocked cursor rather than a real PostgreSQL instance,
+so it verifies the Python-level filtering and normalization logic but not
+PostgreSQL-specific behavior (e.g. the `DATE`→`TIMESTAMP` migration SQL is
+checked for the expected substrings, not executed against a real database).
+
+**CI Job**: `pytest tests/` runs automatically on every PR and push to main
+
+**Status**: Implemented
