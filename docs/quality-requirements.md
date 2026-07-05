@@ -10,6 +10,13 @@
 
 **Linked ADR:** [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md)
 
+**Current status:** Known gap: backend inference meets the 3.0s target,
+but end-to-end response time (including real camera capture and UI
+rendering on Raspberry Pi 5) has been observed to exceed 3.0 seconds in
+production. QRT-001 currently passes because it measures pipeline logic on
+mocks, not the real hardware path. Tracked for
+Sprint 4: [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171).
+
 ---
 
 ## QR-002: Resistance to Static Photo Spoofing
