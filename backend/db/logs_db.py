@@ -48,7 +48,14 @@ def add_log(name: str, status: str):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO logs (name, status) VALUES (%s, %s)", (name, status)
+                """
+                        INSERT INTO logs (name, status)
+                        SELECT %s, %s
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM logs WHERE name = %s AND status = %s AND time > NOW() - INTERVAL '1 minute'
+                        )
+                        """,
+                (name, status, name, status),
             )
         conn.commit()
 
@@ -66,3 +73,16 @@ def delete_old_logs():
         with conn.cursor() as cur:
             cur.execute("DELETE FROM logs WHERE time < NOW() - INTERVAL '3 days'")
         conn.commit()
+
+
+def get_last_entry(employee_name):
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT time FROM logs WHERE name = %s ORDER BY time DESC LIMIT 1",
+                (employee_name,),
+            )
+            row = cur.fetchone()
+    if row:
+        return row[0]
+    return None

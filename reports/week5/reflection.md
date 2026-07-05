@@ -1,1 +1,11 @@
-ᅠ
+## Learning points
+The team learned that documenting software architecture and recording Architecture Decision Records (ADRs) is essential for maintaining system integrity as complexity grows. Creating ADRs for LED behavior and recognition provider abstraction helped formalize decisions and made it easier to reason about change impact. Refining workflow and configuration management revealed that environment consistency between development, CI, and production is critical for reliable deployments. Delivering MVP v2 with physical feedback (LEDs) taught us that customers value tangible, visible indicators of system state over internal improvements.
+
+## Validated assumptions
+The LED indicators (blue = open, red = closed, yellow = other) were approved by the customer, confirming that physical feedback is a valuable addition. The assumption that architecture documentation would be straightforward was partially rejected—maintaining diagrams and ADRs requires continuous effort, not a one-time task. The recognition pipeline performance on Raspberry Pi 5 remains problematic, confirming QR-001 is still not satisfied in production. Configuration management assumptions were challenged by mismatches between development and production environments affecting deployment.
+
+## Friction and gaps
+Architecture documentation remains incomplete; ADRs for LED behavior and provider abstraction are recorded, but camera integration, GPIO management, and database schema lack formal documentation. QR-001 is not satisfied in production due to Raspberry Pi 5 performance limitations, as confirmed by the customer during the Sprint Review. QR-002 remains unvalidated with real printed-photo attacks, and CI workflow is still blocked by repository permissions. Configuration files are not synchronized between environments, and the customer requested further LED behavior improvements during the review.
+
+## Planned response
+Complete ADRs for all key decisions including camera integration, GPIO management, and database schema; update architecture documentation with current system structure and diagrams. Enable GitHub Actions on the protected default branch and update Definition of Done to require CI pass for all merges. Profile and optimize the recognition pipeline on Raspberry Pi 5, adjusting QR-001 if the 3-second target proves unrealistic. Validate anti-spoofing with real printed-photo attacks, refine LED behavior based on customer feedback, and improve Sprint Review presentations with customer-friendly diagrams and demos.

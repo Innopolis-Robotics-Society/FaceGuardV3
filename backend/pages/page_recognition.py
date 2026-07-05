@@ -14,6 +14,7 @@ from faceguard.recognize import (  # noqa: E402
     extract_embedding_from_frame,
     LivenessDetector,
 )
+import leds  # noqa: E402
 from db.employees_db import find_closest_embedding  # noqa: E402
 from db.logs_db import add_log  # noqa: E402
 
@@ -88,6 +89,9 @@ class RecognitionVideoProcessor(VideoProcessorBase):
 
                 with self.lock:
                     if status_code == "real" and embedding is not None:
+                        if self.last_logged_status != "RECOGNIZING":
+                            leds.start_recognizing()
+                            self.last_logged_status = "RECOGNIZING"
                         match = find_closest_embedding(embedding)
                         if match:
                             emp_id, name, similarity = match
@@ -97,12 +101,12 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = f"{name} ({similarity * 100:.1f}%)"
                             self.last_draw_color = (0, 255, 0)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != name
                                 or self.last_logged_status != "ACCESS_GRANTED"
                             ):
+                                leds.access_granted()
                                 try:
                                     add_log(name, "ACCESS_GRANTED")
                                     self.last_log_time = current_time
@@ -120,12 +124,12 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_face = face
                             self.last_draw_text = "Access Denied"
                             self.last_draw_color = (0, 0, 255)
-
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
                                 or self.last_logged_name != "UNKNOWN"
                                 or self.last_logged_status != "ACCESS_DENIED"
                             ):
+                                leds.access_denied()
                                 try:
                                     add_log("UNKNOWN", "ACCESS_DENIED")
                                     self.last_log_time = current_time
@@ -144,11 +148,11 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "SPOOF DETECTED"
                         self.last_draw_color = (0, 0, 255)
-
                         if (
                             current_time - self.last_log_time > self.log_cooldown
                             or self.last_logged_status != "SPOOF_ATTEMPT"
                         ):
+                            leds.access_denied()
                             try:
                                 add_log("UNKNOWN", "SPOOF_ATTEMPT")
                                 self.last_log_time = current_time
@@ -166,11 +170,17 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                         self.last_face = face
                         self.last_draw_text = "Look straight"
                         self.last_draw_color = (0, 255, 255)
+                        if self.last_logged_status != "BAD_FACE":
+                            leds.bad_frame()
+                            self.last_logged_status = "BAD_FACE"
                     else:
                         self.status = "No face detected"
                         self.name = "Unknown"
                         self.similarity = 0.0
                         self.last_face = None
+                        if self.last_logged_status != "NO_FACE":
+                            leds.all_off()
+                            self.last_logged_status = "NO_FACE"
             except Exception as e:
                 print(f"Error in background processing: {e}")
 
@@ -228,16 +238,3 @@ if ctx.state.playing:
                 similarity_display.markdown("### Similarity\n-")
 
         time.sleep(0.1)
-
-# test button (delete later)
-st.divider()
-st.subheader("Test")
-
-col_a, col_b = st.columns(2)
-with col_a:
-    if st.button("Test Status"):
-        st.info("Trigger a test recognition.")
-
-with col_b:
-    if st.button("Reset Status"):
-        st.rerun()

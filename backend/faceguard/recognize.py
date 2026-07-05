@@ -64,8 +64,7 @@ class LivenessDetector:
             pad_bottom,
             pad_left,
             pad_right,
-            borderType=cv2.BORDER_CONSTANT,
-            value=[0, 0, 0],
+            borderType=cv2.BORDER_REPLICATE,
         )
 
         # print(f"DEBUG: Кроп лица успешно сделан. Размер кропа: {face_crop.shape}", flush=True)
