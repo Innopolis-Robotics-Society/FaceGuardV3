@@ -55,10 +55,10 @@ shall deny access outside that window in 100% of automated test cases.
 convenience feature — an employee whose access has expired (or has not yet
 started) must not be recognized, independent of unrelated admin activity
 such as viewing the Employees page. This was found to be a real defect:
-get_all_embeddings() did not filter by expiration/start date, so expired
+`get_all_embeddings()` did not filter by expiration/start date, so expired
 temporary employees could still be granted access until an admin happened
 to reload the Employees page.
 
 **Linked quality requirement tests:** [QRT-004](quality-requirement-tests.md#qrt-004-temporary-access-window-enforcement)
 
-**Linked ADR:** -
+**Linked ADR:** [ADR-004: Enforce Temporary Access Window in Application Logic with TIMESTAMP Normalization](architecture/adr/ADR-004-temporary-access-window-enforcement.md)
