@@ -32,6 +32,10 @@ The test fails if either step exceeds 3.0 seconds, crashes, or fails to produce 
 
 **Status**: Implemented
 
+**Known production gap:** See QR-001 "Current status", end-to-end
+response time exceeds 3.0s on real hardware (Raspberry Pi 5). Tracked
+in [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171).
+
 ## QRT-002: Static Photo Spoofing Rejection
 
 **Linked quality requirement**: `QR-002`
