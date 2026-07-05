@@ -12,8 +12,8 @@ A Product Backlog Item (PBI) may be marked Done only when all of the following a
 - [ ] All automated Quality Requirement Tests (QRTs) linked to affected
       quality requirements pass in CI, referenced by their stable IDs —
       currently QRT-001 (response time), QRT-002 (spoofing resistance),
-      QRT-003 (modularity), and any later-added QRTs
-      (see `docs/quality-requirement-tests.md`)
+      QRT-003 (modularity), QRT-004 (temporary access window enforcement),
+      and any later-added QRTs (see `docs/quality-requirement-tests.md`)
 - [ ] For critical product workflows that lack full automation (e.g. manual
       verification on the recognition test page), verification is
       performed and recorded as evidence in the PR/MR description, and
