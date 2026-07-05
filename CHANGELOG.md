@@ -7,14 +7,19 @@ All notable changes to FaceGuard will be documented in this file.
 ## [2.1.0] - 2026-07-05  
 
 ### Added
-- LEDs integration to show the system's response
-- The ability to edit employee name and status after registration
-- Time of employee's last entry to the employees list
-- A duplicate name check when registering a new employee
+- LEDs integration to show the system's response: yellow blinks during recognition, blue solid 5s on access granted, red solid 5s on access denied, yellow solid 5s on bad frame
+- Edit employee name and status after registration
+- Time of employee's last entry shown in the employees list
+- Duplicate face check when registering a new employee
 - Filtering by date range in access logs
 
 ### Changed
-- Desgin for temporary access changed to use exact time in addition to date
+- Temporary access now uses exact start and expiration date+time pickers
+
+### Fixed
+- Incorrect access granting: expired temporary employees could still be granted access until admin reloaded the Employees page
+- Incorrect blocking access was not blocked before start_date for temporary employees
+- Moscow Time
 
 ## [2.0.0] - 2026-06-28  
 
