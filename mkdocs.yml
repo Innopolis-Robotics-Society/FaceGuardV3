@@ -30,7 +30,7 @@ nav:
   - Testing: testing.md
   - Definition of Done: definition-of-done.md
   - Roadmap: roadmap.md
-  - Changelog: CHANGELOG.md
+  - Changelog: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/CHANGELOG.md
 
 plugins:
   - search
