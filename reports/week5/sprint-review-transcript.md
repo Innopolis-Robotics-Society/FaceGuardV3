@@ -51,14 +51,16 @@ Before recording started, the team requested permission to record the meeting an
 **Interviewer:** Essentially, yes.  
 
 **(04:35)**  
-**Customer:** That means when it sees me and it does not understand who I am, it will say that no, everything is wrong, you are just talking. Correct? On Face Recognition for employees.  
+**Customer:** That means when it sees me and it does not understand who I am, it will say that no, everything is wrong, you are just talking.  
+**Interviewer:** Correct? On Face Recognition for employees.  
+**Customer:** Ah, so, can this be started manually here?  
 **Interviewer:** Yes, we are thinking about making the session run in the background, meaning you need to press start and it runs in the background mode.  
 **Customer:** Uh.
 **Interviewer:** Well, for now, yes.  
 **Customer:** That means to let me through, I need to press the button.  
 
 **(05:08)**  
-**Interviewer:** The session starts, and it is in the background mode, and it continues to run for a long time. For now, it is configured so that you absolutely must be on the page. We will try to make it background. Show face detected, because at first the frame is very. Can you lift it up a little bit? The brain. Now I will clean up the picture properly.  
+**Interviewer:** The session starts, and it is in the background mode, and it continues to run for a long time. For now, it is configured so that you absolutely must be on the page. We will try to make it background. Show face detected, because at first the frame is very. Can you lift it up a little bit? [inaudible]. Now I will clean up the picture properly.  
 **Customer:** And also spoof.  
 
 **(05:54)**  
@@ -104,9 +106,9 @@ Before recording started, the team requested permission to record the meeting an
 **Customer:** No, just, I think, it is still the fourth. Well, somehow we. But I could be wrong. Yes, the fourth model. Okay. And we are here. It is not scary. Okay, good. Then, perhaps, the matter really is in the hardware. I can offer you to try this one to see how much performance gain you can get.  
 
 **(10:16)**  
-**Interviewer:** Look. Right now I just went to the site. The first page is still not moving, it loads for a long time because the database is also being pulled along the way, we will speed that up too. Here, for example, if we try Adam, for instance. If you want, we can just do it on me. Can you see it?  
+**Interviewer:** Look. Right now I just went to the site. The first page is still not moving, it loads for a long time because the database is also being pulled along the way, we will speed that up too. Here, for example, if we try [inaudible], for instance. If you want, we can just do it on me. Can you see it?  
 **Customer:** Uh-huh.  
-**Interviewer:** Turn it on very.  
+**Interviewer:** [inaudible].  
 **Customer:** Well yes, here it works very fast for us.  
 
 **(11:20)**  
@@ -130,7 +132,7 @@ Before recording started, the team requested permission to record the meeting an
 
 **(14:31)** 
 **Interviewer:** Good, thank you. So. Well and. Ah, well we can show it via the demo.  
-**Customer:** Uh. That means we do face recognition and.  
+**Customer:** That means we do face recognition and.  
 **Interviewer:** You can generally fast forward 10 seconds.  
 **Customer:** Oh well.  
 **Interviewer:** That means it lights up yellow when it cannot in the process. When the face specifically was not recognized in terms of asking to look into the camera.  
@@ -147,12 +149,12 @@ Before recording started, the team requested permission to record the meeting an
 **Interviewer:** [inaudible] a little bit now. I do not know if you noticed.  
 **Customer:** Yes, I did not notice. And spoof is here.  
 **Interviewer:** In general like this. They also tried there. Yes, to select. Was it red?  
-**Customer:** Yes. Uh-huh. And there is a feature during registration that when a face is being registered, all three colors speak. Uh-huh.  
-**Interviewer:** To make it clear, yes, that registration is underway. Uh-huh.  
+**Customer:** Yes. And there is a feature during registration that when a face is being registered, all three colors speak.
+**Interviewer:** To make it clear, yes, that registration is underway.  
 **Customer:** Caught it. Okay, good.  
 
 **(16:27)**  
-**Interviewer:** Well and I will just list once again what we did. We changed the temporary registration page, meaning now there is also time there. Uh-huh. We added that you can check it there. Everything can be done through this, there are also several pages there. We added that a face cannot be registered repeatedly. Filtering. We made log filtering so that now there should be fewer of them, meaning repeating logs are not registered.  
+**Interviewer:** Well and I will just list once again what we did. We changed the temporary registration page, meaning now there is also time there. We added that you can check it there. Everything can be done through this, there are also several pages there. We added that a face cannot be registered repeatedly. Filtering. We made log filtering so that now there should be fewer of them, meaning repeating logs are not registered.  
 **Customer:** Now essentially yes.  
 **Interviewer:** Yes, when was the last capture?  
 **Customer:** Yes.  
@@ -162,7 +164,7 @@ Before recording started, the team requested permission to record the meeting an
 **Customer:** Okay, I saw it on the video, saw it.  
 **Interviewer:** Yesterday also, when we just tested, because of the connection to the Raspberry Pi, it perceives it as an external device and sometimes requires separate access.  
 **Customer:** Well yes.  
-**Interviewer:** Meaning separate administrators and so on. [inaudible].  
+**Interviewer:** Meaning separate administrators and so on. We are on our own. Yeah, sudo access.  
 **Customer:** Common overhead.  
 **Interviewer:** Yes, it is common.  
 **Customer:** Alright, okay.  
@@ -175,9 +177,9 @@ Before recording started, the team requested permission to record the meeting an
 **Interviewer:** Well, what else can be improved besides the speed?  
 
 **(18:56)**  
-**Customer:** Well, right now speed is everything. [inaudible]. A bit faster. If you realize that you frequently lack performance, you cannot make it any better, then I can try to get it for you. Uh-huh. Then you will work on them already.  
+**Customer:** Well, right now speed is everything. [inaudible]. A bit faster. If you realize that you frequently lack performance, you cannot make it any better, then I can try to get it for you. Then you will work on them already.  
 **Interviewer:** Good.  
-**Customer:** Well, for now optimize on your own hardware, on the Raspberry Pi later, and we will see what happens. Uh-huh.  
+**Customer:** Well, for now optimize on your own hardware, on the Raspberry Pi later, and we will see what happens.  
 **Interviewer:** Good.  
 **Customer:** That is probably all then.  
 **Interviewer:** Thank you. All then, thank you. Now I will leave.
