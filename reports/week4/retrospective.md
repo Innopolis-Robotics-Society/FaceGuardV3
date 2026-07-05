@@ -1,4 +1,4 @@
-# Sprint Retrospective — Sprint 2 (MVP v2)
+# Sprint Retrospective — Sprint 2 (MVP v1)
 
 ## What went well
 - Daily Scrum meetings helped the team stay in touch and track progress.
