@@ -1,4 +1,5 @@
 # ADR-004: Enforce Temporary Access Window in Application Logic with TIMESTAMP Normalization
+**ID:** ADR-004  
 
 **Status:** Accepted
 
