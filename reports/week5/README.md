@@ -203,6 +203,6 @@ reports/week5/images/
 - ![Sprint milestone](images/sprint_milestone.png)
 - ![Board or project workflow view]((images/board.png))
 - ![Latest CI run](images/ci_run.png)
-- ![SemVer release](images/semver_release.png)
+- ![SemVer release](images/release.png)
 - ![PR example](images/pr_example.png)
-- ![Hosted docs site](images/hosted_site.png)
+- ![Hosted docs site](images/hosted_docs.png)
