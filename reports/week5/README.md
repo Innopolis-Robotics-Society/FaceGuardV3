@@ -139,8 +139,7 @@ All seven scenarios passed. No failures were recorded.
 - Add filtering by date range in access logs
 
 ## 31. Link to the hosted documentation site
-[TODO]
-Our project does not require to be hosted, as the customer wants to have it on the localhost.
+[Hosted Documentation](https://innopolis-robotics-society.github.io/FaceGuardV3/)
 
 ## 32. Customer Review Transcript
 
