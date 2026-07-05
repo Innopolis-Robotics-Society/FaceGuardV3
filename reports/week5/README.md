@@ -201,11 +201,10 @@ The runnable product is not publicly hosted, as the customer explicitly requeste
 | @tyajhelo |  |  |  | Documentation |
 
 ## 41. Screenshots
-[TODO]
 Screenshots are stored in:
 
 ```text
-reports/week4/images/
+reports/week5/images/
 ```
 - ![Sprint milestone](images/sprint_milestone.png)
 - ![Board or project workflow view]((images/board.png))
@@ -213,13 +212,3 @@ reports/week4/images/
 - ![SemVer release](images/semver_release.png)
 - ![PR example](images/pr_example.png)
 - ![Hosted docs site](images/hosted_site.png)
-- ![Branch protection](images/branch_protection.png)
-- ![Coverage](images/coverage.png)
-- ![QA check](images/qa_check.png)
-- ![Release](images/release.png)
-- ![Product Backlog](images/product_backlog.png)
-- ![Sprint Backlog](images/sprint_backlog.png)  
- **Face is blurred for privacy reasons.**
-- ![Recognition page](images/recognition.png)
-- ![Add Employee page](images/add_employee.png)
-
