@@ -43,4 +43,4 @@ docker compose -f docker/docker-compose.yml up
 Open your browser at `http://localhost:8501`
 
 ## Hosted Documentation
-[Hosted Documentation](https://innopolis-robotics-society.github.io/FaceGuardV3/)
+See the [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/).
