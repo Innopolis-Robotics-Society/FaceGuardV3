@@ -1,5 +1,5 @@
 name: Course Task
-description: Create an Assignment 5 course-process task
+description: Create an Assignment 6 course-process task
 title: "Course Task: "
 labels:
   - "type: course task"
@@ -7,35 +7,36 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for Assignment 5 administrative, reporting, evidence, review, release, demo, or documentation tasks.
+        Use this template for Assignment 6 administrative, reporting, evidence, review, release, transition, demo, or documentation tasks.
         Course Task issues do not count toward the required qualifying PBIs.
   - type: input
     id: task-title
     attributes:
       label: Task title
-      placeholder: "Prepare Week 5 report screenshots"
+      placeholder: "Prepare Week 6 report screenshots"
     validations:
       required: true
   - type: dropdown
     id: assignment-part
     attributes:
-      label: Assignment 5 part
+      label: Assignment 6 part
       options:
-        - Part 1 - Refine Product Backlog and plan Sprint 3
-        - Part 2 - Respond to customer feedback on MVP v1
-        - Part 3 - Document the development process and configuration management
-        - Part 4 - Document the architecture
-        - Part 5 - Create and link ADRs
-        - Part 6 - Extend testing, QA, and Definition-of-Done evidence for MVP v2
-        - Part 7 - Implement, release, and deploy MVP v2
-        - Part 8 - Update and execute user acceptance tests
-        - Part 9 - Conduct the Sprint Review
-        - Part 10 - Conduct the Sprint Retrospective
-        - Part 11 - Host the maintained documentation
-        - Part 12 - Reflect on the week
-        - Part 13 - Record a public sanitized demo video
-        - Part 14 - Report on LLM usage
-        - Week 5 README / Moodle PDF
+        - Part 1 - Refine the Product Backlog and Plan Sprint 4 and Sprint 5
+        - Part 2 - Deliver the Week 6 Trial Release
+        - Part 3 - Polish Customer-Facing Documentation and the Repository Entry Point
+        - Part 4 - Maintain the Customer Handover Documentation
+        - Part 5 - Conduct the Week 6 Transition-Readiness Meeting and Customer Trial
+        - Part 6 - Run Sprint 5 and Perform Follow-Up Maintenance
+        - Part 7 - Transition the Product and Release MVP v3
+        - Part 8 - Confirm the Final Transition Outcome and Product Usefulness
+        - Part 9 - Update and Execute User Acceptance Tests
+        - Part 10 - Conduct Sprint Reviews for Week 6 and Week 7
+        - Part 11 - Conduct Sprint Retrospectives for Week 6 and Week 7
+        - Part 12 - Reflect on Week 6 and Week 7 and Report LLM Usage
+        - Part 13 - Prepare, Submit, and Rehearse the Presentation
+        - Part 14 - Record a Public Sanitized Demo Video for MVP v3
+        - Week 6 README / Moodle PDF
+        - Week 7 README / Moodle PDF
         - Other
     validations:
       required: true
@@ -77,10 +78,11 @@ body:
     attributes:
       label: Expected artifacts or links
       placeholder: |
-        - reports/week5/README.md
-        - reports/week5/images/...
+        - reports/week6/README.md
+        - reports/week6/images/...
         - GitHub Project link
         - Release link
+        - docs/customer-handover.md
         - Demo video link
     validations:
       required: false
@@ -91,7 +93,7 @@ body:
       placeholder: |
         - [ ] Required file created or updated
         - [ ] Links verified
-        - [ ] Evidence added to Week 5 report
+        - [ ] Evidence added to Week 6/7 report
         - [ ] PR reviewed
     validations:
       required: false
@@ -102,3 +104,5 @@ body:
       placeholder: "Add relevant notes, risks, or remaining gaps."
     validations:
       required: false
+
+blank_issues_enabled: false
