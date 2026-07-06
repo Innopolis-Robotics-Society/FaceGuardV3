@@ -5,7 +5,7 @@
 Describe the change in 2–5 sentences.
 
 Example:
-This PR implements the question creation form for MVP v2. It adds validation, connects the feature to the existing flow, and updates the required documentation.
+This PR implements the question creation form for MVP v3. It adds validation, connects the feature to the existing flow, and updates the required documentation.
 
 ---
 
@@ -19,7 +19,7 @@ Related issues:
 
 ---
 
-## Assignment 5 workflow evidence
+## Assignment 6 workflow evidence
 
 * [ ] This PR is linked to an issue.
 * [ ] The branch name follows `<issue-number>-short-description`.
@@ -50,6 +50,7 @@ Select all that apply:
 * [ ] Refactoring
 * [ ] Architecture / ADR
 * [ ] Deployment / Release
+* [ ] Transition / Handover
 * [ ] Changelog update
 
 ---
@@ -226,8 +227,10 @@ Log:
 * [ ] ADR created or updated in docs/architecture/adr/
 * [ ] docs/development-process.md updated
 * [ ] docs/user-acceptance-tests.md updated with new/changed scenario(s)
+* [ ] docs/customer-handover.md updated
 * [ ] Hosted documentation site updated (or not affected)
-* [ ] reports/week5 updated
+* [ ] reports/week6 updated
+* [ ] reports/week7 updated
 * [ ] No documentation change needed
 
 Files changed:
@@ -272,6 +275,7 @@ Select exactly one option:
 * [ ] If a quality requirement was affected or introduced, `docs/quality-requirements.md` links it to the relevant ADR(s).
 * [ ] If this change adds or changes user-facing functionality, `docs/user-acceptance-tests.md` was updated with new/changed scenario(s), or marked not applicable.
 * [ ] If maintained documentation changed, the hosted documentation site reflects it, or is explicitly marked not affected.
+* [ ] If this change affects customer handover, deployment, transition status, or access details, `docs/customer-handover.md` was updated, or marked not applicable.
 * [ ] The branch can be merged into the default branch.
 * [ ] The linked issue can be moved to Done after merge.
 

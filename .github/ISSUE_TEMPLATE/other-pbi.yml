@@ -74,14 +74,14 @@ body:
     id: mvp-version
     attributes:
       label: MVP version
-      placeholder: "MVP v2"
+      placeholder: "MVP v3"
     validations:
       required: false
   - type: input
     id: sprint
     attributes:
       label: Sprint milestone
-      placeholder: "Sprint 3"
+      placeholder: "Sprint 4"
     validations:
       required: false
   - type: input
