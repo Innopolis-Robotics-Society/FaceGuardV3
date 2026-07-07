@@ -335,114 +335,114 @@
 
 ---
 
-## UAT-010: Door access control integration
+## UAT-010: Door access control integration  
 
-**Status:** Active
-**User goal:** Verify that the system physically controls door access by opening the door for recognized employees and keeping it closed for unauthorized ones
+**Status:** Active  
+**User goal:** Verify that the system physically controls door access by opening the door for recognized employees and keeping it closed for unauthorized ones  
 
-**Preconditions:**
-- The system is active, powered on
-- A person approaches the camera
+**Preconditions:**  
+- The system is active, powered on    
+- A person approaches the camera  
 
-**Steps:**
-1. Place employee with clearly visible face in front of the camera in its view
-2. Capture employee's face
+**Steps:**  
+1. Place employee with clearly visible face in front of the camera in its view  
+2. Capture employee's face  
 
-**Expected outcome:**
-- Door unlocks automatically for registered employee within 2 seconds of recognition
-- Door remains locked for unregistered person
+**Expected outcome:**  
+- Door unlocks automatically for registered employee within 2 seconds of recognition  
+- Door remains locked for unregistered person  
 ---
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)  
 
-**Result:** Passed or Failed
+**Result:** Passed or Failed  
+**Executed by:** Customer (role: admin)  
+**Comments:**    
+**Resulting PBIs:**  
+
+---
+
+## UAT-011: Face recognition with accessories  
+
+**Status:** Active  
+**User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats, medical masks)  
+
+**Preconditions:**  
+- The system is active, powered on  
+- A registered employee approaches the camera  
+
+**Steps:**  
+1. Place employee with accessories with clearly visible face in front of the camera in its view  
+2. Capture employee's face  
+
+**Expected outcome:**  
+- If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds  
+- During recognition, the LEDs glow yellow; after successful recognition, the LEDs stop blinking yellow and turn solid blue for 5 seconds    
+- If there's no one in front of the camera, nothing lights up  
+- There is no test section on the recognition page  
+- The system recognized the employee within 3 seconds automatically    
+- The system grants the access  
+- The system logs the attempt  
+- Recognition success rate ≥95% with common accessories  
+
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)  
+
+**Result:** Passed or Failed  
 **Executed by:** Customer (role: admin)  
 **Comments:**  
 **Resulting PBIs:**  
 
 ---
 
-## UAT-011: Face recognition with accessories
+## UAT-012: Admin authentication  
 
-**Status:** Active
-**User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats, medical masks)
+**Status:** Active  
+**User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.  
 
-**Preconditions:**
-- The system is active, powered on
-- A registered employee approaches the camera
+**Preconditions:**  
+- The system is active, powered on  
+- The admin is on the authentication page  
 
-**Steps:**
-1. Place employee with accessories with clearly visible face in front of the camera in its view
-2. Capture employee's face
+**Steps:**  
+1. Fill in the login field with the correct login  
+2. Fill in the password field with the correct password  
 
-**Expected outcome:**
-- If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
-- During recognition, the LEDs glow yellow; after successful recognition, the LEDs stop blinking yellow and turn solid blue for 5 seconds
-- If there's no one in front of the camera, nothing lights up
-- There is no test section on the recognition page
-- The system recognized the employee within 3 seconds automatically
-- The system grants the access
-- The system logs the attempt
-- Recognition success rate ≥95% with common accessories
-
+**Expected outcome:**  
+- If the login and password are correct, the system successfully logs in and the admin is switched to the employees page    
+- If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page  
 ---
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)  
 
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Result:** Passed or Failed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  
+**Resulting PBIs:**  
 
 ---
 
-## UAT-012: Admin authentication
+## UAT-013: Background recognition  
 
-**Status:** Active
-**User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.
+**Status:** Active  
+**User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.  
 
-**Preconditions:**
-- The system is active, powered on
-- The admin is on the authentication page
+**Preconditions:**  
+- The system is active, powered on    
+- The admin is on the page with recognition  
+- An employee approaches the camera   
 
-**Steps:**
-1. Fill in the login field with the correct login
-2. Fill in the password field with the correct password
+**Steps:**  
+1. While the admin is on another page, such as 'Employees' or 'Access Logs History', have an employee stand in front of the camera in its view with clearly visible face  
 
-**Expected outcome:**
-- If the login and password are correct, the system successfully logs in and the admin is switched to the employees page
-- If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page
----
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)
-
-**Result:** Passed or Failed
-**Executed by:** Customer (role: admin)
-**Comments:**
-**Resulting PBIs:**
+**Expected outcome:**  
+- The recognition runs without the admin needing to open or stay on the recognition page  
+- The admin can navigate between pages and perform other actions while recognition is in progress   
+- The recognition attempt is logged and the result is visible on the 'Access Logs History' page after it completes  
+- The system handles this recognition attempt together with any other admin action without errors or delay to either task  
 
 ---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)  
 
-## UAT-013: Background recognition
-
-**Status:** Active
-**User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.
-
-**Preconditions:**
-- The system is active, powered on
-- The admin is on the page with recognition
-- An employee approaches the camera
-
-**Steps:**
-1. While the admin is on another page, such as 'Employees' or 'Access Logs History', have an employee stand in front of the camera in its view with clearly visible face
-
-**Expected outcome:**
-- The recognition runs without the admin needing to open or stay on the recognition page
-- The admin can navigate between pages and perform other actions while recognition is in progress
-- The recognition attempt is logged and the result is visible on the 'Access Logs History' page after it completes
-- The system handles this recognition attempt together with any other admin action without errors or delay to either task
-
----
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)
-
-**Result:** Passed or Failed
+**Result:** Passed or Failed  
 **Executed by:** Customer (role: admin)
 **Comments:**
 **Resulting PBIs:**
