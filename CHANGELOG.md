@@ -4,6 +4,17 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-12  
+
+### Added
+- Connection of the system and the door
+- Recognition with accessories
+- Permanent login and password for the admin
+- Running recognition in the background
+
+### Changed
+- The speed of the system's response
+
 ## [2.1.0] - 2026-07-05  
 
 ### Added
@@ -56,3 +67,4 @@ All notable changes to FaceGuard will be documented in this file.
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
 [2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
+[2.2.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.2.0...v2.1.0  
