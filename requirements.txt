@@ -1,0 +1,11 @@
+numpy
+pandas
+psycopg2-binary
+opencv-python
+onnxruntime
+streamlit
+streamlit-webrtc
+pytest
+gpiozero
+RPi.GPIO
+insightface

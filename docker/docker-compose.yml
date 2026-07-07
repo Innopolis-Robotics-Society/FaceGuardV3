@@ -15,5 +15,5 @@ services:
       - ./insightface_models:/root/.insightface/models
     tty: true
     stdin_open: true
-    command: streamlit run backend/pages/page_authentication.py
+    command: bash -c "streamlit run backend/pages/page_authentication.py"
     restart: unless-stopped
