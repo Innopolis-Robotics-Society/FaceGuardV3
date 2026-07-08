@@ -117,6 +117,9 @@ class EnrollVideoProcessor(VideoProcessorBase):
 if "enroll_embedding" not in st.session_state:
     st.session_state["enroll_embedding"] = None
 
+with st.spinner("Warming up AI models (may take up to 15 seconds on first run)..."):
+    get_enroll_models()
+
 ctx = webrtc_streamer(
     key="enroll",
     video_processor_factory=EnrollVideoProcessor,
@@ -128,7 +131,10 @@ ctx = webrtc_streamer(
         },
         "audio": False,
     },
-    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+    rtc_configuration={"iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]},
+    ]},
 )
 success_placeholder = st.empty()
 error_placeholder = st.empty()

@@ -223,6 +223,9 @@ class RecognitionVideoProcessor(VideoProcessorBase):
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 
+with st.spinner("Warming up AI models (may take up to 15 seconds on first run)..."):
+    get_models()
+
 ctx = webrtc_streamer(
     key="recognize",
     video_processor_factory=RecognitionVideoProcessor,
@@ -234,7 +237,10 @@ ctx = webrtc_streamer(
         },
         "audio": False,
     },
-    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+    rtc_configuration={"iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]},
+    ]},
     async_processing=True,
 )
 
