@@ -1,5 +1,3 @@
-import psycopg2 as ps2
-import psycopg2.extras
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -8,6 +6,7 @@ import os
 from datetime import date, datetime, time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from db.connection import get_db_connection
 
 
 TEMPORARY_ACCESS_DATETIME_MIGRATION = """
@@ -85,139 +84,113 @@ def _temporary_access_is_active(start_date, expiration_date, now=None):
     return True
 
 
-def connect_to_db():
-    return ps2.connect(
-        host=st.secrets["host"],
-        database=st.secrets["database"],
-        user=st.secrets["user"],
-        password=st.secrets["password"],
-        sslmode="require",
-    )
+
 
 
 def init_db():
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS employees (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(150) NOT NULL,
-        registration_date DATE DEFAULT CURRENT_DATE,
-        status VARCHAR(50) NOT NULL DEFAULT 'Permanent',
-        embedding FLOAT8[],
-        start_date TIMESTAMP,
-        expiration_date TIMESTAMP
-    );
-    """
-    try:
-        cursor.execute(create_table_query)
-        cursor.execute(TEMPORARY_ACCESS_DATETIME_MIGRATION)
-        connection.commit()
-    except Exception as e:
-        connection.rollback()
-        st.error(f"Error: {e}")
-    finally:
-        cursor.close()
-        connection.close()
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            create_table_query = """
+            CREATE TABLE IF NOT EXISTS employees (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(150) NOT NULL,
+                registration_date DATE DEFAULT CURRENT_DATE,
+                status VARCHAR(50) NOT NULL DEFAULT 'Permanent',
+                embedding FLOAT8[],
+                start_date TIMESTAMP,
+                expiration_date TIMESTAMP
+            );
+            """
+            try:
+                cursor.execute(create_table_query)
+                cursor.execute(TEMPORARY_ACCESS_DATETIME_MIGRATION)
+                connection.commit()
+            except Exception as e:
+                connection.rollback()
+                st.error(f"Error: {e}")
 
 
 def delete_expired_employees():
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    try:
-        cursor.execute("""
-            DELETE FROM employees
-            WHERE status = 'Temporary'
-            AND expiration_date IS NOT NULL
-            AND expiration_date < LOCALTIMESTAMP;
-        """)
-        connection.commit()
-    except Exception as e:
-        connection.rollback()
-        st.error(f"Error: {e}")
-    finally:
-        cursor.close()
-        connection.close()
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute("""
+                    DELETE FROM employees
+                    WHERE status = 'Temporary'
+                    AND expiration_date IS NOT NULL
+                    AND expiration_date < LOCALTIMESTAMP;
+                """)
+                connection.commit()
+            except Exception as e:
+                connection.rollback()
+                st.error(f"Error: {e}")
 
 
 def load_employees():
     delete_expired_employees()
-    connection = connect_to_db()
-    query = "SELECT id, name, registration_date, status, start_date, expiration_date FROM employees ORDER BY id;"
-    df = pd.read_sql(query, connection)
-    connection.close()
+    with get_db_connection() as connection:
+        query = "SELECT id, name, registration_date, status, start_date, expiration_date FROM employees ORDER BY id;"
+        df = pd.read_sql(query, connection)
     return df
 
 
 def update_employee(employee_id, name, status, start_date=None, expiration_date=None):
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    try:
-        start_date, expiration_date = _normalize_access_window(
-            status, start_date, expiration_date
-        )
-        cursor.execute(
-            "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
-            (name, status, start_date, expiration_date, int(employee_id)),
-        )
-        connection.commit()
-    except Exception as e:
-        connection.rollback()
-        st.error(f"Error: {e}")
-    finally:
-        cursor.close()
-        connection.close()
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            try:
+                start_date, expiration_date = _normalize_access_window(
+                    status, start_date, expiration_date
+                )
+                cursor.execute(
+                    "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
+                    (name, status, start_date, expiration_date, int(employee_id)),
+                )
+                connection.commit()
+            except Exception as e:
+                connection.rollback()
+                st.error(f"Error: {e}")
 
 
 def delete_employee(employee_id):
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    try:
-        cursor.execute("DELETE FROM employees WHERE id = %s;", (int(employee_id),))
-        connection.commit()
-    except Exception as e:
-        connection.rollback()
-        st.error(f"Error: {e}")
-    finally:
-        cursor.close()
-        connection.close()
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute("DELETE FROM employees WHERE id = %s;", (int(employee_id),))
+                connection.commit()
+            except Exception as e:
+                connection.rollback()
+                st.error(f"Error: {e}")
 
 
 def add_employees(name, status, embedding=None, start_date=None, expiration_date=None):
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
-    if cursor.fetchone() is not None:
-        st.error("Employee with this name already exists")
-        cursor.close()
-        connection.close()
-        return False
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
+            if cursor.fetchone() is not None:
+                st.error("Employee with this name already exists")
+                return False
 
-    embedding = embedding.tolist() if embedding is not None else None
-    start_date, expiration_date = _normalize_access_window(
-        status, start_date, expiration_date
-    )
+            embedding = embedding.tolist() if embedding is not None else None
+            start_date, expiration_date = _normalize_access_window(
+                status, start_date, expiration_date
+            )
 
-    cursor.execute(
-        "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
-        (name, status, embedding, start_date, expiration_date),
-    )
-    connection.commit()
-    cursor.close()
-    connection.close()
+            cursor.execute(
+                "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
+                (name, status, embedding, start_date, expiration_date),
+            )
+            connection.commit()
     return True
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def get_all_embeddings():
-    connection = connect_to_db()
-    cursor = connection.cursor()
-    cursor.execute(
-        "SELECT id, name, embedding, status, start_date, expiration_date FROM employees WHERE embedding IS NOT NULL"
-    )
-
-    rows = cursor.fetchall()
-    cursor.close()
-    connection.close()
+    with get_db_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, name, embedding, status, start_date, expiration_date FROM employees WHERE embedding IS NOT NULL"
+            )
+            rows = cursor.fetchall()
 
     now = _current_access_time()
 

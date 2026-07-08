@@ -60,6 +60,9 @@ class RecognitionVideoProcessor(VideoProcessorBase):
         self.last_draw_text = ""
         self.last_draw_color = (0, 255, 0)
 
+        self.unrecognized_frames = 0
+        self.access_granted_until = 0
+
         self.current_frame = None
         self.last_frame_time = time.time()
         self.is_running = True
@@ -94,6 +97,8 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                             self.last_logged_status = "RECOGNIZING"
                         match = find_closest_embedding(embedding)
                         if match:
+                            self.unrecognized_frames = 0
+                            self.access_granted_until = current_time + 3.0
                             emp_id, name, similarity = match
                             self.status = "Access Granted"
                             self.name = name
@@ -118,69 +123,93 @@ class RecognitionVideoProcessor(VideoProcessorBase):
                                         exc_info=True,
                                     )
                         else:
-                            self.status = "Access Denied"
+                            if current_time < self.access_granted_until:
+                                pass
+                            else:
+                                self.unrecognized_frames += 1
+                                if self.unrecognized_frames >= 2:
+                                    self.status = "Access Denied"
+                                    self.name = "Unknown"
+                                    self.similarity = 0.0
+                                    self.last_face = face
+                                    self.last_draw_text = "Access Denied"
+                                    self.last_draw_color = (0, 0, 255)
+                                    if (
+                                        current_time - self.last_log_time > self.log_cooldown
+                                        or self.last_logged_name != "UNKNOWN"
+                                        or self.last_logged_status != "ACCESS_DENIED"
+                                    ):
+                                        leds.access_denied()
+                                        try:
+                                            add_log("UNKNOWN", "ACCESS_DENIED")
+                                            self.last_log_time = current_time
+                                            self.last_logged_name = "UNKNOWN"
+                                            self.last_logged_status = "ACCESS_DENIED"
+                                        except Exception:
+                                            logger.warning(
+                                                "Failed to write access denied log",
+                                                exc_info=True,
+                                            )
+                                else:
+                                    self.status = "Recognizing..."
+                                    self.name = "..."
+                                    self.similarity = 0.0
+                                    self.last_face = face
+                                    self.last_draw_text = "Recognizing..."
+                                    self.last_draw_color = (255, 255, 0)
+
+                    elif status_code == "spoof":
+                        if current_time < self.access_granted_until:
+                            pass
+                        else:
+                            self.unrecognized_frames = 0
+                            self.status = "SPOOF DETECTED"
                             self.name = "Unknown"
                             self.similarity = 0.0
                             self.last_face = face
-                            self.last_draw_text = "Access Denied"
+                            self.last_draw_text = "SPOOF DETECTED"
                             self.last_draw_color = (0, 0, 255)
                             if (
                                 current_time - self.last_log_time > self.log_cooldown
-                                or self.last_logged_name != "UNKNOWN"
-                                or self.last_logged_status != "ACCESS_DENIED"
+                                or self.last_logged_status != "SPOOF_ATTEMPT"
                             ):
                                 leds.access_denied()
                                 try:
-                                    add_log("UNKNOWN", "ACCESS_DENIED")
+                                    add_log("UNKNOWN", "SPOOF_ATTEMPT")
                                     self.last_log_time = current_time
                                     self.last_logged_name = "UNKNOWN"
-                                    self.last_logged_status = "ACCESS_DENIED"
+                                    self.last_logged_status = "SPOOF_ATTEMPT"
                                 except Exception:
                                     logger.warning(
-                                        "Failed to write access denied log",
-                                        exc_info=True,
+                                        "Failed to write spoof attempt log", exc_info=True
                                     )
 
-                    elif status_code == "spoof":
-                        self.status = "SPOOF DETECTED"
-                        self.name = "Unknown"
-                        self.similarity = 0.0
-                        self.last_face = face
-                        self.last_draw_text = "SPOOF DETECTED"
-                        self.last_draw_color = (0, 0, 255)
-                        if (
-                            current_time - self.last_log_time > self.log_cooldown
-                            or self.last_logged_status != "SPOOF_ATTEMPT"
-                        ):
-                            leds.access_denied()
-                            try:
-                                add_log("UNKNOWN", "SPOOF_ATTEMPT")
-                                self.last_log_time = current_time
-                                self.last_logged_name = "UNKNOWN"
-                                self.last_logged_status = "SPOOF_ATTEMPT"
-                            except Exception:
-                                logger.warning(
-                                    "Failed to write spoof attempt log", exc_info=True
-                                )
-
                     elif status_code == "bad_face":
-                        self.status = "Please look straight at the camera"
-                        self.name = "Unknown"
-                        self.similarity = 0.0
-                        self.last_face = face
-                        self.last_draw_text = "Look straight"
-                        self.last_draw_color = (0, 255, 255)
-                        if self.last_logged_status != "BAD_FACE":
-                            leds.bad_frame()
-                            self.last_logged_status = "BAD_FACE"
+                        if current_time < self.access_granted_until:
+                            pass
+                        else:
+                            self.unrecognized_frames = 0
+                            self.status = "Please look straight at the camera"
+                            self.name = "Unknown"
+                            self.similarity = 0.0
+                            self.last_face = face
+                            self.last_draw_text = "Look straight"
+                            self.last_draw_color = (0, 255, 255)
+                            if self.last_logged_status != "BAD_FACE":
+                                leds.bad_frame()
+                                self.last_logged_status = "BAD_FACE"
                     else:
-                        self.status = "No face detected"
-                        self.name = "Unknown"
-                        self.similarity = 0.0
-                        self.last_face = None
-                        if self.last_logged_status != "NO_FACE":
-                            leds.all_off()
-                            self.last_logged_status = "NO_FACE"
+                        if current_time < self.access_granted_until:
+                            pass
+                        else:
+                            self.unrecognized_frames = 0
+                            self.status = "No face detected"
+                            self.name = "Unknown"
+                            self.similarity = 0.0
+                            self.last_face = None
+                            if self.last_logged_status != "NO_FACE":
+                                leds.all_off()
+                                self.last_logged_status = "NO_FACE"
             except Exception as e:
                 print(f"Error in background processing: {e}")
 

@@ -25,10 +25,13 @@ st.markdown(
 )
 
 
+@st.cache_resource
+def get_enroll_models():
+    return create_face_app(), LivenessDetector()
+
 class EnrollVideoProcessor(VideoProcessorBase):
     def __init__(self):
-        self.app = create_face_app()
-        self.liveness_detector = LivenessDetector()
+        self.app, self.liveness_detector = get_enroll_models()
         self.embeddings = []
         self.lock = threading.Lock()
         self.status = "Initializing camera..."

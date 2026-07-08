@@ -11,7 +11,7 @@ from db.employees_db import (  # noqa: E402
     delete_employee,
     update_employee,
 )
-from db.logs_db import get_last_entry  # noqa: E402
+from db.logs_db import get_last_entries  # noqa: E402
 
 st.markdown("<h1 style='text-align: center;'>Employees</h1>", unsafe_allow_html=True)
 init_db()
@@ -124,7 +124,8 @@ def confirm_delete():
 
 if df is not None:
     df.insert(0, "Select", False)
-    df["last_entry"] = df["name"].apply(get_last_entry)
+    last_entries = get_last_entries()
+    df["last_entry"] = df["name"].map(last_entries)
     df["last_entry"] = pd.to_datetime(df["last_entry"], errors="coerce")
     df["last_entry"] = (
         df["last_entry"].dt.tz_localize("UTC").dt.tz_convert("Europe/Moscow")
