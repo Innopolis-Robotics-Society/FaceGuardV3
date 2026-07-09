@@ -8,14 +8,11 @@
 
 **Linked quality requirement tests:** [QRT-001](quality-requirement-tests.md#qrt-001-recognition-pipeline-response-time)
 
-**Linked ADR:** [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md)
+**Linked ADR:** 
+- [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md)
+- [ADR-005: Decouple Frontend and Backend for WebSocket Streaming](architecture/adr/ADR-005-decouple-frontend-backend-for-websocket-streaming.md)
 
-**Current status:** Known gap: backend inference meets the 3.0s target,
-but end-to-end response time (including real camera capture and UI
-rendering on Raspberry Pi 5) has been observed to exceed 3.0 seconds in
-production. QRT-001 currently passes because it measures pipeline logic on
-mocks, not the real hardware path. Tracked for
-Sprint 4: [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171).
+**Current status:** Resolved. The transition to a decoupled React+FastAPI architecture with WebSockets (implemented in [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)) eliminated UI polling latency. End-to-end response time is now consistently ~1.1 seconds.
 
 ---
 

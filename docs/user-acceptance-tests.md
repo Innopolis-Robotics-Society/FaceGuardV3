@@ -286,15 +286,14 @@
 **Steps:**
 1. Scroll down to see the entire table with registered employees
 2. Find the employee whose name or status need to be changed
-3. Select the checkbox next to the employee's name
-4. Click "Edit"
-5. In a dialog, fill in the fields with the new name/status information
-6. Click "Save"
+3. Click the "Edit" (pencil) icon next to the employee's name in the table
+4. In a dialog, fill in the fields with the new name/status information
+5. Click "Save"
 
 **Expected outcome:**
 - All registered employees are displayed on the list
-- When the admin clicks "Edit", a dialog opens pre-filled with the employee's current name and status. If "Temporary" is selected, date and time pickers appear pre-filled with existing dates (or defaults if none)
-- After the admin clicks "Save", the database gets updated, and table refreshes
+- When the admin clicks the Edit icon, a dialog opens pre-filled with the employee's current name and status. If "Temporary" is selected, date and time pickers appear pre-filled with existing dates (or defaults if none)
+- After the admin clicks "Save", the database gets updated, and the table refreshes
 - The table with updated fields is displayed
 
 ---
@@ -323,7 +322,7 @@
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
 - The LEDs lit up yellow, red, and blue (all LEDs) during the registration
 - The system shows a message about duplicate and does not register the employee again
-- The button "Try again" is displayed and after pressing, resets the registration
+- The user can change the name and try saving again without recapturing the face
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)

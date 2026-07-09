@@ -2,7 +2,8 @@
 
 actor User
 participant Camera
-participant "FaceGuard Application" as App
+participant "React Client" as Client
+participant "FastAPI Server" as Server
 participant "Recognition Module" as Recognition
 participant "Recognition Model" as Model
 database Storage
@@ -12,28 +13,30 @@ participant "Door Lock" as Door
 
 == Frame capture ==
 User -> Camera: Approaches camera
-Camera -> Camera: Capture frame
-Camera -> App: Send captured frame
+Camera -> Client: Capture frame (WebRTC)
+Client -> Server: Send frame (WebSocket Base64)
 
 == Face recognition ==
-App -> Recognition: Extract face embedding
+Server -> Recognition: Extract face embedding
 Recognition -> Recognition: Detect face & check liveness
 Recognition -> Model: Generate embedding
 Model --> Recognition: Return embedding
-Recognition --> App: Return embedding & status
+Recognition --> Server: Return embedding & status
 
 == Identity verification ==
-App -> Storage: Request identity match for embedding
+Server -> Storage: Request identity match for embedding
 Storage -> Storage: Fetch all stored embeddings
 Storage -> Storage: Compare via Cosine Similarity
-Storage --> App: Return matching User ID
+Storage --> Server: Return matching User ID
 
 == Access decision ==
-App -> App: Approve access
+Server -> Server: Approve access
 
 == Physical response and logging ==
-App -> Logs: Write successful access log
-App -> LED: Turn on blue LED
-App -> Door: Open door
+Server -> Logs: Write successful access log
+Server -> LED: Turn on blue LED
+Server -> Door: Open door
+Server --> Client: Return Access Granted JSON
+Client -> Client: Update UI (Green Box & Text)
 
 @enduml

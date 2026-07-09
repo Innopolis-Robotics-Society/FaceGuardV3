@@ -58,7 +58,7 @@ import os
 @app.post("/api/login")
 def login(credentials: dict):
     try:
-        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+        secrets_path = os.path.join(os.path.dirname(__file__), "secrets.toml")
         with open(secrets_path, "rb") as f:
             secrets = tomli.load(f)
         

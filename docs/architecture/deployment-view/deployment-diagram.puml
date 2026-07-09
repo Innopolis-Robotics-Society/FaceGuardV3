@@ -10,27 +10,35 @@ node "Admin Workstation" <<Physical Device>> as PC {
 }
 
 node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
-    node "Camera" <<Hardware>> as Cam
+    node "Camera" <<Hardware (USB/CSI)>> as Cam
     node "LEDs & Door Relay" <<Hardware (GPIO)>> as DoorCtrl
 
     node "Docker Engine" as Docker {
-        component "faceguard:latest" <<Docker Container>> as FaceGuardApp {
-            artifact "Streamlit App"
+        component "docker-frontend:latest" <<Docker Container>> as FrontendApp {
+            artifact "React SPA (Vite)"
+        }
+        component "docker-backend:latest" <<Docker Container>> as BackendApp {
+            artifact "FastAPI Server"
             artifact "InsightFace Model"
         }
     }
     
     folder "Local Storage" as Storage {
-        file "secrets.toml" as Secrets
+        folder "backend" as BackendDir {
+            folder ".streamlit" as StreamlitDir {
+                file "secrets.toml" as Secrets
+            }
+        }
         folder "insightface_models" as Models
     }
     
-    FaceGuardApp ..> Secrets : " Mounts (ro)"
-    FaceGuardApp ..> Models : " Mounts"
+    BackendApp ..> StreamlitDir : " Mounts"
+    BackendApp ..> Models : " Mounts"
+    FrontendApp ..> BackendDir : " Mounts (Source Code)"
     
     ' Physical connections inside the Pi
-    FaceGuardApp --> Cam : " Captures Stream (USB/CSI)"
-    FaceGuardApp --> DoorCtrl : " Controls via GPIO"
+    Browser --> Cam : " Uses WebRTC (via Frontend UI)"
+    BackendApp --> DoorCtrl : " Controls via GPIO"
 }
 
 cloud "AWS (us-east-1)" <<Cloud Provider>> as AWS {
@@ -40,7 +48,8 @@ cloud "AWS (us-east-1)" <<Cloud Provider>> as AWS {
 }
 
 ' Network Connections
-Browser --> FaceGuardApp : " HTTP :8501 (Admin UI)"
-FaceGuardApp --> DB : " TCP/IP :5432 (psycopg2)"
+Browser --> FrontendApp : " HTTP :3000 (React UI)"
+Browser --> BackendApp : " HTTP/WS :8000 (API & Video Stream)"
+BackendApp --> DB : " TCP/IP :5432 (psycopg2)"
 
 @enduml

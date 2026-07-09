@@ -7,7 +7,7 @@ import os
 warnings.filterwarnings("ignore", message=".*pandas only supports SQLAlchemy connectable.*")
 
 # Load secrets from toml
-secrets_path = os.path.join(os.path.dirname(__file__), "..", ".streamlit", "secrets.toml")
+secrets_path = os.path.join(os.path.dirname(__file__), "..", "secrets.toml")
 with open(secrets_path, "rb") as f:
     st_secrets = tomli.load(f)
 
