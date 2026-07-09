@@ -1,9 +1,9 @@
 import pandas as pd
-import streamlit as st
 import numpy as np
 import sys
 import os
-from datetime import date, datetime, time
+import time
+from datetime import date, datetime, time as dt_time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from db.connection import get_db_connection
@@ -51,7 +51,7 @@ def _as_access_datetime(value, *, end_of_day=False):
         return value
 
     if isinstance(value, date):
-        boundary = time.max if end_of_day else time.min
+        boundary = dt_time.max if end_of_day else dt_time.min
         return datetime.combine(value, boundary)
 
     raise TypeError(f"Unsupported temporary access value type: {type(value)!r}")
@@ -107,7 +107,7 @@ def init_db():
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                st.error(f"Error: {e}")
+                print(f"Error: {e}")
 
 
 def delete_expired_employees():
@@ -123,13 +123,20 @@ def delete_expired_employees():
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                st.error(f"Error: {e}")
+                print(f"Error: {e}")
 
 
 def load_employees():
     delete_expired_employees()
     with get_db_connection() as connection:
-        query = "SELECT id, name, registration_date, status, start_date, expiration_date FROM employees ORDER BY id;"
+        query = """
+        SELECT e.id, e.name, e.registration_date, e.status, e.start_date, e.expiration_date,
+               MAX(l.time) as last_seen
+        FROM employees e
+        LEFT JOIN logs l ON e.name = l.name AND l.status = 'ACCESS_GRANTED'
+        GROUP BY e.id
+        ORDER BY e.id;
+        """
         df = pd.read_sql(query, connection)
     return df
 
@@ -148,7 +155,7 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                st.error(f"Error: {e}")
+                print(f"Error: {e}")
 
 
 def delete_employee(employee_id):
@@ -159,32 +166,43 @@ def delete_employee(employee_id):
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                st.error(f"Error: {e}")
+                print(f"Error: {e}")
 
 
 def add_employees(name, status, embedding=None, start_date=None, expiration_date=None):
+    if embedding is not None:
+        match = find_closest_embedding(embedding)
+        if match:
+            raise ValueError(f"Face already registered as {match[1]}")
+
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
             if cursor.fetchone() is not None:
-                st.error("Employee with this name already exists")
-                return False
+                raise ValueError("Employee with this name already exists")
 
-            embedding = embedding.tolist() if embedding is not None else None
+            embedding_list = embedding.tolist() if embedding is not None else None
             start_date, expiration_date = _normalize_access_window(
                 status, start_date, expiration_date
             )
 
             cursor.execute(
                 "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
-                (name, status, embedding, start_date, expiration_date),
+                (name, status, embedding_list, start_date, expiration_date),
             )
             connection.commit()
     return True
 
 
-@st.cache_data(ttl=60, show_spinner=False)
+_embedding_cache = None
+_embedding_cache_time = 0
+
 def get_all_embeddings():
+    global _embedding_cache, _embedding_cache_time
+    now = time.time()
+    if _embedding_cache is not None and now - _embedding_cache_time < 60:
+        return _embedding_cache
+
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -192,7 +210,7 @@ def get_all_embeddings():
             )
             rows = cursor.fetchall()
 
-    now = _current_access_time()
+    now_dt = _current_access_time()
 
     embeddings = []
     for row in rows:
@@ -200,10 +218,12 @@ def get_all_embeddings():
         if not embedding:
             continue
         if status == "Temporary":
-            if not _temporary_access_is_active(start_date, expiration_date, now):
+            if not _temporary_access_is_active(start_date, expiration_date, now_dt):
                 continue
         embeddings.append((emp_id, name, np.array(embedding)))
 
+    _embedding_cache = embeddings
+    _embedding_cache_time = time.time()
     return embeddings
 
 

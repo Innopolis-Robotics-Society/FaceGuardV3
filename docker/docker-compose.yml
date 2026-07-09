@@ -1,19 +1,25 @@
 services:
-  faceguard:
+  backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile
     ports:
-      - "8501:8501"
+      - "8000:8000"
     environment:
       TZ: Europe/Moscow
       PGTZ: Europe/Moscow
     volumes:
       - ../backend:/app/backend
       - ../tests:/app/tests
-      - ../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
       - ./insightface_models:/root/.insightface/models
-    tty: true
-    stdin_open: true
-    command: bash -c "streamlit run backend/pages/page_authentication.py"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend/src:/app/src
     restart: unless-stopped

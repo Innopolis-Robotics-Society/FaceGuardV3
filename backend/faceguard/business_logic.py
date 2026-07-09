@@ -1,6 +1,6 @@
 import numpy as np
-from backend.faceguard.interfaces import FaceProviderInterface
-from backend.faceguard.recognize import verify_embedding
+from faceguard.interfaces import FaceProviderInterface
+from faceguard.recognize import verify_embedding
 
 
 def process_access_attempt(
@@ -19,7 +19,7 @@ def process_access_attempt(
             return True, "real", "TestUser", score * 100
         return False, "Access Denied", "Unknown", 0.0
 
-    from backend.db.employees_db import find_closest_embedding
+    from db.employees_db import find_closest_embedding
 
     match = find_closest_embedding(embedding)
     if match:

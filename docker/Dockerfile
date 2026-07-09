@@ -15,9 +15,6 @@ COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt
 
-EXPOSE 8501
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-ENV PYTHONPATH=/app
-
-CMD ["bash"]
+ENV PYTHONPATH=/app/backend
+WORKDIR /app/backend
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,4 +1,3 @@
-import streamlit as st
 from db.connection import get_db_connection
 
 def init_db():
@@ -17,7 +16,7 @@ def init_db():
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                st.error(f"Error: {e}")
+                print(f"Error: {e}")
 
 def add_log(name: str, status: str):
     with get_db_connection() as conn:
