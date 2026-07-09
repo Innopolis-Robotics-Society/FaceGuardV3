@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from backend.faceguard.detect import (
+from faceguard.detect import (
     clamp_bbox,
     crop_face,
     is_good_face,
