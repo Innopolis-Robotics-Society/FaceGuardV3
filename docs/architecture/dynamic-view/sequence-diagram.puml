@@ -9,7 +9,6 @@ participant "Recognition Model" as Model
 database Storage
 participant Logs
 participant "LED Indicator" as LED
-participant "Door Lock" as Door
 
 == Frame capture ==
 User -> Camera: Approaches camera
@@ -35,7 +34,6 @@ Server -> Server: Approve access
 == Physical response and logging ==
 Server -> Logs: Write successful access log
 Server -> LED: Turn on blue LED
-Server -> Door: Open door
 Server --> Client: Return Access Granted JSON
 Client -> Client: Update UI (Green Box & Text)
 

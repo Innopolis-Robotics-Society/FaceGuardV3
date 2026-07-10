@@ -6,7 +6,7 @@ actor Employee
 
 package "Lab Entrance (Edge)" {
     component "Camera" as Cam
-    component "Door & LED Controller" as DoorCtrl <<Planned>>
+    component "LED Controller" as LEDCtrl <<Planned>>
 }
 
 package "Web Application Layer" {
@@ -42,7 +42,7 @@ Backend -( IAPI : " Serves"
 DB - ISQL
 Backend -( ISQL : " Requires (psycopg2)"
     
-DoorCtrl - IHW
+LEDCtrl - IHW
 Backend -( IHW : " Requires (Commands)"
 
 interface "Internal Python Interface" as IFace

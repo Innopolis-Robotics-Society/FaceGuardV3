@@ -11,7 +11,7 @@ node "Admin Workstation" <<Physical Device>> as PC {
 
 node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
     node "Camera" <<Hardware (USB/CSI)>> as Cam
-    node "LEDs & Door Relay" <<Hardware (GPIO)>> as DoorCtrl
+    node "LEDs" <<Hardware (GPIO)>> as LEDCtrl
 
     node "Docker Engine" as Docker {
         component "docker-frontend:latest" <<Docker Container>> as FrontendApp {
@@ -41,7 +41,7 @@ node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
     
     ' Physical connections inside the Pi
     Browser --> Cam : " Uses WebRTC (via Frontend UI)"
-    BackendApp --> DoorCtrl : " Controls via GPIO"
+    BackendApp --> LEDCtrl : " Controls via GPIO"
 }
 
 ' Network Connections

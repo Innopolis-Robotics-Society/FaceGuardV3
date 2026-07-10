@@ -194,7 +194,7 @@ Before recording started, the team requested permission to record the meeting an
 **Customer:** It depends on your tests. If the system needs it, I can provide a set of electronics to set it up.
 
 **(24:03)**  
-**Interviewer:** Okay, we will test that as well. The Raspberry Pi needs a constant power supply, so we will need to figure out how to route the wires to the door.
+**Interviewer:** Okay, we will test that as well. The Raspberry Pi needs a constant power supply, so we will need to figure out how to route the wires to the installation location.
 
 **(24:24)**  
 **Interviewer:** To summarize what has been done: employee registration with both permanent and temporary access, employee removal, a logs page, an employees page, a recognition page, access denial for unregistered users, and recognition of registered employees. This is in addition to the feedback items you sent us.

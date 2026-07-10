@@ -148,6 +148,7 @@ async def websocket_recognize(websocket: WebSocket):
 
     from faceguard.recognize import InsightFaceProvider
     from faceguard.business_logic import process_access_attempt
+
     recognizer = InsightFaceProvider(face_app, liveness_detector)
 
     try:
