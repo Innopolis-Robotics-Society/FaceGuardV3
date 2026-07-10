@@ -84,6 +84,14 @@
 **Comments:** The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Add a field with automatic validation so the admin is able to input only the valid date
+**Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
+
 
 ---
 
