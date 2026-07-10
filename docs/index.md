@@ -21,6 +21,10 @@ cp backend/secrets.toml.example backend/secrets.toml
 Open `backend/secrets.toml` and fill in your credentials:
 - `admin_login` — your admin username
 - `admin_password` — your admin password
+- `host`, `database`, `user`, `password` — your PostgreSQL database connection details
+
+> [!WARNING]
+> Never commit your `backend/secrets.toml` file to version control. It is already included in `.gitignore`.
 
 **3. Make sure Docker is running**
 
