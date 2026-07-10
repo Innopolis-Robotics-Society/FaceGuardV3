@@ -363,8 +363,8 @@
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:**  
-**Resulting PBIs:**  
+**Comments:**  Works.  
+**Resulting PBIs:**  -  
 
 ---
 
@@ -389,8 +389,8 @@
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:**  
-**Resulting PBIs:**  
+**Comments:**  Okay.  
+**Resulting PBIs:**  -  
 
 ---
 
@@ -418,5 +418,5 @@
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:**  
-**Resulting PBIs:**  
+**Comments:**  All good!  
+**Resulting PBIs:**  -  
