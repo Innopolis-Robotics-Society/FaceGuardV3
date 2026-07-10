@@ -30,6 +30,6 @@ jobs:
           bandit -r backend
       - name: Run automated tests (Unit, Integration, QRT) and Line coverage
         env:
-          PYTHONPATH: backend
+          PYTHONPATH: backend:.
         run: |
           pytest tests/ --cov=faceguard --cov-report=term-missing --cov-fail-under=30
