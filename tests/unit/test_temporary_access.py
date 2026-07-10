@@ -1,21 +1,36 @@
+import contextlib
 import importlib
+import pytest
 import sys
 import types
 from datetime import date, datetime
+
+
+class FakePool:
+    def getconn(self):
+        return FakeConnection()
+
+    def putconn(self, conn):
+        pass
 
 
 def load_employees_db(monkeypatch):
     psycopg2 = types.ModuleType("psycopg2")
     psycopg2_extras = types.ModuleType("psycopg2.extras")
     psycopg2.extras = psycopg2_extras
+    psycopg2.pool = types.ModuleType("psycopg2.pool")
+    psycopg2.pool.SimpleConnectionPool = lambda minconn, maxconn, **kwargs: FakePool()
     streamlit = types.SimpleNamespace(secrets={}, error=lambda message: None)
     pandas = types.SimpleNamespace(notna=lambda value: value is not None)
+    tomli = types.ModuleType("tomli")
+    tomli.load = lambda f: {}
     monkeypatch.setitem(sys.modules, "psycopg2", psycopg2)
     monkeypatch.setitem(sys.modules, "psycopg2.extras", psycopg2_extras)
     monkeypatch.setitem(sys.modules, "streamlit", streamlit)
     monkeypatch.setitem(sys.modules, "pandas", pandas)
-    sys.modules.pop("backend.db.employees_db", None)
-    return importlib.import_module("backend.db.employees_db")
+    monkeypatch.setitem(sys.modules, "tomli", tomli)
+    sys.modules.pop("db.employees_db", None)
+    return importlib.import_module("db.employees_db")
 
 
 class FakeCursor:
@@ -34,6 +49,12 @@ class FakeCursor:
         return self._fetchall_result
 
     def close(self):
+        pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
 
@@ -55,6 +76,12 @@ class FakeConnection:
 
     def close(self):
         self.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 # --- Pure helper tests (existing, unchanged) ---
@@ -115,7 +142,12 @@ def test_temporary_access_normalizes_dates_before_database_write(monkeypatch):
 def test_init_db_runs_date_to_timestamp_migration(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
     connection = FakeConnection()
-    monkeypatch.setattr(employees_db, "connect_to_db", lambda: connection)
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
     employees_db.init_db()
     executed_sql = "\n".join(
         query for query, params in connection.cursor_instance.executed
@@ -127,7 +159,6 @@ def test_init_db_runs_date_to_timestamp_migration(monkeypatch):
     assert "INTERVAL '1 microsecond'" in executed_sql
     assert connection.committed is True
     assert connection.rolled_back is False
-    assert connection.closed is True
 
 
 # --- New: tests on the actual public functions, not just the helpers ---
@@ -175,7 +206,7 @@ def test_get_all_embeddings_excludes_expired_and_not_yet_started(monkeypatch):
         ),
     ]
     connection = FakeConnection(fetchall_result=rows)
-    monkeypatch.setattr(employees_db, "connect_to_db", lambda: connection)
+    monkeypatch.setattr(employees_db, "get_db_connection", lambda: connection)
 
     result = employees_db.get_all_embeddings()
     names = [name for _, name, _ in result]
@@ -193,11 +224,15 @@ def test_add_employees_returns_false_and_skips_insert_on_duplicate(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
 
     connection = FakeConnection(fetchone_result=(1,))  # existing employee found
-    monkeypatch.setattr(employees_db, "connect_to_db", lambda: connection)
 
-    result = employees_db.add_employees("Alice", "Permanent")
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
 
-    assert result is False
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+
+    with pytest.raises(ValueError, match="Employee with this name already exists"):
+        employees_db.add_employees("Alice", "Permanent")
     # Only the duplicate-check SELECT should have run, never an INSERT
     executed_queries = [q for q, _ in connection.cursor_instance.executed]
     assert len(executed_queries) == 1
@@ -209,7 +244,12 @@ def test_add_employees_returns_true_and_inserts_on_success(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
 
     connection = FakeConnection(fetchone_result=None)  # no existing employee
-    monkeypatch.setattr(employees_db, "connect_to_db", lambda: connection)
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
 
     result = employees_db.add_employees("Bob", "Permanent")
 

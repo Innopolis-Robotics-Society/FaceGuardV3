@@ -1,5 +1,5 @@
 import numpy as np
-from backend.faceguard.interfaces import FaceProviderInterface
+from faceguard.interfaces import FaceProviderInterface
 
 
 class MockFaceRecognizer(FaceProviderInterface):
