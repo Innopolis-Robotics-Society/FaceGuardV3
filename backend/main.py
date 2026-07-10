@@ -78,13 +78,13 @@ def login(credentials: dict):
 
         valid_user = secrets.get("admin_login", "admin")
         stored_hash = secrets.get("admin_password_hash", "")
-        
+
         provided_username = credentials.get("username")
-        provided_password = credentials.get("password", "").encode('utf-8')
+        provided_password = credentials.get("password", "").encode("utf-8")
 
         if provided_username == valid_user and stored_hash:
             # Check bcrypt hash
-            if bcrypt.checkpw(provided_password, stored_hash.encode('utf-8')):
+            if bcrypt.checkpw(provided_password, stored_hash.encode("utf-8")):
                 return {"status": "ok", "token": "authenticated"}  # nosec B105
     except Exception as e:
         print("Error reading secrets:", e)
