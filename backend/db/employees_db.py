@@ -192,7 +192,7 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
                 (name, status, embedding_list, start_date, expiration_date),
             )
             connection.commit()
-            
+
     global _embedding_cache
     _embedding_cache = None
     return True

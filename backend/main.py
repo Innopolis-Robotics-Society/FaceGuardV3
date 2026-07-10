@@ -9,7 +9,6 @@ import time
 from typing import Optional, List
 
 import os
-import tomli
 import bcrypt
 from datetime import datetime
 from db.employees_db import (
@@ -42,11 +41,13 @@ app.add_middleware(
 face_app = create_face_app()
 liveness_detector = LivenessDetector()
 
+
 @app.on_event("startup")
 def startup_event():
     print("STARTING UP DATABASE INITIALIZATION...")
     import db.employees_db
     import db.logs_db
+
     db.employees_db.init_db()
     db.logs_db.init_db()
     print("DATABASE INITIALIZATION COMPLETE.")
@@ -82,8 +83,9 @@ def delete_emp(emp_id: int):
 def login(credentials: dict):
     try:
         from dotenv import load_dotenv
+
         load_dotenv()
-        
+
         valid_user = os.environ.get("ADMIN_LOGIN", "admin")
         stored_hash = os.environ.get("ADMIN_PASSWORD_HASH", "")
 

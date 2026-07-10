@@ -32,5 +32,5 @@ jobs:
         env:
           PYTHONPATH: backend:.
         run: |
-          cp backend/secrets.toml.example backend/secrets.toml
+          cp backend/.env.example backend/.env
           pytest tests/ --cov=faceguard --cov-report=term-missing --cov-fail-under=30
