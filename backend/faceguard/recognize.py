@@ -14,7 +14,7 @@ DEFAULT_MODEL_NAME = "buffalo_s"
 
 
 class LivenessDetector:
-    def __init__(self, threshold=0.50):
+    def __init__(self, threshold=0.85):
         import onnxruntime
 
         self.threshold = threshold
