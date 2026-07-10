@@ -18,7 +18,7 @@ package "ML & Processing Subsystem" {
     component "Face Recognition Module" as FaceRec <<InsightFace>>
 }
 
-package "Database Server" {
+package "Local Database Container" {
     database "PostgreSQL" as DB
 }
 

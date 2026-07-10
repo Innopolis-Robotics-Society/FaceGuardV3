@@ -40,6 +40,7 @@
 
 ## Sprint 4 (MVP v2) — July 6-12, 2026
 - **Milestone:** TBD
-- **Sprint Goal:** TBD
-- **Focus:** Accessories, recognition accuracy
-- **Items:** TBD
+- **Sprint Goal:** Finalize local deployment stability and improve recognition accuracy.
+- **Focus:** Accessories, recognition accuracy, offline capabilities
+- **Items:**
+  - [#PBI: Migrate from cloud NeonDB to local PostgreSQL Docker database for offline stability](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/196)

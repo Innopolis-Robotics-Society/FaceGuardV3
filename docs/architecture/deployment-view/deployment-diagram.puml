@@ -21,19 +21,22 @@ node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
             artifact "FastAPI Server"
             artifact "InsightFace Model"
         }
+        component "docker-db-1:latest" <<Docker Container>> as DB {
+            artifact "PostgreSQL"
+        }
     }
     
     folder "Local Storage" as Storage {
         folder "backend" as BackendDir {
-            folder ".streamlit" as StreamlitDir {
-                file "secrets.toml" as Secrets
-            }
+            file ".env" as EnvFile
         }
         folder "insightface_models" as Models
+        folder "pgdata" as PgData <<Docker Volume>>
     }
     
-    BackendApp ..> StreamlitDir : " Mounts"
+    BackendApp ..> EnvFile : " Mounts"
     BackendApp ..> Models : " Mounts"
+    DB ..> PgData : " Mounts"
     FrontendApp ..> BackendDir : " Mounts (Source Code)"
     
     ' Physical connections inside the Pi
@@ -41,15 +44,9 @@ node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
     BackendApp --> DoorCtrl : " Controls via GPIO"
 }
 
-cloud "AWS (us-east-1)" <<Cloud Provider>> as AWS {
-    node "Neon.tech" <<Managed DB Service>> as Neon {
-        database "neondb" <<PostgreSQL>> as DB
-    }
-}
-
 ' Network Connections
 Browser --> FrontendApp : " HTTP :3000 (React UI)"
 Browser --> BackendApp : " HTTP/WS :8000 (API & Video Stream)"
-BackendApp --> DB : " TCP/IP :5432 (psycopg2)"
+BackendApp --> DB : " TCP/IP :5432 (Internal Docker Network)"
 
 @enduml

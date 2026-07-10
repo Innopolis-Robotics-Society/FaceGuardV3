@@ -42,6 +42,15 @@ app.add_middleware(
 face_app = create_face_app()
 liveness_detector = LivenessDetector()
 
+@app.on_event("startup")
+def startup_event():
+    print("STARTING UP DATABASE INITIALIZATION...")
+    import db.employees_db
+    import db.logs_db
+    db.employees_db.init_db()
+    db.logs_db.init_db()
+    print("DATABASE INITIALIZATION COMPLETE.")
+
 
 class EmployeeUpdate(BaseModel):
     name: str
@@ -72,12 +81,11 @@ def delete_emp(emp_id: int):
 @app.post("/api/login")
 def login(credentials: dict):
     try:
-        secrets_path = os.path.join(os.path.dirname(__file__), "secrets.toml")
-        with open(secrets_path, "rb") as f:
-            secrets = tomli.load(f)
-
-        valid_user = secrets.get("admin_login", "admin")
-        stored_hash = secrets.get("admin_password_hash", "")
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        valid_user = os.environ.get("ADMIN_LOGIN", "admin")
+        stored_hash = os.environ.get("ADMIN_PASSWORD_HASH", "")
 
         provided_username = credentials.get("username")
         provided_password = credentials.get("password", "").encode("utf-8")

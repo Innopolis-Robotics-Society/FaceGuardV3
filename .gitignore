@@ -22,3 +22,5 @@ env/
 *.swodocker/insightface_models/
 
 docker/insightface_models/buffalo_s/
+.env
+backend/.env

@@ -16,15 +16,15 @@ cd FaceGuardV3
 
 **2. Create your secrets file**
 ```bash
-cp backend/secrets.toml.example backend/secrets.toml
+cp backend/.env.example backend/.env
 ```
-Open `backend/secrets.toml` and fill in your credentials:
-- `admin_login` — your admin username
-- `admin_password_hash` — your admin password hash (generate this by running `python backend/scripts/generate_hash.py`)
-- `host`, `database`, `user`, `password` — your PostgreSQL database connection details
+Open `backend/.env` and fill in your credentials:
+- `ADMIN_LOGIN` — your admin username
+- `ADMIN_PASSWORD_HASH` — your admin password hash (generate this by running `python backend/scripts/generate_hash.py`)
+*(The local PostgreSQL connection details are pre-filled correctly for the Docker setup)*
 
 > [!WARNING]
-> Never commit your `backend/secrets.toml` file to version control. It is already included in `.gitignore`.
+> Never commit your `backend/.env` file to version control. It is already included in `.gitignore`.
 
 **3. Make sure Docker is running**
 

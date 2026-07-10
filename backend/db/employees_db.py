@@ -147,6 +147,8 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
                     (name, status, start_date, expiration_date, int(employee_id)),
                 )
                 connection.commit()
+                global _embedding_cache
+                _embedding_cache = None
             except Exception as e:
                 connection.rollback()
                 print(f"Error: {e}")
@@ -160,6 +162,8 @@ def delete_employee(employee_id):
                     "DELETE FROM employees WHERE id = %s;", (int(employee_id),)
                 )
                 connection.commit()
+                global _embedding_cache
+                _embedding_cache = None
             except Exception as e:
                 connection.rollback()
                 print(f"Error: {e}")
@@ -188,6 +192,9 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
                 (name, status, embedding_list, start_date, expiration_date),
             )
             connection.commit()
+            
+    global _embedding_cache
+    _embedding_cache = None
     return True
 
 

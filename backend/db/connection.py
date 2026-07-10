@@ -1,19 +1,17 @@
 import warnings
-import tomli
 from psycopg2 import pool
 from contextlib import contextmanager
 import os
+from dotenv import load_dotenv
 
 warnings.filterwarnings(
     "ignore", message=".*pandas only supports SQLAlchemy connectable.*"
 )
 
-# Load secrets from toml
-secrets_path = os.path.join(os.path.dirname(__file__), "..", "secrets.toml")
-with open(secrets_path, "rb") as f:
-    st_secrets = tomli.load(f)
+# Load variables from .env if present (e.g., for local script execution)
+load_dotenv()
 
-# Use simple caching pattern instead of st.cache_resource
+# Use simple caching pattern
 _pool = None
 
 
@@ -23,11 +21,10 @@ def get_pool():
         _pool = pool.SimpleConnectionPool(
             1,
             20,
-            host=st_secrets["host"],
-            database=st_secrets["database"],
-            user=st_secrets["user"],
-            password=st_secrets["password"],
-            sslmode="require",
+            host=os.environ.get("DB_HOST", "db"),
+            database=os.environ.get("POSTGRES_DB", "faceguard"),
+            user=os.environ.get("POSTGRES_USER", "postgres"),
+            password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
             options="-c timezone=Europe/Moscow",
         )
     return _pool
