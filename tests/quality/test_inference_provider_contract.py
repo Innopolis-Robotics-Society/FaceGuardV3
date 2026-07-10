@@ -16,7 +16,7 @@ def test_qrt_main_003_provider_can_be_swapped_in_access_flow():
     frame = np.zeros((640, 480, 3), dtype=np.uint8)
     db_vector = np.ones(512, dtype=np.float32)
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=db_vector,
@@ -33,7 +33,7 @@ def test_qrt_main_003_provider_failure_returns_application_rejection():
     frame = np.zeros((640, 480, 3), dtype=np.uint8)
     db_vector = np.ones(512, dtype=np.float32)
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=db_vector,

@@ -16,7 +16,6 @@ from db.employees_db import (
     delete_employee,
     update_employee,
     load_employees,
-    find_closest_embedding,
 )
 from db.logs_db import get_all_logs, add_log
 from faceguard.recognize import (
@@ -146,6 +145,11 @@ async def websocket_recognize(websocket: WebSocket):
     last_logged_status = None
     log_cooldown = 5.0
 
+    from faceguard.recognize import InsightFaceProvider
+    from faceguard.business_logic import process_access_attempt
+
+    recognizer = InsightFaceProvider(face_app, liveness_detector)
+
     try:
         while True:
             data = await websocket.receive_text()
@@ -161,8 +165,8 @@ async def websocket_recognize(websocket: WebSocket):
                 await websocket.send_json({"status": "Error decoding image"})
                 continue
 
-            embedding, face, status_code = extract_embedding_from_frame(
-                face_app, liveness_detector, img
+            access_granted, status_code, name, score, face = process_access_attempt(
+                frame=img, recognizer=recognizer
             )
 
             response = {
@@ -172,22 +176,20 @@ async def websocket_recognize(websocket: WebSocket):
                 "similarity": "-",
             }
 
-            if status_code == "real" and embedding is not None:
+            if status_code in ("real", "Access Denied"):
                 if last_logged_status != "RECOGNIZING":
                     leds.start_recognizing()
                     last_logged_status = "RECOGNIZING"
 
-                match = find_closest_embedding(embedding)
-                if match:
+                if access_granted:
                     unrecognized_frames = 0
                     access_granted_until = current_time + 3.0
-                    emp_id, name, similarity = match
                     response = {
                         "status": "Access Granted",
                         "color": "#00FF00",
                         "name": name,
-                        "similarity": f"{similarity * 100:.1f}%",
-                        "box": face.bbox.tolist(),
+                        "similarity": f"{score:.1f}%",
+                        "box": face.bbox.tolist() if face is not None else None,
                     }
                     if (
                         current_time - last_log_time > log_cooldown
@@ -219,7 +221,7 @@ async def websocket_recognize(websocket: WebSocket):
                                 "color": "#FF0000",
                                 "name": "Unknown",
                                 "similarity": "0%",
-                                "box": face.bbox.tolist(),
+                                "box": face.bbox.tolist() if face is not None else None,
                             }
                             if (
                                 current_time - last_log_time > log_cooldown
@@ -240,7 +242,7 @@ async def websocket_recognize(websocket: WebSocket):
                                 "color": "#FFFF00",
                                 "name": "...",
                                 "similarity": "-",
-                                "box": face.bbox.tolist(),
+                                "box": face.bbox.tolist() if face is not None else None,
                             }
             elif status_code == "spoof":
                 if current_time < access_granted_until:

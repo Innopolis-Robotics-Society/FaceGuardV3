@@ -215,6 +215,7 @@ class InsightFaceProvider(FaceProviderInterface):
         self.liveness_detector = liveness_detector
 
     def extract_embedding(self, frame: np.ndarray):
-        embedding, face = extract_embedding_from_frame(self.app, frame)
-        status_code = "real" if embedding is not None else "no_face"
+        embedding, face, status_code = extract_embedding_from_frame(
+            self.app, self.liveness_detector, frame
+        )
         return embedding, face, status_code

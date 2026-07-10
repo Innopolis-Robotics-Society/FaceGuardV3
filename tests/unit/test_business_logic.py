@@ -24,7 +24,7 @@ def test_process_access_attempt_grants_access_for_matching_embeddings():
         status_code="real",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=saved_embedding,
@@ -46,7 +46,7 @@ def test_process_access_attempt_rejects_non_real_statuses():
             status_code=status_code,
         )
 
-        access_granted, returned_status, name, score = process_access_attempt(
+        access_granted, returned_status, name, score, _ = process_access_attempt(
             frame=frame,
             recognizer=recognizer,
             test_db_vector=saved_embedding,
@@ -66,7 +66,7 @@ def test_process_access_attempt_rejects_low_similarity_embeddings():
         status_code="real",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=saved_embedding,

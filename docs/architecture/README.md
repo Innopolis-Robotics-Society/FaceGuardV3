@@ -19,7 +19,7 @@ Together, these decisions match the current architecture shown below: the system
 [Component Diagram Source (PlantUML)](static-view/component-diagram.puml)
 
 **What the diagram shows:**
-The diagram illustrates the core decoupled client-server architecture of FaceGuardV3. The `React Frontend` handles the presentation layer and WebRTC camera capture. It communicates via REST API and WebSockets with the `FastAPI Backend`. The Backend coordinates face recognition by calling the internal `Face Recognition Module` (based on InsightFace), and handles persistent state by requiring the `SQL Interface` from the `PostgreSQL` database. Finally, it issues commands to the `Door & LED Controller` to manage physical access.
+The diagram illustrates the core decoupled client-server architecture of FaceGuardV3. The `React Frontend` handles the presentation layer and WebRTC camera capture. It communicates via REST API and WebSockets with the `FastAPI Backend`. The Backend coordinates face recognition by calling the internal `Face Recognition Module` (based on InsightFace), and handles persistent state by requiring the `SQL Interface` from the `PostgreSQL` database. Finally, it issues commands to the `LED Controller` to manage physical access indication.
 
 **Coupling and Cohesion:**
 *   **Coupling:** The system exhibits low coupling across all layers. The UI is completely decoupled from the ML logic and database via a clean REST/WebSocket API. By logically separating the `Face Recognition Module` behind an `Internal Python Interface`, the `FastAPI Backend` is decoupled from the specific ML implementation details.
@@ -37,18 +37,18 @@ The decoupled approach simplifies scaling. The extraction of the UI into a React
 [Sequence Diagram Source (PlantUML)](dynamic-view/sequence-diagram.puml)
 
 **What the diagram shows:**
-The diagram maps a successful "happy path" access attempt. The `Camera` is accessed by the `React Client` using WebRTC, which captures and sends the frame via WebSocket to the `FastAPI Server`. The server delegates face extraction to the `Recognition Module` (which interacts with the ML `Model`), and then explicitly calls the `Storage` database layer to find the closest matching identity. Upon a successful match, the server sequentially records the event in `Logs`, turns on the `LED Indicator` (blue), triggers the `Door Lock` to open, and returns the result to the client.
+The diagram maps a successful "happy path" access attempt. The `Camera` is accessed by the `React Client` using WebRTC, which captures and sends the frame via WebSocket to the `FastAPI Server`. The server delegates face extraction to the `Recognition Module` (which interacts with the ML `Model`), and then explicitly calls the `Storage` database layer to find the closest matching identity. Upon a successful match, the server sequentially records the event in `Logs`, turns on the `LED Indicator` (blue), and returns the result to the client.
 
 **What scenario the diagram represents:**
-The diagram represents the primary access control workflow: a user attempting to enter the lab. It traces the sequence of events from the physical approach of the user to the camera, through the extraction and verification of face embeddings, down to the final physical response (opening the door, illuminating LEDs) and database logging.
+The diagram represents the primary access control workflow: a user attempting to enter the lab. It traces the sequence of events from the physical approach of the user to the camera, through the extraction and verification of face embeddings, down to the final physical response (illuminating LEDs) and database logging.
 
 **Why that scenario is important to the product:**
-This scenario is the core value proposition of FaceGuardV3. It demonstrates how the system combines hardware inputs (Camera), heavy machine learning tasks (InsightFace models), and hardware outputs (LEDs, Door Relays) within a single coordinated flow to ensure secure, automated access.
+This scenario is the core value proposition of FaceGuardV3. It demonstrates how the system combines hardware inputs (Camera), heavy machine learning tasks (InsightFace models), and hardware outputs (LEDs) within a single coordinated flow to ensure secure, automated access.
 
 **Architecture decisions, integration boundaries, and quality requirements:**
 *   **Architecture Decisions:** The diagram clarifies the decision to perform face embedding matching *in memory* (the `FastAPI Server` requests the database layer to fetch all known embeddings and compare them internally via cosine similarity), rather than performing vector similarity search directly inside the database using extensions.
-*   **Integration Boundaries:** It highlights the critical boundaries between the presentation layer (`React Client`), the software backend (`FastAPI Server`), and the physical edge hardware (Camera, LEDs, Door), showing exactly when and where the software triggers physical state changes.
-*   **Quality Requirements:** It helps reason about *Performance* (latency from frame capture to door opening depends heavily on the ML model execution, database retrieval times, and WebSocket transmission) and *Security/Reliability* (ensuring the door only opens and logs are written strictly after a successful database match).
+*   **Integration Boundaries:** It highlights the critical boundaries between the presentation layer (`React Client`), the software backend (`FastAPI Server`), and the physical edge hardware (Camera, LEDs), showing exactly when and where the software triggers physical state changes.
+*   **Quality Requirements:** It helps reason about *Performance* (latency from frame capture to LED illumination depends heavily on the ML model execution, database retrieval times, and WebSocket transmission) and *Security/Reliability* (ensuring the LED only signals success and logs are written strictly after a successful database match).
 
 
 ## Deployment View
@@ -56,7 +56,7 @@ This scenario is the core value proposition of FaceGuardV3. It demonstrates how 
 [Deployment Diagram Source (PlantUML)](deployment-view/deployment-diagram.puml)
 
 **What the diagram shows:**
-The deployment view illustrates how the FaceGuardV3 system is deployed at the edge. The application runs as separate Docker containers (`docker-frontend:latest`, `docker-backend:latest`, and `docker-db-1`) orchestrated by `docker-compose` on a `Raspberry Pi` located at the lab entrance. The hardware peripherals (LEDs, Door Relay) are physically connected to this Raspberry Pi via GPIO pins. The frontend container exposes port 3000 for the `Admin Workstation` to view the UI, while the backend exposes port 8000 for API requests. State management is handled locally via a dedicated PostgreSQL container (`docker-db-1`) using a persistent Docker volume (`pgdata`).
+The deployment view illustrates how the FaceGuardV3 system is deployed at the edge. The application runs as separate Docker containers (`docker-frontend:latest`, `docker-backend:latest`, and `docker-db-1`) orchestrated by `docker-compose` on a `Raspberry Pi` located at the lab entrance. The hardware peripherals (LEDs) are physically connected to this Raspberry Pi via GPIO pins. The frontend container exposes port 3000 for the `Admin Workstation` to view the UI, while the backend exposes port 8000 for API requests. State management is handled locally via a dedicated PostgreSQL container (`docker-db-1`) using a persistent Docker volume (`pgdata`).
 
 **Why the selected deployment model was chosen:**
 *   **Docker Containerization:** Machine learning libraries (like OpenCV and InsightFace) often have complex system-level dependencies. Packaging the application in Docker ensures that it runs reliably and reproducibly on any host machine without dependency conflicts. Volume mounts are used to persist `.env` and downloaded `insightface_models`, preventing the need to re-download heavy models on every container restart.

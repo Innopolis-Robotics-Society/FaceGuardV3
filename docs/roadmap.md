@@ -41,9 +41,8 @@
 ## Sprint 4 (MVP v3) — July 6-12, 2026
 - **Milestone:** [Sprint 4](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/4)  
 - **Sprint Goal:** Deploy a stable, containerized, and secure Trial Release of the system that reliably opens the physical door in case of successful face recognition even if a registered employee wears accessories while maintaining background processing efficiency, optimized system response time, and protected administrative data access.   
-- **Focus:** Accessories, recognition accuracy, system speedup, door connection, system security  
+- **Focus:** Accessories, recognition accuracy, system speedup, system security  
 - **Items:**
-  - [#PBI: Connect the system to the door](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/194),
   - [#PBI: Speed up the system response](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171),
   - [#US-005: Security](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/44),
   - [#US-002: Face Recognition](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/41),

@@ -8,3 +8,11 @@ bandit
 flake8
 black
 python-dotenv
+fastapi
+uvicorn
+psycopg2-binary
+pandas
+pydantic
+websockets
+python-multipart
+bcrypt
