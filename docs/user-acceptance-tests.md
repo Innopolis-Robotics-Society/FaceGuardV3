@@ -335,33 +335,7 @@
 
 ---
 
-## UAT-010: Door access control integration  
-
-**Status:** Active  
-**User goal:** Verify that the system physically controls door access by opening the door for recognized employees and keeping it closed for unauthorized ones  
-
-**Preconditions:**  
-- The system is active, powered on    
-- A person approaches the camera  
-
-**Steps:**  
-1. Place employee with clearly visible face in front of the camera in its view  
-2. Capture employee's face  
-
-**Expected outcome:**  
-- Door unlocks automatically for registered employee within 2 seconds of recognition  
-- Door remains locked for unregistered person  
----
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-  -)  
-
-**Result:** Passed or Failed  
-**Executed by:** Customer (role: admin)  
-**Comments:**    
-**Resulting PBIs:**  
-
----
-
-## UAT-011: Face recognition with accessories  
+## UAT-010: Face recognition with accessories  
 
 **Status:** Active  
 **User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats, medical masks)  
@@ -394,7 +368,7 @@
 
 ---
 
-## UAT-012: Admin authentication  
+## UAT-011: Admin authentication  
 
 **Status:** Active  
 **User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.  
@@ -420,7 +394,7 @@
 
 ---
 
-## UAT-013: Background recognition  
+## UAT-012: Background recognition  
 
 **Status:** Active  
 **User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.  
