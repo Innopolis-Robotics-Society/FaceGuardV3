@@ -7,6 +7,8 @@ import base64
 import cv2
 import time
 from typing import Optional, List
+import asyncio
+from fastapi.concurrency import run_in_threadpool
 
 import os
 import bcrypt
@@ -134,6 +136,19 @@ def get_logs(start_date: Optional[str] = None, end_date: Optional[str] = None):
     return get_all_logs(sd, ed)
 
 
+async def drain_websocket(websocket: WebSocket) -> str:
+    # Read the first available message
+    data = await websocket.receive_text()
+    # Keep reading and discarding until the queue is empty
+    while True:
+        try:
+            # timeout=0.001 means it returns almost instantly if queue is empty
+            next_data = await asyncio.wait_for(websocket.receive_text(), timeout=0.001)
+            data = next_data
+        except asyncio.TimeoutError:
+            break
+    return data
+
 @app.websocket("/ws/recognize")
 async def websocket_recognize(websocket: WebSocket):
     await websocket.accept()
@@ -152,7 +167,7 @@ async def websocket_recognize(websocket: WebSocket):
 
     try:
         while True:
-            data = await websocket.receive_text()
+            data = await drain_websocket(websocket)
             current_time = time.time()
 
             if "," in data:
@@ -165,8 +180,8 @@ async def websocket_recognize(websocket: WebSocket):
                 await websocket.send_json({"status": "Error decoding image"})
                 continue
 
-            access_granted, status_code, name, score, face = process_access_attempt(
-                frame=img, recognizer=recognizer
+            access_granted, status_code, name, score, face = await run_in_threadpool(
+                process_access_attempt, frame=img, recognizer=recognizer
             )
 
             response = {
@@ -303,7 +318,7 @@ async def websocket_enroll(websocket: WebSocket):
 
     try:
         while True:
-            data = await websocket.receive_text()
+            data = await drain_websocket(websocket)
 
             if len(embeddings) >= 30:
                 final_embedding = average_embeddings(embeddings)
@@ -321,15 +336,9 @@ async def websocket_enroll(websocket: WebSocket):
             if img is None:
                 continue
 
-            embedding, face, status_code = extract_embedding_from_frame(
-                face_app, liveness_detector, img
+            embedding, face, status_code = await run_in_threadpool(
+                extract_embedding_from_frame, face_app, liveness_detector, img
             )
-            if status_code == "spoof":
-                from faceguard.recognize import get_face_embedding
-
-                embedding = get_face_embedding(face)
-                status_code = "real"
-
             if status_code == "real" and embedding is not None:
                 embeddings.append(embedding)
                 leds.registration_active()
@@ -338,6 +347,15 @@ async def websocket_enroll(websocket: WebSocket):
                         "status": f"Collecting: {len(embeddings)}/30",
                         "color": "#00FF00",
                         "box": face.bbox.tolist(),
+                        "progress": len(embeddings) / 30.0,
+                    }
+                )
+            elif status_code == "spoof":
+                await websocket.send_json(
+                    {
+                        "status": "SPOOF DETECTED",
+                        "color": "#FF0000",
+                        "box": face.bbox.tolist() if face is not None else None,
                         "progress": len(embeddings) / 30.0,
                     }
                 )
