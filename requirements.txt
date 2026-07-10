@@ -12,3 +12,4 @@ uvicorn[standard]
 python-multipart
 websockets
 tomli
+bcrypt

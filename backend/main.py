@@ -10,6 +10,7 @@ from typing import Optional, List
 
 import os
 import tomli
+import bcrypt
 from datetime import datetime
 from db.employees_db import (
     add_employees,
@@ -76,13 +77,15 @@ def login(credentials: dict):
             secrets = tomli.load(f)
 
         valid_user = secrets.get("admin_login", "admin")
-        valid_pass = secrets.get("admin_password", "admin")
+        stored_hash = secrets.get("admin_password_hash", "")
+        
+        provided_username = credentials.get("username")
+        provided_password = credentials.get("password", "").encode('utf-8')
 
-        if (
-            credentials.get("username") == valid_user
-            and credentials.get("password") == valid_pass
-        ):
-            return {"status": "ok", "token": "authenticated"}  # nosec B105
+        if provided_username == valid_user and stored_hash:
+            # Check bcrypt hash
+            if bcrypt.checkpw(provided_password, stored_hash.encode('utf-8')):
+                return {"status": "ok", "token": "authenticated"}  # nosec B105
     except Exception as e:
         print("Error reading secrets:", e)
 
