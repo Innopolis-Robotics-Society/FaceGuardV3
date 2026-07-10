@@ -8,7 +8,6 @@ from datetime import date, datetime, time as dt_time
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from db.connection import get_db_connection
 
-
 TEMPORARY_ACCESS_DATETIME_MIGRATION = """
 DO $$
 BEGIN
@@ -82,9 +81,6 @@ def _temporary_access_is_active(start_date, expiration_date, now=None):
         return False
 
     return True
-
-
-
 
 
 def init_db():
@@ -162,7 +158,9 @@ def delete_employee(employee_id):
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             try:
-                cursor.execute("DELETE FROM employees WHERE id = %s;", (int(employee_id),))
+                cursor.execute(
+                    "DELETE FROM employees WHERE id = %s;", (int(employee_id),)
+                )
                 connection.commit()
             except Exception as e:
                 connection.rollback()
@@ -196,6 +194,7 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
 
 _embedding_cache = None
 _embedding_cache_time = 0
+
 
 def get_all_embeddings():
     global _embedding_cache, _embedding_cache_time

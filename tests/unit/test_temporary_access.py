@@ -7,8 +7,12 @@ from datetime import date, datetime
 
 
 class FakePool:
-    def getconn(self): return FakeConnection()
-    def putconn(self, conn): pass
+    def getconn(self):
+        return FakeConnection()
+
+    def putconn(self, conn):
+        pass
+
 
 def load_employees_db(monkeypatch):
     psycopg2 = types.ModuleType("psycopg2")
@@ -138,9 +142,11 @@ def test_temporary_access_normalizes_dates_before_database_write(monkeypatch):
 def test_init_db_runs_date_to_timestamp_migration(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
     connection = FakeConnection()
+
     @contextlib.contextmanager
     def mock_get_conn():
         yield connection
+
     monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
     employees_db.init_db()
     executed_sql = "\n".join(
@@ -218,9 +224,11 @@ def test_add_employees_returns_false_and_skips_insert_on_duplicate(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
 
     connection = FakeConnection(fetchone_result=(1,))  # existing employee found
+
     @contextlib.contextmanager
     def mock_get_conn():
         yield connection
+
     monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
 
     with pytest.raises(ValueError, match="Employee with this name already exists"):
@@ -236,9 +244,11 @@ def test_add_employees_returns_true_and_inserts_on_success(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
 
     connection = FakeConnection(fetchone_result=None)  # no existing employee
+
     @contextlib.contextmanager
     def mock_get_conn():
         yield connection
+
     monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
 
     result = employees_db.add_employees("Bob", "Permanent")

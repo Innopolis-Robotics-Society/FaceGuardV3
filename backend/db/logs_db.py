@@ -1,5 +1,6 @@
 from db.connection import get_db_connection
 
+
 def init_db():
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
@@ -17,6 +18,7 @@ def init_db():
             except Exception as e:
                 connection.rollback()
                 print(f"Error: {e}")
+
 
 def add_log(name: str, status: str):
     with get_db_connection() as conn:
@@ -67,11 +69,10 @@ def get_last_entry(employee_name):
         return row[0]
     return None
 
+
 def get_last_entries():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT name, MAX(time) FROM logs GROUP BY name"
-            )
+            cur.execute("SELECT name, MAX(time) FROM logs GROUP BY name")
             rows = cur.fetchall()
     return {row[0]: row[1] for row in rows}
