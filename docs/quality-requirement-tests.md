@@ -113,3 +113,43 @@ checked for the expected substrings, not executed against a real database).
 **CI Job**: `pytest tests/` runs automatically on every PR and push to main
 
 **Status**: Implemented
+
+## QRT-005: Duplicate Registration Prevention
+
+**Linked quality requirement**: `QR-005`
+
+**Verification method**: Automated integration test using mock embeddings.
+
+**Test data, setup, or environment**: Standard CI test environment. The test intercepts the embedding comparison logic when `register_employee` is called.
+
+**Automated command or CI check**: `pytest tests/quality/test_duplicate_registration.py`
+
+**Expected measurable result**: The `register_employee` function performs an initial lookup of the extracted embedding against the existing database. If a match exceeds the similarity threshold, the function returns an error (e.g., `409 Conflict`) and does not commit the new entry to the database.
+
+**Evidence link**: Latest protected default-branch CI run.
+
+**Limitation**: Uses mock embeddings rather than capturing multiple physical frames.
+
+**CI Job**: `pytest tests/quality/` runs automatically on every PR and push to main
+
+**Status**: Planned
+
+## QRT-006: Hardware Feedback Latency
+
+**Linked quality requirement**: `QR-006`
+
+**Verification method**: Automated CI performance test.
+
+**Test data, setup, or environment**: Standard CI/Docker environment with mocked `gpiozero.LED` endpoints.
+
+**Automated command or CI check**: `pytest tests/quality/test_hardware_latency.py`
+
+**Expected measurable result**: The test verifies that invoking the `set_access_granted_led()` or `set_access_denied_led()` function executes and returns control to the caller in `<= 0.05` seconds, verifying that the actual LED duration (`sleep(5)`) is successfully offloaded to a background task or `asyncio.sleep()`.
+
+**Evidence link**: Latest protected default-branch CI run.
+
+**Limitation**: Only tests the Python-level async task overhead, not the physical GPIO hardware actuation speed on actual Raspberry Pi pins.
+
+**CI Job**: `pytest tests/quality/` runs automatically on every PR and push to main
+
+**Status**: Planned
