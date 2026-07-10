@@ -45,7 +45,6 @@
 - **Items:**
   - [#PBI: Connect the system to the door](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/194),
   - [#PBI: Speed up the system response](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171),
-  - [#PBI: Set a permanent login and password for the admin](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/195),
   - [#US-005: Security](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/44),
   - [#US-002: Face Recognition](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/41),
   - [#PBI: Set up a local database](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/196),
