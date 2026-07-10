@@ -11,19 +11,19 @@ def process_access_attempt(
     embedding, meta, status_code = recognizer.extract_embedding(frame)
 
     if status_code != "real" or embedding is None:
-        return False, status_code, "Unknown", 0.0
+        return False, status_code, "Unknown", 0.0, meta
 
     if test_db_vector is not None:
         verified, score = verify_embedding(embedding, test_db_vector)
         if verified:
-            return True, "real", "TestUser", score * 100
-        return False, "Access Denied", "Unknown", 0.0
+            return True, "real", "TestUser", score * 100, meta
+        return False, "Access Denied", "Unknown", 0.0, meta
 
     from db.employees_db import find_closest_embedding
 
     match = find_closest_embedding(embedding)
     if match:
         emp_id, name, similarity = match
-        return True, "real", name, similarity * 100
+        return True, "real", name, similarity * 100, meta
 
-    return False, "Access Denied", "Unknown", 0.0
+    return False, "Access Denied", "Unknown", 0.0, meta
