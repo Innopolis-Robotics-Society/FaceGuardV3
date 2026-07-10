@@ -99,7 +99,7 @@ def login(credentials: dict):
     except Exception as e:
         print("Error reading secrets:", e)
 
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    raise HTTPException(status_code=401, detail="Invalid login or password")
 
 
 @app.put("/api/employees/{emp_id}")
