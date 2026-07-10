@@ -89,7 +89,7 @@
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:** Add a field with automatic validation so the admin is able to input only the valid date
+**Comments:** Add a field with automatic validation so the admin is able to input only the valid date.  
 **Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
 
 
