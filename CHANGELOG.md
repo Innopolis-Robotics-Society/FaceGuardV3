@@ -14,7 +14,7 @@ All notable changes to FaceGuard will be documented in this file.
 - Extensive customer handover documentation and contributor guides
 
 ### Changed
-- Ssped up system response time by eliminating Streamlit UI polling bottlenecks
+- Sped up system response time by eliminating Streamlit UI polling bottlenecks
 - Improved local database setup for enhanced offline reliability
 
 ### Fixed
@@ -72,4 +72,4 @@ All notable changes to FaceGuard will be documented in this file.
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
 [2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
-[2.2.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.2.0...v2.1.0  
+[3.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.1.0...v3.0.0

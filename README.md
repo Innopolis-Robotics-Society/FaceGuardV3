@@ -1,14 +1,29 @@
 # FaceGuardV3
 
-FaceGuardV3 is a robust, decoupled face recognition access control system designed for the university laboratory. 
-It uses a React frontend, a FastAPI backend, an InsightFace recognition model, and integrates with Raspberry Pi GPIO for physical access control feedback (LEDs).
+Face recognition access control system for the university laboratory.
+The system uses a React frontend, a FastAPI backend, InsightFace for recognition, and Raspberry Pi GPIO for physical door control and LED feedback.
+
+## Product Access
+
+The system is deployed on a Raspberry Pi 5 with a connected USB webcam and electronic door lock.
+Access the frontend at the Pi's address on port `3000` (e.g. `http://<raspberry-pi-ip>:3000`).
+
+For local development or evaluation, build and run via Docker (see below).
 
 ## Key Links
 
-- **[Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)**: Comprehensive documentation including architecture, development process, and quality testing.
-- **[Customer Handover Guide](docs/customer-handover.md)**: Transition details, known limitations, and operational guidance for the customer.
-- **[Contribution Guidelines](CONTRIBUTING.md)**: Workflow for contributing to this project.
-- **[Agent Guidance](AGENTS.md)**: Guidance for AI agents and automation bots operating in this repository.
+- **[Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)** — browsable architecture, process, quality, and testing docs
+- **[Customer Handover Guide](docs/customer-handover.md)** — transition details, known limitations, and operational guidance
+- **[Contribution Guidelines](CONTRIBUTING.md)** — workflow for human contributors
+- **[Agent Guidance](AGENTS.md)** — setup and workflow guidance for AI coding agents
+
+### Maintained Documentation
+
+- [Roadmap](docs/roadmap.md) — Sprint-by-Sprint delivery plan
+- [Architecture](docs/architecture/README.md) — static, dynamic, and deployment views with ADRs
+- [Testing Status](docs/testing.md) — coverage, QRTs, CI gates, and QA checks
+- [Quality Requirements](docs/quality-requirements.md) — measurable non-functional requirements
+- [User Acceptance Tests](docs/user-acceptance-tests.md) — maintained UAT scenarios
 
 ## Setup Instructions
 
