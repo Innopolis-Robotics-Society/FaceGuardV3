@@ -6,7 +6,7 @@ import time
 from datetime import date, datetime, time as dt_time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from db.connection import get_db_connection
+from db.connection import get_db_connection  # noqa: E402
 
 TEMPORARY_ACCESS_DATETIME_MIGRATION = """
 DO $$
@@ -185,7 +185,8 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
             )
 
             cursor.execute(
-                "INSERT INTO employees (name, status, embedding, start_date, expiration_date) VALUES (%s, %s, %s, %s, %s);",
+                "INSERT INTO employees (name, status, embedding, start_date, expiration_date) "
+                "VALUES (%s, %s, %s, %s, %s);",
                 (name, status, embedding_list, start_date, expiration_date),
             )
             connection.commit()
@@ -205,7 +206,8 @@ def get_all_embeddings():
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, name, embedding, status, start_date, expiration_date FROM employees WHERE embedding IS NOT NULL"
+                "SELECT id, name, embedding, status, start_date, expiration_date "
+                "FROM employees WHERE embedding IS NOT NULL"
             )
             rows = cursor.fetchall()
 

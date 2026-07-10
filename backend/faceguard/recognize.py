@@ -7,7 +7,7 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 import numpy as np  # noqa: E402
 from faceguard.interfaces import FaceProviderInterface  # noqa: E402
-import logging  # noqa: E402
+
 from faceguard.detect import select_closest_face, is_good_face  # noqa: E402
 
 DEFAULT_MODEL_NAME = "buffalo_s"

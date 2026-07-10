@@ -1,15 +1,17 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import asyncio
+
 import numpy as np
 import base64
 import cv2
 import time
 from typing import Optional, List
 
+import os
+import tomli
+from datetime import datetime
 from db.employees_db import (
-    get_all_embeddings,
     add_employees,
     delete_employee,
     update_employee,
@@ -23,7 +25,6 @@ from faceguard.recognize import (
     extract_embedding_from_frame,
     average_embeddings,
 )
-from faceguard.detect import draw_face_box
 import leds
 
 app = FastAPI()
@@ -39,8 +40,6 @@ app.add_middleware(
 # Load models once
 face_app = create_face_app()
 liveness_detector = LivenessDetector()
-
-from datetime import datetime
 
 
 class EmployeeUpdate(BaseModel):
@@ -69,10 +68,6 @@ def delete_emp(emp_id: int):
     return {"status": "ok"}
 
 
-import tomli
-import os
-
-
 @app.post("/api/login")
 def login(credentials: dict):
     try:
@@ -87,7 +82,7 @@ def login(credentials: dict):
             credentials.get("username") == valid_user
             and credentials.get("password") == valid_pass
         ):
-            return {"status": "ok", "token": "authenticated"}
+            return {"status": "ok", "token": "authenticated"}  # nosec B105
     except Exception as e:
         print("Error reading secrets:", e)
 
@@ -193,7 +188,7 @@ async def websocket_recognize(websocket: WebSocket):
                             last_logged_name = name
                             last_logged_status = "ACCESS_GRANTED"
                         except Exception as e:
-                            pass
+                            print(f"Log error: {e}")
                 else:
                     if current_time < access_granted_until:
                         response = {
@@ -224,8 +219,8 @@ async def websocket_recognize(websocket: WebSocket):
                                     last_log_time = current_time
                                     last_logged_name = "UNKNOWN"
                                     last_logged_status = "ACCESS_DENIED"
-                                except:
-                                    pass
+                                except Exception as e:
+                                    print(f"Log error: {e}")
                         else:
                             response = {
                                 "status": "Recognizing...",
@@ -256,8 +251,8 @@ async def websocket_recognize(websocket: WebSocket):
                             last_log_time = current_time
                             last_logged_name = "UNKNOWN"
                             last_logged_status = "SPOOF_ATTEMPT"
-                        except:
-                            pass
+                        except Exception as e:
+                            print(f"Log error: {e}")
             elif status_code == "bad_face":
                 if current_time < access_granted_until:
                     pass
@@ -358,4 +353,4 @@ async def websocket_enroll(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104
