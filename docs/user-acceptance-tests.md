@@ -62,7 +62,7 @@
 
 **Expected outcome:**
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
-- The LEDs lit up yellow, red, and blue (all LEDs) during the registration and 3 seconds after its
+- The LEDs lit up yellow, red, and blue (all LEDs) during the registration and 3 seconds after it
 - The employee was registered
 - The system recognizes them during the allowed period
 - The name, registration date, the type of the access (status), start date and time, and expiration date and time are displayed in the list of all registered employees on the page 'Employees'
@@ -83,6 +83,14 @@
 **Executed by:** Customer (role: admin)   
 **Comments:** The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
+
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Add a field with automatic validation so the admin is able to input only the valid date.  
+**Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
 
 
 ---
@@ -333,3 +341,89 @@
 **Resulting PBIs:**  -  
 
 ---
+
+## UAT-010: Face recognition with accessories  
+
+**Status:** Active  
+**User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats, medical masks)  
+
+**Preconditions:**  
+- The system is active, powered on  
+- A registered employee approaches the camera  
+
+**Steps:**  
+1. Place employee with accessories with clearly visible face in front of the camera in its view  
+2. Capture employee's face  
+
+**Expected outcome:**  
+- If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds  
+- During recognition, the LEDs glow yellow; after successful recognition, the LEDs stop blinking yellow and turn solid blue for 5 seconds    
+- If there's no one in front of the camera, nothing lights up  
+- There is no test section on the recognition page  
+- The system recognized the employee within 3 seconds automatically    
+- The system grants the access  
+- The system logs the attempt  
+- Recognition success rate ≥95% with common accessories  
+
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  Works.  
+**Resulting PBIs:**  -  
+
+---
+
+## UAT-011: Admin authentication  
+
+**Status:** Active  
+**User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.  
+
+**Preconditions:**  
+- The system is active, powered on  
+- The admin is on the authentication page  
+
+**Steps:**  
+1. Fill in the login field with the correct login  
+2. Fill in the password field with the correct password  
+
+**Expected outcome:**  
+- If the login and password are correct, the system successfully logs in and the admin is switched to the employees page    
+- If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page  
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  Okay.  
+**Resulting PBIs:**  -  
+
+---
+
+## UAT-012: Background recognition  
+
+**Status:** Active  
+**User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.  
+
+**Preconditions:**  
+- The system is active, powered on    
+- The admin is on the page with recognition  
+- An employee approaches the camera   
+
+**Steps:**  
+1. While the admin is on another page, such as 'Employees' or 'Access Logs History', have an employee stand in front of the camera in its view with clearly visible face  
+
+**Expected outcome:**  
+- The recognition runs without the admin needing to open or stay on the recognition page  
+- The admin can navigate between pages and perform other actions while recognition is in progress   
+- The recognition attempt is logged and the result is visible on the 'Access Logs History' page after it completes  
+- The system handles this recognition attempt together with any other admin action without errors or delay to either task  
+
+---
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  All good!  
+**Resulting PBIs:**  -  
