@@ -149,6 +149,7 @@ async def drain_websocket(websocket: WebSocket) -> str:
             break
     return data
 
+
 @app.websocket("/ws/recognize")
 async def websocket_recognize(websocket: WebSocket):
     await websocket.accept()
