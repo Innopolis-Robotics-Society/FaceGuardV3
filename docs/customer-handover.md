@@ -4,9 +4,9 @@ This document is the authoritative handover artifact for MVP v3. It defines the 
 
 ## 1. Product Status and Handover Scope
 
-**Product Overview:** FaceGuardV3 is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time, automatically trigger door unlocking mechanisms, and log all access attempts.
+**Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time, automatically trigger door unlocking mechanisms, and log all access attempts.
 
-**Scope of this release:** This handover covers the MVP v3 release. It includes background video processing, physical door and LED integration via GPIO, duplicate registration prevention, and a fully persistent local database.
+**Scope of this release:** This handover covers the MVP v3 release. It includes background video processing, fully persistent local database, permormance improvement, recognition with acessories.
 
 ## 2. Handover Status and Ownership
 
@@ -61,7 +61,7 @@ Ensure the `.env` file has restricted read permissions on the Raspberry Pi so th
 
 ## 4. Setup, Deployment, and Verification
 
-FaceGuardV3 relies entirely on Docker, simplifying the deployment process.
+The system relies entirely on Docker, simplifying the deployment process.
 
 ### Initial Setup on Raspberry Pi 5
 
@@ -108,10 +108,9 @@ For normal customer use, operation, and troubleshooting, refer to:
 - Fix occasional page freeze during recognition
 - Add form validation for temporary access dates, prevent past dates
 - Continue performance optimization for Raspberry Pi
-- Add a dedicated documentation page with function descriptions (nice to have)
+- Add a dedicated documentation page with function descriptions
 
 **Known limitations and customer-side responsibilities:**
 
-- **Physical door wiring:** the software fully supports and sends the automated door unlocking signal via Raspberry Pi GPIO 14. The customer must physically wire the laboratory's electronic door relay to this pin.
 - **Lighting sensitivity:** the recognition model's accuracy degrades in low lighting. The deployment area must be well lit.
 - **Thermal management:** running the system continuously on the Raspberry Pi without active cooling may cause thermal throttling.
