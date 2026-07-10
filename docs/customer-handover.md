@@ -1,6 +1,6 @@
 # Customer Handover and Operations Guide
 
-This document is the authoritative handover artifact for FaceGuardV3 (`MVP v3`). It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
+This document is the authoritative handover artifact for MVP v3. It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
 
 ## 1. Product Status and Handover Scope
 
