@@ -127,10 +127,8 @@ def load_employees():
     with get_db_connection() as connection:
         query = """
         SELECT e.id, e.name, e.registration_date, e.status, e.start_date, e.expiration_date,
-               MAX(l.time) as last_seen
+               (SELECT time FROM logs WHERE name = e.name ORDER BY time DESC LIMIT 1) as last_seen
         FROM employees e
-        LEFT JOIN logs l ON e.name = l.name AND l.status = 'ACCESS_GRANTED'
-        GROUP BY e.id
         ORDER BY e.id;
         """
         df = pd.read_sql(query, connection)

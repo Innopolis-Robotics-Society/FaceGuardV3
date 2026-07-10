@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { useCamera } from '../context/CameraContext';
 
 interface Log {
   id: number;
@@ -11,10 +12,14 @@ interface Log {
 export default function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
+  const { recognitionData, isRecognizing } = useCamera();
   
   const [search, setSearch] = useState('');
   const [sortCol, setSortCol] = useState<keyof Log>('time');
   const [sortDesc, setSortDesc] = useState(true);
+
+  // We use a ref to prevent adding duplicate logs within a cooldown period
+  const lastLogRef = useRef<{ name: string, status: string, time: number } | null>(null);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/logs')
@@ -24,6 +29,54 @@ export default function Logs() {
         setLoading(false);
       });
   }, []);
+
+  // Real-time logs updates
+  useEffect(() => {
+    if (!isRecognizing) return;
+    
+    let dbStatus = '';
+    let dbName = recognitionData.name || 'Unknown';
+    
+    if (recognitionData.status === 'Access Granted') dbStatus = 'ACCESS_GRANTED';
+    else if (recognitionData.status === 'Access Denied') {
+      dbStatus = 'ACCESS_DENIED';
+      dbName = 'UNKNOWN';
+    }
+    else if (recognitionData.status === 'SPOOF DETECTED') {
+      dbStatus = 'SPOOF_ATTEMPT';
+      dbName = 'UNKNOWN';
+    }
+    
+    if (dbStatus) {
+      const now = Date.now();
+      const cooldown = 60000; // 1 minute, matching backend DB restriction
+      
+      const isDuplicate = lastLogRef.current && 
+                          lastLogRef.current.name === dbName && 
+                          lastLogRef.current.status === dbStatus && 
+                          (now - lastLogRef.current.time) < cooldown;
+                          
+      if (!isDuplicate) {
+        lastLogRef.current = { name: dbName, status: dbStatus, time: now };
+        
+        // Use a fake ID for UI rendering. A negative number ensures it doesn't collide with DB IDs until refresh
+        const newLog: Log = {
+          id: -now, 
+          name: dbName,
+          status: dbStatus,
+          time: new Date().toISOString()
+        };
+        
+        setLogs(prev => {
+          // Check if already in the list to be safe (in case of strict mode double execution)
+          if (prev.length > 0 && prev[0].name === newLog.name && prev[0].status === newLog.status && (new Date(prev[0].time).getTime() > now - 2000)) {
+            return prev;
+          }
+          return [newLog, ...prev];
+        });
+      }
+    }
+  }, [recognitionData, isRecognizing]);
 
   const getStatusBadge = (status: string) => {
     if (status === 'ACCESS_GRANTED') return 'badge success';

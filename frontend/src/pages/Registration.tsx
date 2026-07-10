@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
+import { useCamera } from '../context/CameraContext';
 
 export default function Registration() {
+  const { stream, startEnroll, stopEnroll, enrollData } = useCamera();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const navigate = useNavigate();
   
-  const [status, setStatus] = useState('Initializing camera...');
-  const [color, setColor] = useState('#888');
-  const [progress, setProgress] = useState(0);
-  const [embedding, setEmbedding] = useState<number[] | null>(null);
-  const [box, setBox] = useState<number[] | null>(null);
+  const { status, color, progress, embedding, box } = enrollData;
   
   const [name, setName] = useState('');
   const [accessType, setAccessType] = useState('Permanent');
@@ -26,56 +22,18 @@ export default function Registration() {
   const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth()+1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false })
-      .then(stream => {
-        if (videoRef.current) videoRef.current.srcObject = stream;
-      })
-      .catch(err => setStatus('Error accessing camera: ' + err.message));
-
-    const connectWs = () => {
-      wsRef.current = new WebSocket('ws://localhost:8000/ws/enroll');
-      wsRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.status === 'Finished') {
-          setEmbedding(data.embedding);
-          setStatus('Face data collected! Please fill the form.');
-          setColor('#00FF00');
-          setBox(null);
-          wsRef.current?.close();
-        } else {
-          setStatus(data.status);
-          setColor(data.color);
-          setProgress(data.progress || 0);
-          setBox(data.box || null);
-        }
-      };
-    };
-    connectWs();
-
-    const interval = setInterval(() => {
-      if (embedding) return; // Stop sending if finished
-      if (videoRef.current && canvasRef.current && wsRef.current?.readyState === WebSocket.OPEN) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        if (video.videoWidth > 0) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            wsRef.current.send(canvas.toDataURL('image/jpeg', 0.5));
-          }
-        }
-      }
-    }, 300);
-
+    // Tell the context we are enrolling now
+    startEnroll();
     return () => {
-      clearInterval(interval);
-      wsRef.current?.close();
-      const stream = videoRef.current?.srcObject as MediaStream;
-      stream?.getTracks().forEach(t => t.stop());
+      stopEnroll();
     };
-  }, [embedding]);
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
 
   const handleSave = () => {
     setErrorMsg('');
@@ -144,7 +102,6 @@ export default function Registration() {
       {!embedding ? (
         <div className="camera-container">
           <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
           
           {box && videoRef.current && (
             <div style={{

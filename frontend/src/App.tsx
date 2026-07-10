@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { Camera, Users, UserPlus, Clock, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useCamera } from './context/CameraContext';
 import Recognition from './pages/Recognition';
 import Registration from './pages/Registration';
 import Employees from './pages/Employees';
@@ -11,6 +12,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('auth_token') === 'authenticated';
   });
+  
+  const { isRecognizing } = useCamera();
 
   if (!isAuthenticated) {
     return <Auth onLogin={() => {
@@ -38,7 +41,16 @@ function App() {
               <span>Access Logs</span>
             </NavLink>
             <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              <Camera size={20} />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Camera size={20} />
+                {isRecognizing && (
+                  <div style={{
+                    position: 'absolute', top: -2, right: -2, 
+                    width: 8, height: 8, borderRadius: '50%', 
+                    background: '#00ff00', boxShadow: '0 0 5px #00ff00'
+                  }} title="Background recognition active" />
+                )}
+              </div>
               <span>Recognition</span>
             </NavLink>
           </nav>
