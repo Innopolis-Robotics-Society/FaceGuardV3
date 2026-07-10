@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from backend.faceguard.recognize import (
+from faceguard.recognize import (
     average_embeddings,
     cosine_similarity,
     normalize_embedding,

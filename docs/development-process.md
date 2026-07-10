@@ -62,9 +62,9 @@ The diagram illustrates our standard workflow in a collaborative environment. Wh
 
 We prioritize security and portability by keeping sensitive data out of version control.
 
-- **Secret Storage & Runtime Configuration:** All runtime secrets (like database credentials and API keys) are stored securely in `backend/.streamlit/secrets.toml`. During runtime, this configuration is supplied to the product via a read-only volume mount in `docker-compose.yml` (`../backend/.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro`).
-- **Ignored Files:** Our `.gitignore` strictly ignores sensitive and environment-specific files, including `.env`, `.streamlit/secrets.toml`, `.coverage`, and large binaries/models (unless Git LFS is used).
-- **Sanitized Examples:** To onboard new developers, we commit a sanitized example file: `backend/.streamlit/secrets.toml.example`. Developers copy this file to `.streamlit/secrets.toml` and fill in the actual local credentials.
+- **Secret Storage & Runtime Configuration:** All runtime secrets (like database credentials and API keys) are stored securely in `backend/secrets.toml`. During runtime, this configuration is supplied to the backend container natively through the volume mount in `docker-compose.yml`.
+- **Ignored Files:** Our `.gitignore` strictly ignores sensitive and environment-specific files, including `.env`, `backend/secrets.toml`, `.coverage`, and large binaries/models (unless Git LFS is used).
+- **Sanitized Examples:** To onboard new developers, we commit a sanitized example file: `backend/secrets.toml.example`. Developers copy this file to `backend/secrets.toml` and fill in the actual local credentials.
 - **CI Configuration:** When CI pipelines need access to secrets (e.g., for integration testing), they are securely supplied via **GitHub Actions Repository Secrets**, never hardcoded in the YAML files.
 - **Deployment Configuration:** For edge deployment (e.g., on the Raspberry Pi), deployment configuration is handled manually by an administrator who securely transfers the `secrets.toml` file to the production device. CI does not deploy secrets directly to the edge.
 
@@ -72,7 +72,7 @@ We prioritize security and portability by keeping sensitive data out of version 
 
 To eliminate "it works on my machine" issues, especially given our dependencies on native machine learning libraries (OpenCV, InsightFace), we use a containerized setup.
 
-- **Docker & Docker Compose:** The product is defined in `docker/docker-compose.yml`. Developers simply run `docker compose up --build` (or the equivalent target in a Makefile/run script) to launch the application. This ensures that the Python environment, system libraries, and Streamlit configurations are identical across all developer machines.
+- **Docker & Docker Compose:** The product is defined in `docker/docker-compose.yml`. Developers simply run `docker compose up --build` (or the equivalent target in a Makefile/run script) to launch the application. This ensures that the Node.js (React) and Python (FastAPI) environments, system libraries, and configurations are identical across all developer machines.
 
 ## 5. Continuous Integration (CI) Process
 

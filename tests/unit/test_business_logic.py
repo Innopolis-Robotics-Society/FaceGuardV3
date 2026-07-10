@@ -1,7 +1,7 @@
 import numpy as np
 
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
 
 
 class FakeRecognizer(FaceProviderInterface):

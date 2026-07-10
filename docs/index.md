@@ -16,9 +16,9 @@ cd FaceGuardV3
 
 **2. Create your secrets file**
 ```bash
-cp backend/.streamlit/secrets.toml.example backend/.streamlit/secrets.toml
+cp backend/secrets.toml.example backend/secrets.toml
 ```
-Open `backend/.streamlit/secrets.toml` and fill in your credentials:
+Open `backend/secrets.toml` and fill in your credentials:
 - `admin_login` — your admin username
 - `admin_password` — your admin password
 
@@ -36,4 +36,5 @@ docker compose -f docker/docker-compose.yml up
 ```
 
 **5. Access the application**
-Open your browser at `http://localhost:8501`
+Open your browser at `http://localhost:3000` for the Web UI.
+*(The backend API and WebSockets are automatically served at `http://localhost:8000`)*

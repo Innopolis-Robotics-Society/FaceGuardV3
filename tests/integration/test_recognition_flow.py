@@ -1,8 +1,8 @@
 import numpy as np
 
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
-from backend.faceguard.recognize import normalize_embedding
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
+from faceguard.recognize import normalize_embedding
 
 
 class FakeRecognitionProvider(FaceProviderInterface):
