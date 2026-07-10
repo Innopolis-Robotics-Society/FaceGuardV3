@@ -1,46 +1,45 @@
 # FaceGuardV3
-Face recognition access control system for the university laboratory.
 
-## Setup Instructions - Docker
+FaceGuardV3 is a robust, decoupled face recognition access control system designed for the university laboratory. 
+It uses a React frontend, a FastAPI backend, an InsightFace recognition model, and integrates with Raspberry Pi GPIO for physical access control feedback (LEDs).
 
-**1. Clone the repository**
+## Key Links
+
+- **[Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)**: Comprehensive documentation including architecture, development process, and quality testing.
+- **[Customer Handover Guide](docs/customer-handover.md)**: Transition details, known limitations, and operational guidance for the customer.
+- **[Contribution Guidelines](CONTRIBUTING.md)**: Workflow for contributing to this project.
+- **[Agent Guidance](AGENTS.md)**: Guidance for AI agents and automation bots operating in this repository.
+
+## Setup Instructions
+
+### 1. Clone the repository
+
 ```bash
 git clone git@github.com:Innopolis-Robotics-Society/FaceGuardV3.git
 cd FaceGuardV3
 ```
-If the above does not work, use HTTPS instead:
+*(If the above does not work, use HTTPS: `git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git`)*
+
+### 2. Configure the environment
+
+FaceGuardV3 uses a `.env` file for secrets.
 ```bash
-git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
-cd FaceGuardV3
+cp backend/.env.example backend/.env
 ```
+Open `backend/.env` and specify your required configuration variables (e.g., admin credentials, database settings).
 
-**2. Create your secrets file**
-```bash
-cp backend/.streamlit/secrets.toml.example backend/.streamlit/secrets.toml
-```
-Open `backend/.streamlit/secrets.toml` and fill in your credentials:
-- `admin_login` — your admin username
-- `admin_password` — your admin password
+### 3. Build and Run with Docker
 
-**3. Make sure Docker is running**
+Make sure Docker and Docker Compose are installed and running on your machine.
 
-**Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
-
-**Mac:** Run `open -a Docker` and wait until the Docker icon appears in the menu bar.
-
-**Linux:**
-```bash
-sudo systemctl start docker
-```
-
-**4. Build and run with Docker**
 ```bash
 docker compose -f docker/docker-compose.yml build
-docker compose -f docker/docker-compose.yml up
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-**5. Access the application**
-Open your browser at `http://localhost:8501`
+### 4. Access the Application
 
-## Hosted Documentation
-See the [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/).
+- **Frontend (UI)**: Open your browser at `http://localhost:3000`
+- **Backend (API Docs)**: Open your browser at `http://localhost:8000/docs`
+
+*For edge deployment on Raspberry Pi, please refer to the deployment section in our hosted documentation or the [Customer Handover Guide](docs/customer-handover.md).*
