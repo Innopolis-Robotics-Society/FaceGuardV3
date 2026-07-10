@@ -7,3 +7,4 @@ pytest-cov
 bandit
 flake8
 black
+python-dotenv
