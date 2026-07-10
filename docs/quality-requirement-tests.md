@@ -10,6 +10,8 @@
 
 - QR-004: Temporary Access Window Enforcement
 
+- QR-005: Duplicate Registration Prevention
+
 ## QRT-001: Recognition Pipeline Response Time
 
 **Linked quality requirement**: `QR-001`
