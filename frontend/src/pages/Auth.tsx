@@ -19,7 +19,7 @@ export default function Auth({ onLogin }: AuthProps) {
       if (res.ok) {
         onLogin();
       } else {
-        setError('Invalid credentials');
+        setError('Invalid login or password');
       }
     });
   };
