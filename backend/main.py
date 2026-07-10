@@ -16,7 +16,6 @@ from db.employees_db import (
     delete_employee,
     update_employee,
     load_employees,
-    find_closest_embedding,
 )
 from db.logs_db import get_all_logs, add_log
 from faceguard.recognize import (
