@@ -38,9 +38,23 @@
   - [#PBI: Add filtering logs by date range](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116),
   - [#PBI: Change the provision of temporary access](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117),
 
-## Sprint 4 (MVP v2) — July 6-12, 2026
-- **Milestone:** TBD
-- **Sprint Goal:** Finalize local deployment stability and improve recognition accuracy.
-- **Focus:** Accessories, recognition accuracy, offline capabilities
+## Sprint 4 (MVP v3) — July 6-12, 2026
+- **Milestone:** [Sprint 4](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/4)  
+- **Sprint Goal:** Deploy a stable, containerized, and secure Trial Release of the system that reliably opens the physical door in case of successful face recognition even if a registered employee wears accessories while maintaining background processing efficiency, optimized system response time, and protected administrative data access.   
+- **Focus:** Accessories, recognition accuracy, system speedup, door connection, system security  
 - **Items:**
-  - [#PBI: Migrate from cloud NeonDB to local PostgreSQL Docker database for offline stability](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/196)
+  - [#PBI: Connect the system to the door](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/194),
+  - [#PBI: Speed up the system response](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171),
+  - [#US-005: Security](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/44),
+  - [#US-002: Face Recognition](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/41),
+  - [#PBI: Set up a local database](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/196),
+  - [#PBI: Recognition runs in the background](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172),
+  - [#PBI: Optimize Docker build process](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/197),
+  - [#US-012: Add recognition with accessories](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/51),
+  - [#PBI: Test the recognition with different parameters](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/61)
+
+## Sprint 5 (MVP v3) — July 13-19, 2026
+- **Milestone:** [Sprint 5](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/5)  
+- **Sprint Goal:** Complete final transition based on customer feedback and deliver MVP v3 with polished documentation.
+- **Focus:** Customer feedback implementation, documentation updates, final release
+- **Items:** TBD
