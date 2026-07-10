@@ -192,7 +192,11 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
                 (name, status, embedding_list, start_date, expiration_date),
             )
             connection.commit()
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 04e39d8 (feat: migrate to local PostgreSQL DB, switch to .env, remove cache delay, and update architecture docs)
     global _embedding_cache
     _embedding_cache = None
     return True
