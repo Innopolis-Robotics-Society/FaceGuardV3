@@ -9,7 +9,7 @@ import time
 from typing import Optional, List
 
 import os
-import tomli
+import bcrypt
 from datetime import datetime
 from db.employees_db import (
     add_employees,
@@ -42,6 +42,17 @@ face_app = create_face_app()
 liveness_detector = LivenessDetector()
 
 
+@app.on_event("startup")
+def startup_event():
+    print("STARTING UP DATABASE INITIALIZATION...")
+    import db.employees_db
+    import db.logs_db
+
+    db.employees_db.init_db()
+    db.logs_db.init_db()
+    print("DATABASE INITIALIZATION COMPLETE.")
+
+
 class EmployeeUpdate(BaseModel):
     name: str
     status: str
@@ -71,18 +82,20 @@ def delete_emp(emp_id: int):
 @app.post("/api/login")
 def login(credentials: dict):
     try:
-        secrets_path = os.path.join(os.path.dirname(__file__), "secrets.toml")
-        with open(secrets_path, "rb") as f:
-            secrets = tomli.load(f)
+        from dotenv import load_dotenv
 
-        valid_user = secrets.get("admin_login", "admin")
-        valid_pass = secrets.get("admin_password", "admin")
+        load_dotenv()
 
-        if (
-            credentials.get("username") == valid_user
-            and credentials.get("password") == valid_pass
-        ):
-            return {"status": "ok", "token": "authenticated"}  # nosec B105
+        valid_user = os.environ.get("ADMIN_LOGIN", "admin")
+        stored_hash = os.environ.get("ADMIN_PASSWORD_HASH", "")
+
+        provided_username = credentials.get("username")
+        provided_password = credentials.get("password", "").encode("utf-8")
+
+        if provided_username == valid_user and stored_hash:
+            # Check bcrypt hash
+            if bcrypt.checkpw(provided_password, stored_hash.encode("utf-8")):
+                return {"status": "ok", "token": "authenticated"}  # nosec B105
     except Exception as e:
         print("Error reading secrets:", e)
 

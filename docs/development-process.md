@@ -62,11 +62,11 @@ The diagram illustrates our standard workflow in a collaborative environment. Wh
 
 We prioritize security and portability by keeping sensitive data out of version control.
 
-- **Secret Storage & Runtime Configuration:** All runtime secrets (like database credentials and API keys) are stored securely in `backend/secrets.toml`. During runtime, this configuration is supplied to the backend container natively through the volume mount in `docker-compose.yml`.
-- **Ignored Files:** Our `.gitignore` strictly ignores sensitive and environment-specific files, including `.env`, `backend/secrets.toml`, `.coverage`, and large binaries/models (unless Git LFS is used).
-- **Sanitized Examples:** To onboard new developers, we commit a sanitized example file: `backend/secrets.toml.example`. Developers copy this file to `backend/secrets.toml` and fill in the actual local credentials.
+- **Secret Storage & Runtime Configuration:** All runtime secrets and environment variables are stored securely in `backend/.env`. During runtime, this configuration is supplied to the backend container natively through the `env_file` directive in `docker-compose.yml`.
+- **Ignored Files:** Our `.gitignore` strictly ignores sensitive and environment-specific files, including `backend/.env`, `.coverage`, and large binaries/models (unless Git LFS is used).
+- **Sanitized Examples:** To onboard new developers, we commit a sanitized example file: `backend/.env.example`. Developers copy this file to `backend/.env` and fill in the actual local credentials.
 - **CI Configuration:** When CI pipelines need access to secrets (e.g., for integration testing), they are securely supplied via **GitHub Actions Repository Secrets**, never hardcoded in the YAML files.
-- **Deployment Configuration:** For edge deployment (e.g., on the Raspberry Pi), deployment configuration is handled manually by an administrator who securely transfers the `secrets.toml` file to the production device. CI does not deploy secrets directly to the edge.
+- **Deployment Configuration:** For edge deployment (e.g., on the Raspberry Pi), deployment configuration is handled manually by an administrator who securely sets up the `.env` file on the production device. CI does not deploy secrets directly to the edge.
 
 ## 4. Reproducible Development Environment
 

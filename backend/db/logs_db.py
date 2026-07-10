@@ -44,7 +44,7 @@ def get_all_logs(start_date=None, end_date=None):
             if start_date and end_date:
                 query += " WHERE time >= %s AND time < %s"
                 params.extend([start_date, end_date])
-            query += " ORDER BY time DESC"
+            query += " ORDER BY time DESC LIMIT 100"
             cur.execute(query, tuple(params))
             rows = cur.fetchall()
     return [{"id": r[0], "name": r[1], "time": str(r[2]), "status": r[3]} for r in rows]
