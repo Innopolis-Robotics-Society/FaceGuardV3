@@ -4,16 +4,21 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-## [2.2.0] - 2026-07-12  
+## [3.0.0] - 2026-07-12  
 
 ### Added
+- Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming
+- Recognition runs efficiently in the background without blocking the UI
 - Connection of the system and the door
 - Recognition with accessories
-- Permanent login and password for the admin
-- Running recognition in the background
+- Extensive customer handover documentation and contributor guides
 
 ### Changed
-- The speed of the system's response
+- Ssped up system response time by eliminating Streamlit UI polling bottlenecks
+- Improved local database setup for enhanced offline reliability
+
+### Fixed
+- Stabilized Docker build process and image sizes
 
 ## [2.1.0] - 2026-07-05  
 
