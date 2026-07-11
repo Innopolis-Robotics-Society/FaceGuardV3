@@ -1,14 +1,5 @@
 # FaceGuardV3
-
 Face recognition access control system for the university laboratory.
-The system uses a React frontend, a FastAPI backend, InsightFace for recognition, and Raspberry Pi GPIO for physical door control and LED feedback.
-
-## Product Access
-
-The system is deployed on a Raspberry Pi 5 with a connected USB webcam and electronic door lock.
-Access the frontend at the Pi's address on port `3000` (e.g. `http://<raspberry-pi-ip>:3000`).
-
-For local development or evaluation, build and run via Docker (see below).
 
 ## Key Links
 
@@ -25,7 +16,7 @@ For local development or evaluation, build and run via Docker (see below).
 - [Quality Requirements](docs/quality-requirements.md) — measurable non-functional requirements
 - [User Acceptance Tests](docs/user-acceptance-tests.md) — maintained UAT scenarios
 
-## Setup Instructions
+## Setup Instructions - Docker
 
 ### 1. Clone the repository
 
@@ -33,28 +24,64 @@ For local development or evaluation, build and run via Docker (see below).
 git clone git@github.com:Innopolis-Robotics-Society/FaceGuardV3.git
 cd FaceGuardV3
 ```
-*(If the above does not work, use HTTPS: `git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git`)*
-
-### 2. Configure the environment
-
-FaceGuardV3 uses a `.env` file for secrets.
+If the above does not work, use HTTPS instead:
 ```bash
-cp backend/.env.example backend/.env
+git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
+cd FaceGuardV3
 ```
-Open `backend/.env` and specify your required configuration variables (e.g., admin credentials, database settings).
 
-### 3. Build and Run with Docker
+### 2. Configure environment variables
 
-Make sure Docker and Docker Compose are installed and running on your machine.
-
+Navigate to the backend directory and copy the environment example file:
 ```bash
+cd backend
+cp .env.example .env
+```
+
+### 3. Generate an admin password hash
+
+Run the hash generation script to securely hash your password:
+```bash
+python3 scripts/generate_hash.py
+```
+Enter your desired password when prompted, and copy the generated bcrypt hash.
+
+### 4. Fill in the `.env` file
+
+Open `backend/.env` and fill in all the required data.
+For the admin credentials, paste your login and the generated hash without any quotes:
+```
+ADMIN_LOGIN=myadmin
+ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
+```
+
+### 5. Make sure Docker is running
+
+Docker is supported on Mac, Windows, and Linux.
+
+- **Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
+- **Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.
+- **Linux:**
+  ```bash
+  sudo systemctl start docker
+  ```
+
+### 6. Build and run the containers
+
+Return to the project root directory and start Docker:
+```bash
+cd ..
 docker compose -f docker/docker-compose.yml build
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml up
 ```
 
-### 4. Access the Application
+### 7. Access the application
 
-- **Frontend (UI)**: Open your browser at `http://localhost:3000`
-- **Backend (API Docs)**: Open your browser at `http://localhost:8000/docs`
+Once the containers are running, open your browser and navigate to:
+```
+http://localhost:3000
+```
 
-*For edge deployment on Raspberry Pi, please refer to the deployment section in our hosted documentation or the [Customer Handover Guide](docs/customer-handover.md).*
+## Hosted Documentation
+
+See the [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/).
