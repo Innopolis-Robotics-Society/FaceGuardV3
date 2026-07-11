@@ -66,3 +66,29 @@ to reload the Employees page.
 **Linked quality requirement tests:** [QRT-004](quality-requirement-tests.md#qrt-004-temporary-access-window-enforcement)
 
 **Linked ADR:** [ADR-004: Enforce Temporary Access Window in Application Logic with TIMESTAMP Normalization](architecture/adr/ADR-004-temporary-access-window-enforcement.md)
+
+---
+
+## QR-005: Duplicate Registration Prevention
+
+**ISO/IEC 25010 sub-characteristic:** Functional Correctness / Integrity
+
+**Scenario:** When an admin or user attempts to register a new employee using a face that already exists in the system's database, the backend registration module shall detect the high similarity match, reject the registration request with an appropriate error message, and prevent duplicate entries in the database.
+
+**Why this matters:** Storing multiple identical identities for the same physical person can lead to undefined behavior during face recognition (e.g. oscillating between the two profiles or matching the wrong one). The customer specifically requested a check to ensure a person cannot be registered twice.
+
+**Linked quality requirement tests:** [QRT-005](quality-requirement-tests.md#qrt-005-duplicate-registration-prevention)
+
+---
+
+## QR-006: Hardware Feedback Latency
+
+**ISO/IEC 25010 sub-characteristic:** Time behaviour
+
+**Scenario:** When a recognition event (success or failure) is determined by the backend inference service, the physical LED indicators connected to the edge device's GPIO pins shall illuminate in the correct color (e.g., blue for success, red for failure) within 0.5 seconds of the software decision, without blocking subsequent video frames.
+
+**Why this matters:** User interaction requires immediate visual feedback. If the system grants access but the LED takes an additional 2 seconds to turn on, the user experience is degraded and confusing. The actuation must be fast and asynchronous.
+
+**Linked quality requirement tests:** [QRT-006](quality-requirement-tests.md#qrt-006-hardware-feedback-latency)
+
+**Linked ADR:** [ADR-007: Asynchronous GPIO Hardware Integration for Edge Devices](architecture/adr/ADR-007-gpio-hardware-integration.md)
