@@ -1,8 +1,10 @@
 # FaceGuardV3
 
-Face recognition access control for university laboratories.
+Face recognition access control for a university laboratory.
 
-FaceGuardV3 replaces physical access cards with a camera-based face recognition system. When a registered employee approaches the entrance, the system identifies them in seconds, unlocks the door, and logs the event. This all happens without any manual action. The system runs on a Raspberry Pi 5 at the edge, works fully offline, and integrates with LED indicators for immediate visual feedback.
+FaceGuardV3 replaces physical access cards with a camera-based face recognition system. When a registered employee approaches the entrance, the system identifies them, gives visual feedback, and logs the event. This all happens without any manual action.
+
+The system runs on a Raspberry Pi 5, works fully offline, detects liveness to prevent photo spoofing, recognises employees even with glasses or masks, and integrates with LED indicators for immediate visual feedback. Building and deploying takes one command with Docker.
 
 | Quick links | |
 |---|---|
