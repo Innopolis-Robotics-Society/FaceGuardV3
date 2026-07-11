@@ -1,12 +1,12 @@
 # Customer Handover and Operations Guide
 
-This document is the authoritative handover artifact for MVP v3. It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
+This document is the authoritative handover artifact for MVP v2 (3.0.0). It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
 
 ## 1. Product Status and Handover Scope
 
 **Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time, automatically trigger door unlocking mechanisms, and log all access attempts.
 
-**Scope of this release:** This handover covers the MVP v3 release. It includes background video processing, fully persistent local database, permormance improvement, recognition with acessories.
+**Scope of this release:** This handover covers the MVP v2 release. It includes background video processing, fully persistent local database, permormance improvement, recognition with acessories.
 
 ## 2. Handover Status and Ownership
 
@@ -98,7 +98,7 @@ For normal customer use, operation, and troubleshooting, refer to:
 - [Main README](../README.md): primary entry point and setup instructions
 - [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/): full project documentation
 - [Contributor Guide](../CONTRIBUTING.md) and [Agents Guide](../AGENTS.md): guidelines for team members and AI agents
-- [System Roadmap](roadmap.md): product evolution up to `MVP v3`
+- [System Roadmap](roadmap.md): product evolution up to `MVP v2`
 - [User Acceptance Tests](user-acceptance-tests.md): step-by-step instructions for admin panel usage
 
 ## 7. Remaining Actions and Known Limitations
