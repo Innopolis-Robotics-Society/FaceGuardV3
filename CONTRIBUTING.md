@@ -8,7 +8,7 @@ FaceGuardV3 is a secure, decoupled face recognition access control system deploy
 **No product work is started without an issue.** 
 All changes must trace back to a specific GitHub Issue.
 
-1. **Find or Create an Issue:** Check the [Issues](../../issues) tab. If you find a bug or want to propose a feature, create an issue using one of the provided templates (`User Story`, `Bug Report`, or `Other PBI`).
+1. **Find or Create an Issue:** Check the [Issues](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues) tab. If you find a bug or want to propose a feature, create an issue using one of the provided templates (`User Story`, `Bug Report`, or `Other PBI`).
 2. **Assignment and Estimation:** Wait for the issue to be prioritized in the Sprint Backlog. An issue must be moved to the **Ready** column with an assigned owner and Story Points before work begins.
 3. **Branching:** Create a branch for your issue. Use the naming convention: `<issue-number>-<short-description>` (e.g., `42-add-login-form`).
 
