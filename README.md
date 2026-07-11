@@ -1,20 +1,55 @@
 # FaceGuardV3
-Face recognition access control system for the university laboratory.
 
-## Key Links
+Face recognition access control for university laboratories.
 
-- **[Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)** — browsable architecture, process, quality, and testing docs
-- **[Customer Handover Guide](docs/customer-handover.md)** — transition details, known limitations, and operational guidance
-- **[Contribution Guidelines](CONTRIBUTING.md)** — workflow for human contributors
-- **[Agent Guidance](AGENTS.md)** — setup and workflow guidance for AI coding agents
+FaceGuardV3 replaces physical access cards with a camera-based face recognition system. When a registered employee approaches the entrance, the system identifies them in seconds, unlocks the door, and logs the event. This all happens without any manual action. The system runs on a Raspberry Pi 5 at the edge, works fully offline, and integrates with LED indicators for immediate visual feedback.
 
-### Maintained Documentation
+| Quick links | |
+|---|---|
+| **Hosted documentation** | [docs.faceguard.dev](https://innopolis-robotics-society.github.io/FaceGuardV3/) |
+| **Current release** | [v3.0.0 - Trial release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) |
+| **Customer handover** | [docs/customer-handover.md](docs/customer-handover.md) |
+| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| **Agent guidance** | [AGENTS.md](AGENTS.md) |
 
-- [Roadmap](docs/roadmap.md) — Sprint-by-Sprint delivery plan
-- [Architecture](docs/architecture/README.md) — static, dynamic, and deployment views with ADRs
-- [Testing Status](docs/testing.md) — coverage, QRTs, CI gates, and QA checks
-- [Quality Requirements](docs/quality-requirements.md) — measurable non-functional requirements
-- [User Acceptance Tests](docs/user-acceptance-tests.md) — maintained UAT scenarios
+## Product goal
+
+Laboratory access control must be secure, fast, and effortless. FaceGuardV3 removes the problem of lost or forgotten access cards by recognising employees solely by their face. The system is designed for unattended operation on a Raspberry Pi, with automatic recognition, liveness-based spoofing protection.
+
+## Current features
+
+- **Decoupled architecture**: React frontend + FastAPI backend, communicating via WebSockets for real-time video streaming
+- **Automatic face recognition**: captures video frames and recognises registered employees
+- **Accessories support**: recognises employees wearing glasses, masks, or other accessories
+- **Liveness detection**: resists static photo spoofing attacks using a MiniFASNet model
+- **Temporary access**: grant time-limited access with exact start and expiration date+time
+- **Employee management**: add, edit, remove, and search employees through a web interface
+- **Access logs**: view all attempts with date-range filtering
+- **LED indicators**: yellow during recognition, blue on access granted, red on access denied
+- **Background recognition**: runs continuously without blocking the UI
+- **Local database**: fully offline operation with PostgreSQL on the edge device
+- **Full Docker deployment**: reproducible environment for development and production
+- **Sprint 4 trial release v3.0.0**: see the [release page](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) for a complete changelog
+
+## Screenshots
+
+| Admin login | Recognition in action |
+|---|---|
+| ![Admin login](docs/screenshots/login.png) | ![Recognition](docs/screenshots/recognition.png) |
+
+| Employee management | Access logs |
+|---|---|
+| ![Employees page](docs/screenshots/employees.png) | ![Access logs](docs/screenshots/logs.png) |
+
+## Maintained documentation
+
+| Document | What it covers |
+|---|---|
+| [Roadmap](docs/roadmap.md) | Sprint-by-Sprint delivery plan |
+| [Architecture](docs/architecture/README.md) | Static, dynamic, and deployment views with ADRs |
+| [Testing status](docs/testing.md) | Coverage, QRTs, CI gates, and QA checks |
+| [Quality requirements](docs/quality-requirements.md) | Measurable non-functional requirements |
+| [User acceptance tests](docs/user-acceptance-tests.md) | Maintained UAT scenarios with execution history |
 
 ## Setup Instructions - Docker
 
@@ -56,12 +91,9 @@ ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
 ```
 
 ### 5. Make sure Docker is running
-
-Docker is supported on Mac, Windows, and Linux.
-
-- **Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
-- **Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.
-- **Linux:**
+**Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
+**Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.
+**Linux:**
   ```bash
   sudo systemctl start docker
   ```
@@ -76,7 +108,6 @@ docker compose -f docker/docker-compose.yml up
 ```
 
 ### 7. Access the application
-
 Once the containers are running, open your browser and navigate to:
 ```
 http://localhost:3000
