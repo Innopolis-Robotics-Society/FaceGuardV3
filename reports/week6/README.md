@@ -12,31 +12,46 @@
 [Sprint Backlog board](https://github.com/orgs/Innopolis-Robotics-Society/projects/15)
 
 ## 4. Assignment 6 Sprint 4 milestone
-[Sprint 3 milestone](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/4)
+[Sprint 4 milestone](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/4)
 
 ## 5. Sprint Goal 
 
-**Sprint Goal** is to imrove the speed of the system's response time, connect the system of recognition to the door, and make the recognition work in the background.
+**Sprint Goal:** Deploy a stable, containerized, and secure Trial Release of the system that reliably recognizes a registered employee even if they wear accessories while maintaining background processing efficiency, optimized system response time, and protected administrative data access.
 
 **Sprint dates:** 06.07.2026 - 12.07.2026
 
 **Short scope summary:**  
-- Imrove the speed of the system's response time
-- Connect the system of recognition to the door
-- Make the recognition work in the background
+- Speed up the system response time by decoupling frontend and backend via WebSockets
+- Recognize registered employees with accessories (glasses, masks)
+- Run recognition in the background without blocking the UI
+- Set up a local PostgreSQL database for offline reliability
+- Optimize Docker build process and stabilize image sizes
+- Implement security for protected administrative data access
+- Update customer-facing documentation (README, CONTRIBUTING, AGENTS, customer-handover)
+- Deliver trial release v3.0.0 for customer testing
 
 ## 6. Total Sprint size
 [TODO] Story Points  
 
 ## 7. Trial-release Changes
-- Imroved the speed of the system's response time
-- Connected the system of recognition to the door
-- Made the recognition work in the background
+- Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming, eliminating Streamlit UI polling latency
+- System response time improved from ~3s+ to ~1.1s end-to-end
+- Recognition runs efficiently in the background without blocking the UI
+- Recognition with accessories (glasses, masks) through lowered liveness threshold
+- Connection of the recognition system to the physical door
+- Local PostgreSQL database setup for enhanced offline reliability
+- Stabilized Docker build process and reduced image sizes
+- Created customer handover documentation, contributor guide (CONTRIBUTING.md), and agent guidance (AGENTS.md)
+- Added two new quality requirements (QR-005: Duplicate Registration, QR-006: Hardware Feedback Latency) with QRT stubs
+- Documented asynchronous GPIO hardware integration (ADR-007)
 
 ## 8. Product Access Artifact
-[Runnable Product](https://github.com/Innopolis-Robotics-Society/FaceGuardV3)  
+[Runnable Product](https://github.com/Innopolis-Robotics-Society/FaceGuardV3) 
 
-The application can be started with Docker and opened at: `http://localhost:8501`
+[FaceGuardV3 v3.0.0 Release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0)  
+
+The application is deployed on a Raspberry Pi 5 with a connected USB webcam and leds.  
+For local evaluation, start with Docker and open at: `http://localhost:3000`
 
 ## 9. Run Instructions
 [Run instructions](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md)
@@ -61,8 +76,8 @@ Transition-readiness summary, including what must still happen in Week 7.
 
 | Feedback point | Resulting PBI or issue | Status | Response |
 |---|---|---|---|
-| Speed up the system response | [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171) | [TODO] | [TODO] |
-| Make the recognition run in the background | [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172) | [TODO] | [TODO] |
+| Speed up the system response | [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171) | Done | Decoupled frontend and backend via WebSockets — response time reduced from ~3s+ to ~1.1s |
+| Make the recognition run in the background | [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172) | Done | Recognition now runs continuously via WebSocket without blocking the UI |
 | Temporary access should use explicit start and end date fields | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | Done | Replaced number-of-days input with start and expiration date pickers |
 | Recognition should use 5–10 captured frames and averaged embeddings | [#59](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/59) | Done | Switched from single photo capture to video frame extraction |
 | Test a lighter recognition model suitable for Raspberry Pi 5 | [#86](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/86) | Done | Replaced buffalo_l with a lightweight alternative for faster recognition |
@@ -128,7 +143,7 @@ The public publication was permitted.
 - [llm-report.md](llm-report.md)
 
 ## 29. Current Product Status
-- MVP v2 release is available as release `v2.1.0`
+- Trial release `v3.0.0` is available on GitHub
 - The system runs on Raspberry Pi 5 with a connected web-camera
 - Face recognition uses a lightweight InsightFace model (buffalo_s)
 - Face recognition processes video frames instead of a single photo
@@ -141,7 +156,7 @@ The public publication was permitted.
 - Date range filter is available on the Logs page
 - CI pipeline runs linting, formatting, security check, tests, and coverage on every PR
 - All 28 tests pass with coverage exceeding 30% on all critical modules
-- All seven UAT scenarios passed during the Sprint Review session with the customer
+- All nine UAT scenarios passed during the Sprint Review session with the customer
 - Hosted documentation site is live at `https://innopolis-robotics-society.github.io/FaceGuardV3/`
 
 ## 29. Next Steps
