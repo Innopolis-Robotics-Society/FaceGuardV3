@@ -1,12 +1,12 @@
 # Customer Handover and Operations Guide
 
-This document is the authoritative handover artifact for MVP v2 (3.0.0). It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
+This document is the authoritative handover artifact for FaceGuard, Week 6 Trial Release (`v3.0.0`, MVP v2). It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
 
 ## 1. Product Status and Handover Scope
 
-**Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time, automatically trigger door unlocking mechanisms, and log all access attempts.
+**Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time and log all access attempts.
 
-**Scope of this release:** This handover covers the MVP v2 release. It includes background video processing, fully persistent local database, permormance improvement, recognition with acessories.
+**Scope of this release:** This handover covers the Week 6 Trial Release (MVP v2). It includes background video processing, a fully persistent local database, performance improvements, and recognition with accessories.
 
 ## 2. Handover Status and Ownership
 
@@ -40,7 +40,7 @@ Detailed confirmation evidence, the meeting date, and the customer's exact feedb
 | Source code (GitHub) | Team (retained) | Customer has read access |
 | Deployed product | Customer | Raspberry Pi 5, local deployment |
 | Admin credentials | Customer | Managed in `.env` file |
-| Hardware (camera, door, LEDs) | Customer | Pre-existing hardware |
+| Hardware (camera, LEDs) | Customer | Pre-existing hardware |
 | Database (PostgreSQL) | Customer | Local, operated on Raspberry Pi |
 | Documentation | Customer | Public repository and hosted docs |
 | Future support | Team | Critical fixes only, until course completion |
@@ -51,30 +51,62 @@ To operate the system, the customer must manage the runtime environment variable
 
 ### Required Environment Variables
 
-Create a `.env` file in the `backend/` directory (copy `backend/.env.example` as a starting point). The following keys are required:
+Create a `.env` file in the `backend/` directory (copy `backend/.env.example` as a starting point). At minimum:
 
-- `ADMIN_USERNAME`: the username required to log into the React admin panel
-- `ADMIN_PASSWORD`: the password for the admin account
+- `ADMIN_LOGIN`: the login required to access the React admin panel
+- `ADMIN_PASSWORD_HASH`: a bcrypt hash of the admin password. Generate it with `python3 scripts/generate_hash.py` from the `backend/` directory, then paste the resulting hash here. Do not store the plain password anywhere.
 - `DATABASE_URL`: connection string for the local PostgreSQL instance, for example `postgresql://postgres:postgres@db:5432/faceguard`
 
-Ensure the `.env` file has restricted read permissions on the Raspberry Pi so that unauthorized users cannot extract the admin credentials.
+Ensure the `.env` file has restricted read permissions on the Raspberry Pi so that unauthorized users cannot extract the admin credentials or password hash.
 
 ## 4. Setup, Deployment, and Verification
 
-The system relies entirely on Docker, simplifying the deployment process.
+Full setup instructions and troubleshooting are also maintained in the root [README.md](../README.md). The steps below reflect the current actual process.
 
-### Initial Setup on Raspberry Pi 5
+### Initial Setup
 
-1. Install Docker and Docker Compose on the Raspberry Pi.
-2. Clone the repository: `git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git`
-3. Configure your secrets: `cp backend/.env.example backend/.env` and edit it.
-4. Start the system: `docker compose -f docker/docker-compose.yml up -d --build`
+1. Clone the repository:
+   ```bash
+   git clone git@github.com:Innopolis-Robotics-Society/FaceGuardV3.git
+   cd FaceGuardV3
+   ```
+   If SSH does not work, use HTTPS instead:
+   ```bash
+   git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
+   cd FaceGuardV3
+   ```
+2. Configure environment variables:
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+3. Generate an admin password hash:
+   ```bash
+   python3 scripts/generate_hash.py
+   ```
+   Enter your chosen password when prompted and copy the generated bcrypt hash.
+4. Open `backend/.env` and fill in the required values, including `DATABASE_URL` and the admin credentials, without quotes:
+   ```
+   ADMIN_LOGIN=myadmin
+   ADMIN_PASSWORD_HASH=your_copied_bcrypt_hash
+   ```
+5. Make sure Docker is running:
+   - Windows: open Docker Desktop and wait for "Engine running"
+   - Mac: open the Docker app and wait for the Docker icon in the menu bar
+   - Linux: `sudo systemctl start docker`
+6. From the project root, build and start the containers:
+   ```bash
+   cd ..
+   docker compose -f docker/docker-compose.yml build
+   docker compose -f docker/docker-compose.yml up
+   ```
+7. Once the containers are running, open `http://localhost:3000` in a browser.
 
 ### Verification Steps
 
-1. **Access the UI:** open a web browser on a device connected to the same local network and navigate to `http://<RASPBERRY_PI_IP>:3000`.
-2. **Login:** enter the credentials specified in your `.env` file.
-3. **Hardware check:** register a test user. The connected LEDs should cycle colors (yellow, red, blue), confirming the GPIO module is functioning.
+1. **Access the UI:** confirm `http://localhost:3000` loads without errors.
+2. **Login:** enter the `ADMIN_LOGIN` and the password you hashed in step 3 above.
+3. **Hardware check:** register a test user and confirm the connected LEDs respond as described in Section 5.
 
 ### System Recovery
 
@@ -83,11 +115,13 @@ The system relies entirely on Docker, simplifying the deployment process.
 
 ## 5. Operational Notes for Normal Use
 
-- **LED feedback logic:**
-  - Yellow, blinking: system is actively attempting to recognize a face
-  - Yellow, solid 5s: bad frame or poor lighting, user must look straight ahead
-  - Blue, solid 5s: access granted, door unlock signal sent
-  - Red, solid 5s: access denied, face not recognized
+- **LED feedback during recognition:**
+  - Yellow, blinking: the system is actively attempting to recognize a face
+  - Yellow, solid for 5 seconds: poor lighting or a blurry frame, the person should look straight ahead
+  - Blue, solid for 5 seconds: access granted, the person was recognized
+  - Red, solid for 5 seconds: access denied, the face was not recognized
+  - No LEDs lit: no one is currently in front of the camera
+- **LED feedback during employee registration:** all three LEDs (yellow, red, blue) light up together during registration and for 3 seconds afterward.
 - **Temporary access auto-expiry:** employees with temporary access are validated against their start and expiration dates. Access is automatically denied outside this window, no admin action needed.
 - **Log management:** access logs are retained in the local database. The system automatically prunes logs older than 3 days to preserve storage on the Raspberry Pi.
 
