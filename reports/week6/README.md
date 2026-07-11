@@ -184,4 +184,4 @@ reports/week6/images/
 - ![Sprint milestone](images/sprint_milestone.png)
 - ![SemVer release](images/release.png)
 - ![PR example](images/pr_example.png)
-- ![Board or project workflow view](images/board.png))
+- ![Board or project workflow view](images/board.png)
