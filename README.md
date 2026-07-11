@@ -1,50 +1,22 @@
-# FaceGuardV3
+# FaceGuard
+Face recognition access control system for a university laboratory.
 
-Face recognition access control for a university laboratory.
-
-FaceGuardV3 replaces physical access cards with a camera-based face recognition system. When a registered employee approaches the entrance, the system identifies them, gives visual feedback, and logs the event. This all happens without any manual action.
-
-The system runs on a Raspberry Pi 5, works fully offline, detects liveness to prevent photo spoofing, recognises employees even with glasses or masks, and integrates with LED indicators for immediate visual feedback. Building and deploying takes one command with Docker.
-
-| Quick links | |
-|---|---|
-| **Hosted documentation** | [docs.faceguard.dev](https://innopolis-robotics-society.github.io/FaceGuardV3/) |
-| **Current release** | [v3.0.0 - Trial release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) |
-| **Customer handover** | [docs/customer-handover.md](docs/customer-handover.md) |
-| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| **Agent guidance** | [AGENTS.md](AGENTS.md) |
+## Project description
+FaceGuard replaces physical access cards with a camera-based face recognition system. When a registered employee approaches the entrance, the system identifies them, gives visual feedback with LED indicators, and logs the event. This all happens without any manual action. The system runs on a Raspberry Pi, works fully offline, detects liveness to prevent photo spoofing, recognises employees even with glasses or masks, and integrates with LED indicators for immediate visual feedback.
 
 ## Product goal
-
-Laboratory access control must be secure, fast, and effortless. FaceGuardV3 removes the problem of lost or forgotten access cards by recognising employees solely by their face. The system is designed for unattended operation on a Raspberry Pi, with automatic recognition, liveness-based spoofing protection.
+Laboratory access control must be secure and fast. FaceGuard removes the problem of lost or forgotten access cards by recognising employees solely by their face. The system is designed for unattended operation on a Raspberry Pi, with automatic recognition, liveness-based spoofing protection.
 
 ## Current features
-
-- **Decoupled architecture**: React frontend + FastAPI backend, communicating via WebSockets for real-time video streaming
-- **Automatic face recognition**: captures video frames and recognises registered employees
-- **Accessories support**: recognises employees wearing glasses, masks, or other accessories
-- **Liveness detection**: resists static photo spoofing attacks using a MiniFASNet model
-- **Temporary access**: grant time-limited access with exact start and expiration date+time
-- **Employee management**: add, edit, remove, and search employees through a web interface
-- **Access logs**: view all attempts with date-range filtering
-- **LED indicators**: yellow during recognition, blue on access granted, red on access denied
-- **Background recognition**: runs continuously without blocking the UI
-- **Local database**: fully offline operation with PostgreSQL on the edge device
-- **Full Docker deployment**: reproducible environment for development and production
-- **Sprint 4 trial release v3.0.0**: see the [release page](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) for a complete changelog
-
-## Screenshots
-
-| Admin login | Recognition in action |
-|---|---|
-| ![Admin login](docs/screenshots/login.png) | ![Recognition](docs/screenshots/recognition.png) |
-
-| Employee management | Access logs |
-|---|---|
-| ![Employees page](docs/screenshots/employees.png) | ![Access logs](docs/screenshots/logs.png) |
+- **Automatic face recognition**: captures video frames and recognises registered employees.
+- **Accessories support**: recognises employees wearing glasses, masks, or other accessories.
+- **Liveness detection**: resists static photo spoofing attacks using a MiniFASNet model.
+- **Employee management**: add, edit, remove, and search employees through a web interface.
+- **LED indicators**: yellow during recognition, blue on access granted, red on access denied.
+- **Background recognition**: runs continuously without blocking the UI.
+- **Local database**: fully offline operation with PostgreSQL on the edge device.
 
 ## Maintained documentation
-
 | Document | What it covers |
 |---|---|
 | [Roadmap](docs/roadmap.md) | Sprint-by-Sprint delivery plan |
@@ -53,7 +25,16 @@ Laboratory access control must be secure, fast, and effortless. FaceGuardV3 remo
 | [Quality requirements](docs/quality-requirements.md) | Measurable non-functional requirements |
 | [User acceptance tests](docs/user-acceptance-tests.md) | Maintained UAT scenarios with execution history |
 
-## Setup Instructions - Docker
+## Documentation Links
+| Documentation | Link |
+|---|---|
+| Hosted documentation | [docs.faceguard.dev](https://innopolis-robotics-society.github.io/FaceGuardV3/) |
+| Current release | [v3.0.0 - Trial release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) |
+| Customer handover | [docs/customer-handover.md](docs/customer-handover.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Agent guidance | [AGENTS.md](AGENTS.md) |
+
+## Setup Instructions
 
 ### 1. Clone the repository
 
@@ -93,8 +74,8 @@ ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
 ```
 
 ### 5. Make sure Docker is running
-**Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.
-**Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.
+**Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.  
+**Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.  
 **Linux:**
   ```bash
   sudo systemctl start docker
