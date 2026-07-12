@@ -1,66 +1,155 @@
-Speaker 2
-Here is the instruction, what you need to do. A hint for the login password. 
-Speaker 1
-Here is the admin in English with small letters. Password admin user. Here is the instruction. Is it possible to bring it here? 
-Speaker 2
-No. We need to bring it back. It goes like this, 60 seconds. 
-Speaker 1
-Ah, wait, no, I gave myself time and access, I gave it to myself from tomorrow. 
-Speaker 2
-There is just a moment with a rollback, it can be reduced. 
-Speaker 1
-Ah, that is, the old one can be improved. You need to adjust it according to the time. I have a lot of divinity. If I do it like this, it will be very cool. 
-Speaker 2
-How much is the threshold? The threshold for the minimum recognition is 56. What is recognized as a whole. How is it finished? Because the average embedding is taken. We tried to compile embedding by ourselves, because several people are registered under it. And here it is, plus or minus, it recognizes exactly 50, 60, 27. You can try without stopping, go to the conditional access logs, for example. 
-Speaker 1
-Now I can go to the account. List. List. This is my system. Super. So what else do we need to do? We need to register. We need to register. We need to register. We need to register. 
-Speaker 2
-And here... I don't remember the name of the blog. 
-Speaker 1
-I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't know. It's because the parallel settings are already working. 
-Speaker 2
-But it has to stop. It stops the first process before recognition 
-Speaker 1
-and starts the second. 
-Speaker 2
-How clear was the interface? 
-Speaker 1
-Well, it's hard not to figure it out. You can delete it right away. Sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, Sometimes there is a bug that the stream is not loaded correctly in the pack. Loading on the logo is a bit long, but it is not a minor problem. If you find it, it will be faster. If not, then it is not at all. At what stage of the project? 
-Speaker 2
-Are you ready to move on? 
-Speaker 1
-I'm ready. If it's ready, then yes. Does the system still work? Yes. 
-Speaker 2
-How much does the app weigh in the end? No, I didn't measure it, but according to the assumptions, that is, as far as I remember, the whole model is packed somewhere in gigabytes. How much does the app weigh? 
-Speaker 1
-I didn't take it, I don't even remember it. There is a funny improvement in the compression of vectors. It's not too much anymore. I like it, it's cool, it works. I see, I believe. I believe that it works a little. I hope to see it tomorrow at 7 o'clock. It's not so bad. 
-Speaker 2
-What did you do this week? This week we made the website faster. We rewrote it from the streamlit to the weekly front, to the React. We added the background recognition. The session starts and that's it. So you can easily move between pages and everything will work. Also, we added that we moved the database, that is, we also accelerated the site itself by moving the database that was sent to the cloud to the local one. That is, now it's all just in the local. It was supposed to be like that. Did you have a cloud of base data? Yes, we add it to the blog. 
-Speaker 1
-Don't do that. Don't do that. 
-Speaker 2
-No external base data. No such things. No cloud springs. Everything is stored only on iron. Now everything is stored only on iron. There we cleaned everything in general. Super good. So here. The most important thing for this week is that we speeded up the website, rewrote it and added background recognition. 
-Speaker 1
-We were also ready to add a door, but there is a kind of door, but... A kind of door is our lights. It doesn't require much more and it's not needed. What are you going to do next week? 
-Speaker 2
-We finished. But you said about the bug. I'll try to fix the bug with the fact that sometimes 1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1 And now, for example, at 18.33, it will be taken as the minimum threshold, but the rest will not be given permission. Okay. Well, in general, that is, to finish, to optimize as much as possible, so that it still works on Malinka. 
-Speaker 1
-Well, I hope that it will work for the rest of the week, so that Roshan and their My goal is to get into the repository, add new books, descriptions, tags. If we manage to gather the documentation on static, push the whole ICD, it will be generally cool. 
-Speaker 2
-We have a documentation site, all the documentation. Yes, show us. Well, now it may not be available, but we have it on our own. So it's basically there. And how 
-Speaker 1
-do you use it? 
-Speaker 2
-With GitHub. And what does it say on the CICD? Well, the main record is still updated, we still have the instructions, and so we added all the information. Do you have a password? I do. And here is the hosting documentation. But that's all in practice. 
-Speaker 1
-It's strange that there is such a link, because it should refer to the repository, not to the organization itself. 
-Speaker 2
-In short, you can see something and go inside. 
-Speaker 1
-So, it will be interesting. I want to have a GitHub page with a description of all the functions. Can I have a look? Let's open it. Then go back. 
-Speaker 2
-Can I? Yes, of course. Try it. We also have a set of pages. We also have a set of pages. I don't know. I don't know. Maybe we should do it like this? Maybe we should do it like this? 
-Speaker 1
-Thank you very much. 
-Speaker 2
-If you want to work further, before the next game... 
+# Customer Review Transcript
+
+Date: 09.07.2026  
+Participants: Development team, Customer  
+
+Before recording started, the team requested permission to record the meeting and to publish a sanitized English transcript in the public repository. The customer agreed to both. Since UAT was conducted during the same session, the recording permission covers both the Sprint Review and UAT execution.
+
+(00:00)  
+Interviewer: Great then. Good morning. I suggest we start right away by testing our system. Temporary login, login and password. Is the password just one?  
+
+Customer: Yeah.  
+
+Interviewer: Good. Or did you change it?  
+
+Customer: It is quite secure.  
+
+Interviewer: This is temporary.  
+
+Customer: Okay. I suggest we add it right away.
+
+(00:29)  
+Interviewer: Let us add my face?  
+
+Customer: Yes.  
+
+Interviewer: [Interviewer's name], I think. Actually, I think my face is already there. We can check that at the same time.  
+
+Customer: Let us check.  
+
+Interviewer: Let us check, yes. The only thing is that we will work more on the speed.  
+
+Customer: Uh-huh.  
+
+Interviewer: There are issues with that.
+
+(01:11)  
+Customer: Have you not configured it yet?  
+
+Interviewer: No, everything is fine.  
+
+Customer: Did you configure it so that the information forwarding from the website, as I mentioned, you just connect and can already see it all via the terminal... It is really bad.  
+
+Interviewer: Yes. Very slow.
+
+(02:10)  
+Interviewer: Is everything okay?  
+
+Customer: It is okay.  
+
+Interviewer: Ah, yes, I deleted it this morning.  
+
+Customer: It is there. Are you working on the upload, right? Yes. You can do it here.
+
+(02:59)  
+Customer: Can you change specifically the status here?  
+
+Interviewer: ... Right now is exactly the button.  
+
+Customer: Super.  
+
+Interviewer: We will try now. Let us see.
+
+(03:54)  
+Interviewer: It is just like a placeholder, then.  
+
+Customer: Yes. Well, okay. At least it does nothing bad. Should we make it disappear?  
+
+Interviewer: It is better, yes. ... So, is our camera working right now?
+
+(04:35)  
+Customer: That means when it sees me and it does not understand who I am, it will say that no, everything is wrong... On Face Recognition for employees.  
+
+Interviewer: Correct?  
+
+Customer: Ah, so, can this be started manually here?  
+
+Interviewer: Yes, we are thinking about making the session run in the background...
+
+(05:08)  
+Interviewer: The session starts, and it is in the background mode... Can you lift it up a little bit? Now I will clean up the picture properly.  
+
+Customer: And also spoof.
+
+(05:54)  
+Interviewer: It reacts to the board like that.  
+
+Customer: So, tell me, how did you make such a system?  
+
+Interviewer: There is another system installed there that specifically reacts to a phone, or to any other sort of object.
+
+(06:12)  
+Customer: Is it a model? ... Well, okay, fine, I believe you. Good. So, what else should I look at? ... the fact that it does not work in an office mode, the fact that the speed is rather slow there because of two models at once... I suggested trying some compromises...
+
+(07:58)  
+Interviewer: Good. Hmm, so. That means speeding up the process of recognition as a whole and the performance of the website?  
+
+Customer: Yes. This is a must have priority.
+
+(08:43)  
+Interviewer: Good. We are working on the speed. Perhaps, also just my personal assumption... the small board itself sometimes cannot handle it.  
+
+Customer: Well, obviously, yes. If you can show it works on a laptop, then... This is the fourth model of the board given, correct?
+
+(09:35)  
+Customer: ... I can offer you to try this one to see how much performance gain you can get.
+
+(10:16)  
+Interviewer: Look. Right now I just went to the site... Here it works very fast for us.
+
+(11:20)  
+Interviewer: ... Here anti spoofing also works...  
+
+Customer: Let us do it.
+
+(12:34)  
+Customer: Access denied takes a long time too.  
+
+Interviewer: Yes. Hm. Well, we will need to work on the performance.  
+
+Customer: ... look at how you work with memory, because that is obvious.And copying embeddings is a rather expensive operation...
+
+(13:23)  
+Customer: ... Just turned on the camera, but it works. You can do that obviously, flashing should also happen.
+
+(14:31)  
+Interviewer: Good, thank you. ... That means it lights up yellow when it cannot in the process...
+
+(15:14)  
+Customer: Yes, meaning blue when it recognizes the face... Can I have another explanation regarding the signals?  
+
+Interviewer: Yellow is when the face was recognized, but poorly... Blue gave reaction, with red they gave.
+
+(16:27)  
+Interviewer: Well and I will just list once again what we did... We added that a face cannot be registered repeatedly. Filtering... last capture... LEDs...
+
+(17:31)  
+Customer: Okay, I saw it on the video.  
+
+Interviewer: ... sometimes requires separate access (sudo).  
+
+Customer: Common overhead.
+
+(18:05)  
+Interviewer: ... the goal of our review was... status led indicators implementation...  
+
+Customer: Well, I see everything, everything works not perfectly, but it works. There is still time... Are there any questions for me?
+
+(18:56)  
+Customer: Well, right now speed is everything... If you realize that you frequently lack performance... I can try to get it for you.  
+
+Interviewer: Good.  
+
+Customer: That is probably all then.
+
+Interviewer: Thank you. All then, thank you. Now I will leave.
