@@ -4,6 +4,25 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-07-12  
+
+### Added
+- Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming
+- Recognition runs efficiently in the background without blocking the UI
+- Connection of the system and the door
+- Recognition with accessories
+- Extensive customer handover documentation and contributor guides
+
+### Changed
+- Sped up system response time by eliminating Streamlit UI polling bottlenecks
+- Improved local database setup for enhanced offline reliability
+
+### Fixed
+- Stabilized Docker build process and image sizes
+
+### Removed
+- US-011: Recognize in a crowd (removed based on customer feedback; not needed for current scope)
+
 ## [2.1.0] - 2026-07-05  
 
 ### Added
@@ -56,3 +75,4 @@ All notable changes to FaceGuard will be documented in this file.
 [1.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/1.0.0  
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
 [2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
+[3.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.1.0...v3.0.0
