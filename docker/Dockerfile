@@ -10,17 +10,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir numpy pandas psycopg2-binary
-RUN pip install --no-cache-dir opencv-python onnxruntime
-RUN pip install --no-cache-dir streamlit streamlit-webrtc pytest
-RUN pip install --no-cache-dir gpiozero RPi.GPIO
-RUN pip install --no-cache-dir insightface
+COPY requirements.txt .
 
-VOLUME ["/app/backend", "/app/tests"]
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
 
-EXPOSE 8501
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-ENV PYTHONPATH=/app
-
-CMD ["bash"]
+ENV PYTHONPATH=/app/backend
+WORKDIR /app/backend
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

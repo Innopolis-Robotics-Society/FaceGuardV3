@@ -6,15 +6,15 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 import numpy as np  # noqa: E402
-from backend.faceguard.interfaces import FaceProviderInterface  # noqa: E402
+from faceguard.interfaces import FaceProviderInterface  # noqa: E402
 
-from backend.faceguard.detect import select_closest_face, is_good_face  # noqa: E402
+from faceguard.detect import select_closest_face, is_good_face  # noqa: E402
 
 DEFAULT_MODEL_NAME = "buffalo_s"
 
 
 class LivenessDetector:
-    def __init__(self, threshold=0.50):
+    def __init__(self, threshold=0.85):
         import onnxruntime
 
         self.threshold = threshold
@@ -67,7 +67,7 @@ class LivenessDetector:
             borderType=cv2.BORDER_REPLICATE,
         )
 
-        # print(f"DEBUG: Кроп лица успешно сделан. Размер кропа: {face_crop.shape}", flush=True)
+        # print(f"DEBUG: Crop size: {face_crop.shape}", flush=True)
         face_crop = cv2.resize(face_crop, (80, 80))
         img = face_crop.astype(np.float32)
         img = np.transpose(img, (2, 0, 1))
@@ -81,7 +81,7 @@ class LivenessDetector:
 
         mock_liveness_score = float(probabilities[1])
         is_live = mock_liveness_score >= self.threshold
-        # print(f"DEBUG: Выход модели MiniFASNet (вероятности): {probabilities}", flush=True)
+        # print(f"DEBUG: MiniFASNet probs: {probabilities}", flush=True)
 
         return is_live, mock_liveness_score
 
@@ -215,6 +215,7 @@ class InsightFaceProvider(FaceProviderInterface):
         self.liveness_detector = liveness_detector
 
     def extract_embedding(self, frame: np.ndarray):
-        embedding, face = extract_embedding_from_frame(self.app, frame)
-        status_code = "real" if embedding is not None else "no_face"
+        embedding, face, status_code = extract_embedding_from_frame(
+            self.app, self.liveness_detector, frame
+        )
         return embedding, face, status_code

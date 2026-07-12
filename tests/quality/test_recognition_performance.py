@@ -1,8 +1,8 @@
 import numpy as np
 from time import perf_counter
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
-from backend.faceguard.recognize import (
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
+from faceguard.recognize import (
     extract_embedding_from_frame,
     normalize_embedding,
 )
@@ -71,7 +71,7 @@ def test_qrt_perf_001_full_access_decision_within_three_seconds():
     db_vector = normalize_embedding(np.ones(512, dtype=np.float32))
 
     started_at = perf_counter()
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=db_vector,

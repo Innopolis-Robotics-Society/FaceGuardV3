@@ -1,6 +1,8 @@
 docker/insightface_models/buffalo_s.zip
 backend/faceguard/data/*.npy
 **/.streamlit/secrets.toml
+backend/secrets.toml
+secrets.toml
 __pycache__/
 *.pyc
 *.pyo
@@ -20,3 +22,5 @@ env/
 *.swodocker/insightface_models/
 
 docker/insightface_models/buffalo_s/
+.env
+backend/.env

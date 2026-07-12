@@ -166,7 +166,7 @@ so that I can be sure that strangers did not enter legally.
 
 ### Notes and constraints
 
-Focus on the person closest to the door.
+Focus on the person closest to the camera.
 
 ---
 

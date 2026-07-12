@@ -1,4 +1,4 @@
-@startuml
+@startuml static-view
 skinparam componentStyle rectangle
 
 actor Admin
@@ -6,44 +6,49 @@ actor Employee
 
 package "Lab Entrance (Edge)" {
     component "Camera" as Cam
-    component "Door & LED Controller" as DoorCtrl <<Planned>>
+    component "LED Controller" as LEDCtrl <<Planned>>
 }
 
 package "Web Application Layer" {
-    component "Streamlit Application" as WebApp <<UI & Logic Orchestrator>>
+    component "React Frontend" as Frontend <<Web UI (Vite/Node)>>
+    component "FastAPI Backend" as Backend <<API & Logic Orchestrator>>
 }
 
 package "ML & Processing Subsystem" {
     component "Face Recognition Module" as FaceRec <<InsightFace>>
 }
 
-package "Database Server" {
+package "Local Database Container" {
     database "PostgreSQL" as DB
 }
 
 ' Interfaces
-interface "Video Stream" as IVideo
+interface "Video Stream (WebRTC)" as IVideo
+interface "REST / WebSockets" as IAPI
 interface "SQL Interface" as ISQL
 interface "Hardware Control" as IHW
 
 ' Actor interactions
-Admin --> WebApp : Uses (Web UI)
+Admin --> Frontend : Uses (Web UI)
 Employee --> Cam : Looks at
 
-' Ball and Socket Connections
+' Connections
 Cam - IVideo
-WebApp -( IVideo : " Requires"
+Frontend -( IVideo : " Requires (Browser)"
+
+Frontend - IAPI
+Backend -( IAPI : " Serves"
 
 DB - ISQL
-WebApp -( ISQL : " Requires (psycopg2)"
+Backend -( ISQL : " Requires (psycopg2)"
     
-DoorCtrl - IHW
-WebApp -( IHW : " Requires (Commands)"
+LEDCtrl - IHW
+Backend -( IHW : " Requires (Commands)"
 
 interface "Internal Python Interface" as IFace
 
 ' Internal components
 FaceRec - IFace
-WebApp -( IFace : " Requires"
+Backend -( IFace : " Requires"
 
 @enduml

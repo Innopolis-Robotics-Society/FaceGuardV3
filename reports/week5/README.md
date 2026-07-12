@@ -92,7 +92,7 @@ All feedback from the Week 4 Sprint Review was addressed in this Sprint. Feedbac
 - [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](../../docs/architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md)
 
 ## 22. Architecture
-The system is a monolithic Streamlit application running in a Docker container on a Raspberry Pi. It coordinates camera input, face recognition via InsightFace, PostgreSQL-backed embedding lookup, access logging, and hardware outputs (LEDs, door relay). The `FaceProviderInterface` decouples business logic from the recognition provider, allowing provider swaps without touching access-decision code. The database is hosted on Neon.tech (PostgreSQL on AWS).
+The system is a monolithic Streamlit application running in a Docker container on a Raspberry Pi. It coordinates camera input, face recognition via InsightFace, PostgreSQL-backed embedding lookup, access logging, and hardware outputs (LEDs). The `FaceProviderInterface` decouples business logic from the recognition provider, allowing provider swaps without touching access-decision code. The database is hosted on Neon.tech (PostgreSQL on AWS).
 
 ## 23. QRs and Architecture decisions
 
@@ -180,7 +180,7 @@ The runnable product is not publicly hosted, as the customer explicitly requeste
 
 ## 39. Next Steps
 1. Improve recognition accuracy with accessories such as glasses and masks
-2. Integrate a smart lock controlled by the recognition result
+2. Provide visual indications via LEDs based on the recognition result
 3. Increase the speed of the system's response
 
 ## 40. Contribution Traceability

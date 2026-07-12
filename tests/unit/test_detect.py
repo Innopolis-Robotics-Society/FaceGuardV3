@@ -1,10 +1,13 @@
+import sys
+import types
 from types import SimpleNamespace
 
 import numpy as np
 
-from backend.faceguard.detect import (
+from faceguard.detect import (
     clamp_bbox,
     crop_face,
+    draw_face_box,
     is_good_face,
     select_closest_face,
 )
@@ -80,3 +83,34 @@ def test_is_good_face_rejects_invalid_faces():
         det_score=0.99,
     )
     assert is_good_face(no_embedding_face, frame) is False
+
+
+def test_draw_face_box_clamps_coordinates_and_annotates_frame(monkeypatch):
+    calls = []
+    fake_cv2 = types.ModuleType("cv2")
+    fake_cv2.FONT_HERSHEY_SIMPLEX = 4
+    fake_cv2.rectangle = lambda *args: calls.append(("rectangle", args))
+    fake_cv2.putText = lambda *args: calls.append(("putText", args))
+    monkeypatch.setitem(sys.modules, "cv2", fake_cv2)
+    frame = np.zeros((100, 120, 3), dtype=np.uint8)
+    face = make_face([-10, 5, 140, 90])
+
+    result = draw_face_box(frame, face, "Alice", color=(1, 2, 3))
+
+    assert result is frame
+    assert calls[0] == (
+        "rectangle",
+        (frame, (0, 5), (120, 90), (1, 2, 3), 2),
+    )
+    assert calls[1] == (
+        "putText",
+        (frame, "Alice", (0, 30), 4, 0.7, (1, 2, 3), 2),
+    )
+
+
+def test_draw_face_box_leaves_frame_unchanged_without_face(monkeypatch):
+    fake_cv2 = types.ModuleType("cv2")
+    monkeypatch.setitem(sys.modules, "cv2", fake_cv2)
+    frame = np.zeros((10, 10, 3), dtype=np.uint8)
+
+    assert draw_face_box(frame, None, "ignored") is frame

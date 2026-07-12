@@ -1,7 +1,11 @@
+import importlib
+import sys
+import types
+
 import numpy as np
 
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
 
 
 class FakeRecognizer(FaceProviderInterface):
@@ -24,7 +28,7 @@ def test_process_access_attempt_grants_access_for_matching_embeddings():
         status_code="real",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=saved_embedding,
@@ -46,7 +50,7 @@ def test_process_access_attempt_rejects_non_real_statuses():
             status_code=status_code,
         )
 
-        access_granted, returned_status, name, score = process_access_attempt(
+        access_granted, returned_status, name, score, _ = process_access_attempt(
             frame=frame,
             recognizer=recognizer,
             test_db_vector=saved_embedding,
@@ -66,7 +70,7 @@ def test_process_access_attempt_rejects_low_similarity_embeddings():
         status_code="real",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=frame,
         recognizer=recognizer,
         test_db_vector=saved_embedding,
@@ -76,3 +80,40 @@ def test_process_access_attempt_rejects_low_similarity_embeddings():
     assert status_code == "Access Denied"
     assert name == "Unknown"
     assert score == 0.0
+
+
+def test_process_access_attempt_uses_database_match(monkeypatch):
+    db_package = importlib.import_module("db")
+    employees_db = types.ModuleType("db.employees_db")
+    received = []
+    employees_db.find_closest_embedding = lambda embedding: received.append(
+        embedding
+    ) or (7, "Alice", 0.876)
+    monkeypatch.setitem(sys.modules, "db.employees_db", employees_db)
+    monkeypatch.setattr(db_package, "employees_db", employees_db, raising=False)
+    embedding = np.array([1.0, 0.0], dtype=np.float32)
+    recognizer = FakeRecognizer(embedding=embedding)
+
+    result = process_access_attempt(
+        frame=np.zeros((20, 20, 3), dtype=np.uint8), recognizer=recognizer
+    )
+
+    assert result[0:4] == (True, "real", "Alice", 87.6)
+    assert result[4] == {"source": "fake"}
+    assert received == [embedding]
+
+
+def test_process_access_attempt_denies_when_database_has_no_match(monkeypatch):
+    db_package = importlib.import_module("db")
+    employees_db = types.ModuleType("db.employees_db")
+    employees_db.find_closest_embedding = lambda embedding: None
+    monkeypatch.setitem(sys.modules, "db.employees_db", employees_db)
+    monkeypatch.setattr(db_package, "employees_db", employees_db, raising=False)
+    recognizer = FakeRecognizer(embedding=np.array([1.0, 0.0], dtype=np.float32))
+
+    result = process_access_attempt(
+        frame=np.zeros((20, 20, 3), dtype=np.uint8), recognizer=recognizer
+    )
+
+    assert result[0:4] == (False, "Access Denied", "Unknown", 0.0)
+    assert result[4] == {"source": "fake"}

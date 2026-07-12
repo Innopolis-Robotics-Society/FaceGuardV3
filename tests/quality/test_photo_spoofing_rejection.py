@@ -1,7 +1,7 @@
 import numpy as np
 
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
 
 
 class FakeSpoofRecognizer(FaceProviderInterface):
@@ -26,7 +26,7 @@ def test_qrt_sec_002_rejects_spoof_status_before_matching():
         status_code="spoof",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=dummy_frame,
         recognizer=recognizer,
         test_db_vector=dummy_db_vector,
@@ -47,7 +47,7 @@ def test_qrt_sec_002_rejects_no_face_input():
         status_code="no_face",
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=dummy_frame,
         recognizer=recognizer,
         test_db_vector=dummy_db_vector,
@@ -74,7 +74,7 @@ def test_qrt_sec_002_rejects_at_least_9_out_of_10_low_similarity_attempts():
             status_code="real",
         )
 
-        access_granted, status_code, name, score = process_access_attempt(
+        access_granted, status_code, name, score, _ = process_access_attempt(
             frame=dummy_frame,
             recognizer=recognizer,
             test_db_vector=dummy_db_vector,

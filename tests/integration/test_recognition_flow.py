@@ -1,8 +1,8 @@
 import numpy as np
 
-from backend.faceguard.business_logic import process_access_attempt
-from backend.faceguard.interfaces import FaceProviderInterface
-from backend.faceguard.recognize import normalize_embedding
+from faceguard.business_logic import process_access_attempt
+from faceguard.interfaces import FaceProviderInterface
+from faceguard.recognize import normalize_embedding
 
 
 class FakeRecognitionProvider(FaceProviderInterface):
@@ -30,7 +30,7 @@ def test_recognition_flow_grants_access_for_matching_provider_embedding():
         np.array([0.99, 0.01, 0.0, 0.0], dtype=np.float32)
     )
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=fake_frame,
         recognizer=provider,
         test_db_vector=database_embedding,
@@ -49,7 +49,7 @@ def test_recognition_flow_rejects_low_similarity_provider_embedding():
     )
     provider = FakeRecognitionProvider(np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float32))
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=fake_frame,
         recognizer=provider,
         test_db_vector=database_embedding,
@@ -68,7 +68,7 @@ def test_recognition_flow_rejects_provider_no_face_status():
     )
     provider = FakeRecognitionProvider(None, status_code="no_face")
 
-    access_granted, status_code, name, score = process_access_attempt(
+    access_granted, status_code, name, score, _ = process_access_attempt(
         frame=fake_frame,
         recognizer=provider,
         test_db_vector=database_embedding,

@@ -1,4 +1,15 @@
-**/.streamlit/secrets.toml
-**/__pycache__/
+venv/
+.venv/
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 .git/
+.gitignore
+reports/
+test_integration.py
+docker/
+.vscode/
+.idea/
+.env
