@@ -6,7 +6,7 @@ This document is the authoritative handover artifact for FaceGuard, Week 6 Trial
 
 **Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time and log all access attempts.
 
-**Scope of this release:** This handover covers the Week 6 Trial Release (MVP v2). It includes background video processing, a fully persistent local database, performance improvements, and recognition with accessories.
+**Scope of this release:** This handover covers the Week 6 Trial Release (towards `MVP v3`). It includes background video processing, a fully persistent local database, performance improvements, and recognition with accessories.
 
 ## 2. Handover Status and Ownership
 
