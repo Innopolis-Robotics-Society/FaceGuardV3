@@ -1,10 +1,9 @@
-ᅠ
 # Sprint Review Summary — Sprint 4, Week 6
 
-**Date:** 10.07.2026
-**Format:** Offline, in person
-**Participants:** Development team, Customer (role: admin)
-**Recording:** The meeting was recorded with the customer's permission. A sanitized transcript was published, since the customer approved publication. UAT execution and the transition discussion were conducted during the same session, so this recording also covers both.
+**Date:** 10.07.2026  
+**Format:** Offline, in person  
+**Participants:** Development team, Customer (role: admin)  
+**Recording:** The meeting was recorded with the customer's permission. A sanitized transcript was published, since the customer approved publication. UAT execution and the transition discussion were conducted during the same session, so this recording also covers both.  
 
 ## Scope reviewed
 
