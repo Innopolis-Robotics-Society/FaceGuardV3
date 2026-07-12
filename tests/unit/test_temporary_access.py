@@ -1,5 +1,6 @@
 import contextlib
 import importlib
+import numpy as np
 import pytest
 import sys
 import types
@@ -15,6 +16,7 @@ class FakePool:
 
 
 def load_employees_db(monkeypatch):
+    db_package = importlib.import_module("db")
     psycopg2 = types.ModuleType("psycopg2")
     psycopg2_extras = types.ModuleType("psycopg2.extras")
     psycopg2.extras = psycopg2_extras
@@ -24,12 +26,20 @@ def load_employees_db(monkeypatch):
     pandas = types.SimpleNamespace(notna=lambda value: value is not None)
     tomli = types.ModuleType("tomli")
     tomli.load = lambda f: {}
+    dotenv = types.ModuleType("dotenv")
+    dotenv.load_dotenv = lambda: None
     monkeypatch.setitem(sys.modules, "psycopg2", psycopg2)
     monkeypatch.setitem(sys.modules, "psycopg2.extras", psycopg2_extras)
     monkeypatch.setitem(sys.modules, "streamlit", streamlit)
     monkeypatch.setitem(sys.modules, "pandas", pandas)
     monkeypatch.setitem(sys.modules, "tomli", tomli)
-    sys.modules.pop("db.employees_db", None)
+    monkeypatch.setitem(sys.modules, "dotenv", dotenv)
+    monkeypatch.setattr(db_package, "connection", None, raising=False)
+    monkeypatch.setitem(sys.modules, "db.connection", None)
+    del sys.modules["db.connection"]
+    monkeypatch.setattr(db_package, "employees_db", None, raising=False)
+    monkeypatch.setitem(sys.modules, "db.employees_db", None)
+    del sys.modules["db.employees_db"]
     return importlib.import_module("db.employees_db")
 
 
@@ -258,3 +268,182 @@ def test_add_employees_returns_true_and_inserts_on_success(monkeypatch):
     assert len(executed_queries) == 2  # SELECT check + INSERT
     assert "INSERT INTO employees" in executed_queries[1]
     assert connection.committed is True
+
+
+def test_access_datetime_rejects_unsupported_values(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+
+    with pytest.raises(TypeError, match="Unsupported temporary access value type"):
+        employees_db._as_access_datetime("2026-07-11")
+
+
+def test_permanent_access_discards_temporary_window(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+
+    assert employees_db._normalize_access_window(
+        "Permanent", date(2026, 7, 1), date(2026, 7, 2)
+    ) == (None, None)
+
+
+def test_update_employee_normalizes_window_commits_and_invalidates_cache(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    connection = FakeConnection()
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+    employees_db._embedding_cache = ["cached"]
+
+    employees_db.update_employee(
+        "7",
+        "Alice",
+        "Temporary",
+        date(2026, 7, 11),
+        date(2026, 7, 12),
+    )
+
+    query, params = connection.cursor_instance.executed[0]
+    assert query.startswith("UPDATE employees")
+    assert params == (
+        "Alice",
+        "Temporary",
+        datetime(2026, 7, 11, 0, 0),
+        datetime(2026, 7, 12, 23, 59, 59, 999999),
+        7,
+    )
+    assert connection.committed is True
+    assert employees_db._embedding_cache is None
+
+
+def test_update_employee_rolls_back_query_failure(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    connection = FakeConnection()
+    connection.cursor_instance.execute = lambda *args, **kwargs: (_ for _ in ()).throw(
+        RuntimeError("write failed")
+    )
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+
+    employees_db.update_employee(1, "Alice", "Permanent")
+
+    assert connection.committed is False
+    assert connection.rolled_back is True
+
+
+def test_delete_employee_uses_integer_id_and_invalidates_cache(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    connection = FakeConnection()
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+    employees_db._embedding_cache = ["cached"]
+
+    employees_db.delete_employee("12")
+
+    query, params = connection.cursor_instance.executed[0]
+    assert query.startswith("DELETE FROM employees")
+    assert params == (12,)
+    assert connection.committed is True
+    assert employees_db._embedding_cache is None
+
+
+def test_add_employees_rejects_duplicate_embedding_before_query(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    monkeypatch.setattr(
+        employees_db,
+        "find_closest_embedding",
+        lambda embedding: (4, "Existing Alice", 0.99),
+    )
+    monkeypatch.setattr(
+        employees_db,
+        "get_db_connection",
+        lambda: pytest.fail("database should not be accessed"),
+    )
+
+    with pytest.raises(ValueError, match="Face already registered as Existing Alice"):
+        employees_db.add_employees(
+            "New Alice", "Permanent", embedding=np.array([1.0, 0.0])
+        )
+
+
+def test_add_employees_serializes_embedding_and_temporary_dates(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    connection = FakeConnection(fetchone_result=None)
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+    monkeypatch.setattr(employees_db, "find_closest_embedding", lambda embedding: None)
+
+    result = employees_db.add_employees(
+        "Carol",
+        "Temporary",
+        embedding=np.array([0.25, 0.75]),
+        start_date=date(2026, 7, 11),
+        expiration_date=date(2026, 7, 12),
+    )
+
+    insert_query, params = connection.cursor_instance.executed[1]
+    assert "INSERT INTO employees" in insert_query
+    assert params == (
+        "Carol",
+        "Temporary",
+        [0.25, 0.75],
+        datetime(2026, 7, 11, 0, 0),
+        datetime(2026, 7, 12, 23, 59, 59, 999999),
+    )
+    assert result is True
+    assert connection.committed is True
+
+
+def test_get_all_embeddings_returns_fresh_cache_without_query(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    cached = [(1, "Alice", np.array([1.0, 0.0]))]
+    employees_db._embedding_cache = cached
+    employees_db._embedding_cache_time = 100.0
+    monkeypatch.setattr(employees_db.time, "time", lambda: 120.0)
+    monkeypatch.setattr(
+        employees_db,
+        "get_db_connection",
+        lambda: pytest.fail("fresh cache should avoid a database query"),
+    )
+
+    assert employees_db.get_all_embeddings() is cached
+
+
+def test_find_closest_embedding_returns_best_match_above_threshold(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    monkeypatch.setattr(
+        employees_db,
+        "get_all_embeddings",
+        lambda: [
+            (1, "Weak", np.array([0.8, 0.2], dtype=np.float32)),
+            (2, "Best", np.array([1.0, 0.0], dtype=np.float32)),
+            (3, "Rejected", np.array([0.0, 1.0], dtype=np.float32)),
+        ],
+    )
+
+    match = employees_db.find_closest_embedding(
+        np.array([1.0, 0.0], dtype=np.float32), threshold=0.9
+    )
+
+    assert match[0:2] == (2, "Best")
+    assert match[2] == pytest.approx(1.0)
+
+
+def test_find_closest_embedding_handles_empty_database(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    monkeypatch.setattr(employees_db, "get_all_embeddings", lambda: [])
+
+    assert employees_db.find_closest_embedding(np.ones(2)) is None
