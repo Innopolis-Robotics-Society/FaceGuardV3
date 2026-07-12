@@ -1,6 +1,18 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import (
+    FastAPI,
+    WebSocket,
+    WebSocketDisconnect,
+    HTTPException,
+    Depends,
+    Request,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from core.security import create_access_token, get_current_user, verify_token
 
 import numpy as np
 import base64
@@ -30,9 +42,13 @@ import leds
 
 app = FastAPI()
 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -66,7 +82,7 @@ class EmployeeAdd(EmployeeUpdate):
 
 
 @app.get("/api/employees")
-def get_employees():
+def get_employees(user: dict = Depends(get_current_user)):
     df = load_employees()
     df = df.replace({np.nan: None})
     for col in df.select_dtypes(include=["datetime64"]).columns:
@@ -75,13 +91,14 @@ def get_employees():
 
 
 @app.delete("/api/employees/{emp_id}")
-def delete_emp(emp_id: int):
+def delete_emp(emp_id: int, user: dict = Depends(get_current_user)):
     delete_employee(emp_id)
     return {"status": "ok"}
 
 
 @app.post("/api/login")
-def login(credentials: dict):
+@limiter.limit("5/minute")
+def login(request: Request, credentials: dict):
     try:
         from dotenv import load_dotenv
 
@@ -96,7 +113,8 @@ def login(credentials: dict):
         if provided_username == valid_user and stored_hash:
             # Check bcrypt hash
             if bcrypt.checkpw(provided_password, stored_hash.encode("utf-8")):
-                return {"status": "ok", "token": "authenticated"}  # nosec B105
+                token = create_access_token({"sub": valid_user})
+                return {"status": "ok", "token": token}  # nosec B105
     except Exception as e:
         print("Error reading secrets:", e)
 
@@ -104,7 +122,9 @@ def login(credentials: dict):
 
 
 @app.put("/api/employees/{emp_id}")
-def update_emp(emp_id: int, emp: EmployeeUpdate):
+def update_emp(
+    emp_id: int, emp: EmployeeUpdate, user: dict = Depends(get_current_user)
+):
     try:
         update_employee(
             emp_id, emp.name, emp.status, emp.start_date, emp.expiration_date
@@ -115,7 +135,7 @@ def update_emp(emp_id: int, emp: EmployeeUpdate):
 
 
 @app.post("/api/employees")
-def add_emp(emp: EmployeeAdd):
+def add_emp(emp: EmployeeAdd, user: dict = Depends(get_current_user)):
     try:
         add_employees(
             emp.name,
@@ -130,7 +150,11 @@ def add_emp(emp: EmployeeAdd):
 
 
 @app.get("/api/logs")
-def get_logs(start_date: Optional[str] = None, end_date: Optional[str] = None):
+def get_logs(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    user: dict = Depends(get_current_user),
+):
     sd = start_date if start_date else None
     ed = end_date if end_date else None
     return get_all_logs(sd, ed)
@@ -152,6 +176,16 @@ async def drain_websocket(websocket: WebSocket) -> str:
 
 @app.websocket("/ws/recognize")
 async def websocket_recognize(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=1008)
+        return
+    try:
+        verify_token(token)
+    except Exception:
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
 
     unrecognized_frames = 0
@@ -314,6 +348,16 @@ async def websocket_recognize(websocket: WebSocket):
 
 @app.websocket("/ws/enroll")
 async def websocket_enroll(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=1008)
+        return
+    try:
+        verify_token(token)
+    except Exception:
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
     embeddings = []
 

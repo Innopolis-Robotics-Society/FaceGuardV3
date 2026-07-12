@@ -274,3 +274,12 @@ tbody tr:hover {
   font-size: 0.875rem;
   color: rgba(255,255,255,0.8);
 }
+
+/* Hide default password reveal eye in some browsers like Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input[type="password"]::-webkit-reveal {
+  display: none;
+}

@@ -28,7 +28,8 @@ def add_log(name: str, status: str):
                         INSERT INTO logs (name, status)
                         SELECT %s, %s
                         WHERE NOT EXISTS (
-                            SELECT 1 FROM logs WHERE name = %s AND status = %s AND time > NOW() - INTERVAL '1 minute'
+                            SELECT 1 FROM logs WHERE name = %s
+                            AND status = %s AND time > NOW() - INTERVAL '1 minute'
                         )
                         """,
                 (name, status, name, status),

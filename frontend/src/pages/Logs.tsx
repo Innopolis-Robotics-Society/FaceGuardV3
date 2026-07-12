@@ -22,7 +22,9 @@ export default function Logs() {
   const lastLogRef = useRef<{ name: string, status: string, time: number } | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/logs')
+    fetch('http://localhost:8000/api/logs', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+    })
       .then(res => res.json())
       .then(data => {
         setLogs(data);

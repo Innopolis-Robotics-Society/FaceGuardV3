@@ -165,7 +165,8 @@ def test_init_db_runs_date_to_timestamp_migration(monkeypatch):
     assert "CREATE TABLE IF NOT EXISTS employees" in executed_sql
     assert "ALTER COLUMN start_date TYPE TIMESTAMP" in executed_sql
     assert "ALTER COLUMN expiration_date TYPE TIMESTAMP" in executed_sql
-    assert "expiration_date::timestamp + INTERVAL '1 day'" in executed_sql
+    assert "expiration_date::timestamp +" in executed_sql
+    assert "INTERVAL '1 day'" in executed_sql
     assert "INTERVAL '1 microsecond'" in executed_sql
     assert connection.committed is True
     assert connection.rolled_back is False

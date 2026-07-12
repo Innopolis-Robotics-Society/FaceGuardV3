@@ -86,7 +86,8 @@ export function CameraProvider({ children }: { children: ReactNode }) {
     }
 
     const isEnrollMode = isEnrolling; // enrollment takes precedence
-    const endpoint = isEnrollMode ? 'ws://localhost:8000/ws/enroll' : 'ws://localhost:8000/ws/recognize';
+    const token = localStorage.getItem('auth_token') || '';
+    const endpoint = isEnrollMode ? `ws://localhost:8000/ws/enroll?token=${token}` : `ws://localhost:8000/ws/recognize?token=${token}`;
     const intervalTime = isEnrollMode ? 300 : 200;
 
     if (isEnrollMode) {

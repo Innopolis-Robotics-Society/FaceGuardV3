@@ -10,14 +10,14 @@ import Auth from './pages/Auth';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('auth_token') === 'authenticated';
+    return !!localStorage.getItem('auth_token');
   });
   
   const { isRecognizing } = useCamera();
 
   if (!isAuthenticated) {
-    return <Auth onLogin={() => {
-      localStorage.setItem('auth_token', 'authenticated');
+    return <Auth onLogin={(token) => {
+      localStorage.setItem('auth_token', token);
       setIsAuthenticated(true);
     }} />;
   }

@@ -67,7 +67,7 @@ class LivenessDetector:
             borderType=cv2.BORDER_REPLICATE,
         )
 
-        # print(f"DEBUG: Кроп лица успешно сделан. Размер кропа: {face_crop.shape}", flush=True)
+        # print(f"DEBUG: Crop size: {face_crop.shape}", flush=True)
         face_crop = cv2.resize(face_crop, (80, 80))
         img = face_crop.astype(np.float32)
         img = np.transpose(img, (2, 0, 1))
@@ -81,7 +81,7 @@ class LivenessDetector:
 
         mock_liveness_score = float(probabilities[1])
         is_live = mock_liveness_score >= self.threshold
-        # print(f"DEBUG: Выход модели MiniFASNet (вероятности): {probabilities}", flush=True)
+        # print(f"DEBUG: MiniFASNet probs: {probabilities}", flush=True)
 
         return is_live, mock_liveness_score
 
