@@ -14,7 +14,6 @@ Sprint 4, Week 6 Trial Release: MVP v2 progress (towards MVP v3).
 - Admin login and authentication
 - Employee registration, including temporary access with an expiration date
 - Recognition threshold and embedding averaging, explained to the customer
-- Employee deletion and sorting in the employee list
 - Background recognition: the admin can navigate between pages while recognition keeps running
 - Migration from the Streamlit admin panel to a separate frontend
 - Migration of the database from cloud storage to fully local storage on the device
@@ -22,7 +21,6 @@ Sprint 4, Week 6 Trial Release: MVP v2 progress (towards MVP v3).
 ## Feedback
 
 **Positive:**
-- Employee deletion and list sorting work well
 - Background recognition works: the admin can move between pages without interrupting recognition
 - The customer confirmed the system works overall and expressed clear approval
 
