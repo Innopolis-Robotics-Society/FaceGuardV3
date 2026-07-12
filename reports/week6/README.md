@@ -31,7 +31,7 @@
 - Deliver trial release v3.0.0 for customer testing
 
 ## 6. Total Sprint size
-[TODO] Story Points  
+104 Story Points  
 
 ## 7. Trial-release Changes
 - Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming, eliminating Streamlit UI polling latency
@@ -46,8 +46,7 @@
 - Documented asynchronous GPIO hardware integration (ADR-007)
 
 ## 8. Product Access Artifact
-[Runnable Product](https://github.com/Innopolis-Robotics-Society/FaceGuardV3) 
-
+[Runnable Product](https://github.com/Innopolis-Robotics-Society/FaceGuardV3)  
 [FaceGuardV3 v3.0.0 Release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0)  
 
 The application is deployed on a Raspberry Pi 5 with a connected USB webcam and leds.  
@@ -57,12 +56,11 @@ For local evaluation, start with Docker and open at: `http://localhost:3000`
 [Run instructions](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md)
 
 ## 10-14. Links
-
-[README.md](../../README.md)
-[CONTRIBUTING.md](../../CONTRIBUTING.md)
-[AGENTS.md](../../AGENTS.md)
-[docs/customer-handover.md](../../docs/customer-handover.md)
-[Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)
+- [README.md](../../README.md)  
+- [CONTRIBUTING.md](../../CONTRIBUTING.md)  
+- [AGENTS.md](../../AGENTS.md)  
+- [docs/customer-handover.md](../../docs/customer-handover.md)  
+- [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)  
 
 ## 15. Customer-facing Documentation Review
 [TODO]
@@ -76,7 +74,8 @@ Transition-readiness summary, including what must still happen in Week 7.
 
 | Feedback point | Resulting PBI or issue | Status | Response |
 |---|---|---|---|
-| Speed up the system response | [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171) | Done | Decoupled frontend and backend via WebSockets — response time reduced from ~3s+ to ~1.1s |
+| Recognize in a crowd not needed | [#50](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/50) | Removed | Customer confirmed during Sprint 4 Review (2026-07-10), see `reports/week6/sprint-review-summary.md` |
+| Speed up the system response | [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171) | Done | Decoupled frontend and backend via WebSockets |
 | Make the recognition run in the background | [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172) | Done | Recognition now runs continuously via WebSocket without blocking the UI |
 | Temporary access should use explicit start and end date fields | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | Done | Replaced number-of-days input with start and expiration date pickers |
 | Recognition should use 5–10 captured frames and averaged embeddings | [#59](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/59) | Done | Switched from single photo capture to video frame extraction |
@@ -125,18 +124,17 @@ User acceptance testing was conducted during an online Sprint Review session on 
 All nine scenarios passed. No failures were recorded.
 
 **Most important feedback received:**
-- Increase the speed of system's response
+[TODO]
 
 ## 22-23. Links
-- [Release 3.0.0 - MVP v3](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0)
-[CHANGELOG.md](../../CHANGELOG.md)
+- [3.0.0 - towards MVP v3](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0)  
+- [CHANGELOG.md](../../CHANGELOG.md)
 
 ## 24. Customer Review Transcript
 The public publication was permitted.  
 [Customer Review Transcript.md](sprint-review-transcript.md)
 
 ## 25-28. Links
-
 - [sprint-review-summary.md](sprint-review-summary.md)
 - [reflection.md](reflection.md)
 - [retrospective.md](retrospective.md)
@@ -168,12 +166,12 @@ The public publication was permitted.
 
 | GitHub username | Issues | PRs/MRs | Review activity | Contribution |
 |---|---|---|---|---|
-| @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#140](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/140), [#159](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/159) | [#143](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/143) | Backend, Testing, Documentation, CI/CD |
+| @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#140](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/140), [#159](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/159) | [#143](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/143) | Tests, Documentation, Project Management |
 | @oebarbie |  |  |  | Documentation, Project Management |
-| @Exckernels |  |  |  | Backend, Testing, Documentation, LEDs setup |
-| @ixkci |  |  |  | Backend, Testing, Docker setup |
-| @grex861 |  |  |  | LEDs setup, Documentation |
-| @tyajhelo |  |  |  | Documentation |
+| @Exckernels |  |  |  | Backend, Tests CI, System's Optimization |
+| @ixkci |  |  |  | Backend, System's Optimization, Architecture |
+| @grex861 |  |  |  | Documentation |
+| @tyajhelo | - | - | - | - |
 
 ## 41. Screenshots
 Screenshots are stored in:
