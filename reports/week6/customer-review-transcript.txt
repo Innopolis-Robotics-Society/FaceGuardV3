@@ -1,0 +1,66 @@
+Speaker 2
+Here is the instruction, what you need to do. A hint for the login password. 
+Speaker 1
+Here is the admin in English with small letters. Password admin user. Here is the instruction. Is it possible to bring it here? 
+Speaker 2
+No. We need to bring it back. It goes like this, 60 seconds. 
+Speaker 1
+Ah, wait, no, I gave myself time and access, I gave it to myself from tomorrow. 
+Speaker 2
+There is just a moment with a rollback, it can be reduced. 
+Speaker 1
+Ah, that is, the old one can be improved. You need to adjust it according to the time. I have a lot of divinity. If I do it like this, it will be very cool. 
+Speaker 2
+How much is the threshold? The threshold for the minimum recognition is 56. What is recognized as a whole. How is it finished? Because the average embedding is taken. We tried to compile embedding by ourselves, because several people are registered under it. And here it is, plus or minus, it recognizes exactly 50, 60, 27. You can try without stopping, go to the conditional access logs, for example. 
+Speaker 1
+Now I can go to the account. List. List. This is my system. Super. So what else do we need to do? We need to register. We need to register. We need to register. We need to register. 
+Speaker 2
+And here... I don't remember the name of the blog. 
+Speaker 1
+I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't remember the name of the blog. I don't know. It's because the parallel settings are already working. 
+Speaker 2
+But it has to stop. It stops the first process before recognition 
+Speaker 1
+and starts the second. 
+Speaker 2
+How clear was the interface? 
+Speaker 1
+Well, it's hard not to figure it out. You can delete it right away. Sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, sort, Sometimes there is a bug that the stream is not loaded correctly in the pack. Loading on the logo is a bit long, but it is not a minor problem. If you find it, it will be faster. If not, then it is not at all. At what stage of the project? 
+Speaker 2
+Are you ready to move on? 
+Speaker 1
+I'm ready. If it's ready, then yes. Does the system still work? Yes. 
+Speaker 2
+How much does the app weigh in the end? No, I didn't measure it, but according to the assumptions, that is, as far as I remember, the whole model is packed somewhere in gigabytes. How much does the app weigh? 
+Speaker 1
+I didn't take it, I don't even remember it. There is a funny improvement in the compression of vectors. It's not too much anymore. I like it, it's cool, it works. I see, I believe. I believe that it works a little. I hope to see it tomorrow at 7 o'clock. It's not so bad. 
+Speaker 2
+What did you do this week? This week we made the website faster. We rewrote it from the streamlit to the weekly front, to the React. We added the background recognition. The session starts and that's it. So you can easily move between pages and everything will work. Also, we added that we moved the database, that is, we also accelerated the site itself by moving the database that was sent to the cloud to the local one. That is, now it's all just in the local. It was supposed to be like that. Did you have a cloud of base data? Yes, we add it to the blog. 
+Speaker 1
+Don't do that. Don't do that. 
+Speaker 2
+No external base data. No such things. No cloud springs. Everything is stored only on iron. Now everything is stored only on iron. There we cleaned everything in general. Super good. So here. The most important thing for this week is that we speeded up the website, rewrote it and added background recognition. 
+Speaker 1
+We were also ready to add a door, but there is a kind of door, but... A kind of door is our lights. It doesn't require much more and it's not needed. What are you going to do next week? 
+Speaker 2
+We finished. But you said about the bug. I'll try to fix the bug with the fact that sometimes 1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1.0.1 And now, for example, at 18.33, it will be taken as the minimum threshold, but the rest will not be given permission. Okay. Well, in general, that is, to finish, to optimize as much as possible, so that it still works on Malinka. 
+Speaker 1
+Well, I hope that it will work for the rest of the week, so that Roshan and their My goal is to get into the repository, add new books, descriptions, tags. If we manage to gather the documentation on static, push the whole ICD, it will be generally cool. 
+Speaker 2
+We have a documentation site, all the documentation. Yes, show us. Well, now it may not be available, but we have it on our own. So it's basically there. And how 
+Speaker 1
+do you use it? 
+Speaker 2
+With GitHub. And what does it say on the CICD? Well, the main record is still updated, we still have the instructions, and so we added all the information. Do you have a password? I do. And here is the hosting documentation. But that's all in practice. 
+Speaker 1
+It's strange that there is such a link, because it should refer to the repository, not to the organization itself. 
+Speaker 2
+In short, you can see something and go inside. 
+Speaker 1
+So, it will be interesting. I want to have a GitHub page with a description of all the functions. Can I have a look? Let's open it. Then go back. 
+Speaker 2
+Can I? Yes, of course. Try it. We also have a set of pages. We also have a set of pages. I don't know. I don't know. Maybe we should do it like this? Maybe we should do it like this? 
+Speaker 1
+Thank you very much. 
+Speaker 2
+If you want to work further, before the next game... 
