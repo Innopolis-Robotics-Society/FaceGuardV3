@@ -151,7 +151,7 @@ The public publication was permitted.
 - Last entry time is shown in the employees list
 - Date range filter is available on the Logs page
 - CI pipeline runs linting, formatting, security check, tests, and coverage on every PR
-- All 28 tests pass with coverage exceeding 30% on all critical modules
+- All 38 tests pass with coverage exceeding 30% on all critical modules
 - All four UAT scenarios passed during the Sprint Review session with the customer
 - Hosted documentation site is live at `https://innopolis-robotics-society.github.io/FaceGuardV3/`
 
@@ -171,7 +171,7 @@ The public publication was permitted.
 | @grex861 | [#222](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/222) | [#222](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/222) |  | Documentation |
 | @tyajhelo | - | - | - | - |
 
-## 41. Screenshots
+## 31. Screenshots
 Screenshots are stored in:
 
 ```text
