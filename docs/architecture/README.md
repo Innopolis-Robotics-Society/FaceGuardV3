@@ -20,7 +20,7 @@ Together, these decisions match the current architecture shown below: the system
 [Component Diagram Source (PlantUML)](static-view/component-diagram.puml)
 
 **What the diagram shows:**
-The diagram illustrates the core decoupled client-server architecture of FaceGuardV3. The `React Frontend` handles the presentation layer and WebRTC camera capture. It communicates via REST API and WebSockets with the `FastAPI Backend`. The Backend coordinates face recognition by calling the internal `Face Recognition Module` (based on InsightFace), and handles persistent state by requiring the `SQL Interface` from the `PostgreSQL` database. Finally, it issues commands to the `LED Controller` to manage physical access indication.
+The diagram illustrates the core decoupled client-server architecture of FaceGuardV3. The `React Frontend` handles the presentation layer and WebRTC camera capture. It communicates via REST API and WebSockets with the `FastAPI Backend`. The Backend coordinates face recognition by calling the internal `Face Recognition Module` (based on InsightFace), handles persistent state by requiring the `SQL Interface` from the `PostgreSQL` database, and enforces rate-limiting to prevent brute-force attacks. API endpoints and WebSockets are secured via JWT authentication. Finally, it issues commands to the `LED Controller` to manage physical access indication.
 
 **Coupling and Cohesion:**
 *   **Coupling:** The system exhibits low coupling across all layers. The UI is completely decoupled from the ML logic and database via a clean REST/WebSocket API. By logically separating the `Face Recognition Module` behind an `Internal Python Interface`, the `FastAPI Backend` is decoupled from the specific ML implementation details.

@@ -57,7 +57,11 @@ Create a `.env` file in the `backend/` directory (copy `backend/.env.example` as
 
 - `ADMIN_LOGIN`: the login required to access the React admin panel
 - `ADMIN_PASSWORD_HASH`: a bcrypt hash of the admin password. Generate it with `python3 scripts/generate_hash.py` from the `backend/` directory, then paste the resulting hash here. Do not store the plain password anywhere.
-- `DATABASE_URL`: connection string for the local PostgreSQL instance, for example `postgresql://postgres:postgres@db:5432/faceguard`. This must point only to the local PostgreSQL container, never to an external or cloud database.
+- `POSTGRES_USER`: PostgreSQL user
+- `POSTGRES_PASSWORD`: PostgreSQL password
+- `POSTGRES_DB`: PostgreSQL database name
+- `DB_HOST`: PostgreSQL hostname (usually `db` in Docker Compose)
+These must point only to the local PostgreSQL container, never to an external or cloud database.
 
 Ensure the `.env` file has restricted read permissions on the Raspberry Pi so that unauthorized users cannot extract the admin credentials or password hash.
 
@@ -87,8 +91,12 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
    python3 scripts/generate_hash.py
    ```
    Enter your chosen password when prompted and copy the generated bcrypt hash.
-4. Open `backend/.env` and fill in the required values, including `DATABASE_URL` and the admin credentials, without quotes:
+4. Open `backend/.env` and fill in the required values, including the database credentials and the admin credentials, without quotes:
    ```
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=postgres
+   POSTGRES_DB=faceguard
+   DB_HOST=db
    ADMIN_LOGIN=myadmin
    ADMIN_PASSWORD_HASH=your_copied_bcrypt_hash
    ```
@@ -126,6 +134,7 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
   - No LEDs lit: no one is currently in front of the camera
 - **LED feedback during employee registration:** all three LEDs (yellow, red, blue) light up together during registration and for 3 seconds afterward.
 - **Background recognition:** recognition keeps running while the admin uses other pages in the panel; the admin does not need to stay on the recognition page.
+- **Rate limiting and Authentication:** API endpoints are secured with JSON Web Tokens (JWT). The login page is protected against brute-force attacks via SlowAPI: if an admin inputs incorrect credentials 5 times within a minute, access is temporarily blocked with a "Too Many Requests" (429) status.
 - **Temporary access auto-expiry:** employees with temporary access are validated against their start and expiration dates. Access is automatically denied outside this window, no admin action needed. Date and time validation to prevent past dates is a planned improvement, see Section 7.
 - **Log management:** access logs are retained in the local database. The system automatically prunes logs older than 3 days to preserve storage on the Raspberry Pi.
 

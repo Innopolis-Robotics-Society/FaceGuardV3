@@ -23,9 +23,13 @@ class FakeWebSocketDisconnect(Exception):
 class FakeFastAPI:
     def __init__(self):
         self.middleware = []
+        self.state = SimpleNamespace()
 
     def add_middleware(self, middleware, **kwargs):
         self.middleware.append((middleware, kwargs))
+
+    def add_exception_handler(self, exc_class, handler):
+        pass
 
     def _decorator(self, *args, **kwargs):
         return lambda function: function
@@ -48,12 +52,16 @@ class FakeWebSocket:
     def __init__(self):
         self.accepted = False
         self.sent = []
+        self.query_params = {"token": "fake"}
 
     async def accept(self):
         self.accepted = True
 
     async def send_json(self, value):
         self.sent.append(value)
+
+    async def close(self, code=None):
+        pass
 
 
 def module(name, **attributes):
@@ -75,6 +83,8 @@ def load_backend_main(monkeypatch):
         WebSocket=FakeWebSocket,
         WebSocketDisconnect=FakeWebSocketDisconnect,
         HTTPException=FakeHTTPException,
+        Depends=lambda x: None,
+        Request=object,
     )
     fastapi.__path__ = []
     middleware = module("fastapi.middleware")
@@ -151,6 +161,28 @@ def load_backend_main(monkeypatch):
     bcrypt = module("bcrypt", checkpw=lambda provided, stored: False)
     dotenv = module("dotenv", load_dotenv=lambda: None)
 
+    class FakeLimiter:
+        def __init__(self, **kwargs):
+            pass
+
+        def limit(self, *args, **kwargs):
+            return lambda f: f
+
+    slowapi = module(
+        "slowapi", Limiter=FakeLimiter, _rate_limit_exceeded_handler=object()
+    )
+    slowapi_util = module("slowapi.util", get_remote_address=lambda: "127.0.0.1")
+    slowapi_errors = module("slowapi.errors", RateLimitExceeded=Exception)
+    slowapi.util = slowapi_util
+    slowapi.errors = slowapi_errors
+
+    security = module(
+        "core.security",
+        create_access_token=lambda d: "fake_token",
+        get_current_user=lambda: {"sub": "admin"},
+        verify_token=lambda t: {"sub": "admin"},
+    )
+
     replacements = {
         "fastapi": fastapi,
         "fastapi.middleware": middleware,
@@ -167,6 +199,10 @@ def load_backend_main(monkeypatch):
         "cv2": fake_cv2,
         "bcrypt": bcrypt,
         "dotenv": dotenv,
+        "slowapi": slowapi,
+        "slowapi.util": slowapi_util,
+        "slowapi.errors": slowapi_errors,
+        "core.security": security,
     }
     for name, replacement in replacements.items():
         monkeypatch.setitem(sys.modules, name, replacement)
@@ -241,11 +277,15 @@ def test_employee_and_log_endpoints_delegate_to_adapters(monkeypatch):
         name="Bob", status="Permanent", embedding=[0.25, 0.75]
     )
 
-    assert backend_main.get_employees() == [{"id": 1, "name": "Alice"}]
-    assert backend_main.delete_emp(3) == {"status": "ok"}
-    assert backend_main.update_emp(4, update) == {"status": "ok"}
-    assert backend_main.add_emp(addition) == {"status": "ok"}
-    assert backend_main.get_logs("2026-07-01", "2026-08-01") == ["log"]
+    assert backend_main.get_employees(user={"sub": "admin"}) == [
+        {"id": 1, "name": "Alice"}
+    ]
+    assert backend_main.delete_emp(3, user={"sub": "admin"}) == {"status": "ok"}
+    assert backend_main.update_emp(4, update, user={"sub": "admin"}) == {"status": "ok"}
+    assert backend_main.add_emp(addition, user={"sub": "admin"}) == {"status": "ok"}
+    assert backend_main.get_logs("2026-07-01", "2026-08-01", user={"sub": "admin"}) == [
+        "log"
+    ]
 
     assert frame.replacements[0] == {np.nan: None}
     assert deleted == [3]
@@ -267,7 +307,7 @@ def test_employee_endpoints_translate_adapter_errors(monkeypatch):
     )
 
     with pytest.raises(FakeHTTPException) as update_error:
-        backend_main.update_emp(1, update)
+        backend_main.update_emp(1, update, user={"sub": "admin"})
 
     assert update_error.value.status_code == 400
     assert update_error.value.detail == "update failed"
@@ -278,7 +318,7 @@ def test_employee_endpoints_translate_adapter_errors(monkeypatch):
     )
 
     with pytest.raises(FakeHTTPException) as add_error:
-        backend_main.add_emp(addition)
+        backend_main.add_emp(addition, user={"sub": "admin"})
 
     assert add_error.value.status_code == 400
     assert add_error.value.detail == "duplicate face"
@@ -295,9 +335,9 @@ def test_login_accepts_valid_bcrypt_credentials(monkeypatch):
         lambda password, stored: checked.append((password, stored)) or True,
     )
 
-    result = backend_main.login({"username": "operator", "password": "secret"})
+    result = backend_main.login(None, {"username": "operator", "password": "secret"})
 
-    assert result == {"status": "ok", "token": "authenticated"}
+    assert result == {"status": "ok", "token": "fake_token"}
     assert checked == [(b"secret", b"$2b$fake")]
 
 
@@ -315,7 +355,7 @@ def test_login_rejects_invalid_credentials(monkeypatch, credentials):
     monkeypatch.setenv("ADMIN_PASSWORD_HASH", "$2b$fake")
 
     with pytest.raises(FakeHTTPException) as error:
-        backend_main.login(credentials)
+        backend_main.login(None, credentials)
 
     assert error.value.status_code == 401
 

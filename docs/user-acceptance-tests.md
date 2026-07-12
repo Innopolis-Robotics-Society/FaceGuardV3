@@ -391,6 +391,7 @@
 **Expected outcome:**  
 - If the login and password are correct, the system successfully logs in and the admin is switched to the employees page    
 - If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page  
+- If the admin attempts to log in with an incorrect password 5 times consecutively within a minute, the system denies access with a "Too many attempts. Please try again later." message and temporarily blocks further attempts
 ---
 ### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
 

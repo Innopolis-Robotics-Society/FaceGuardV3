@@ -34,7 +34,8 @@ BEGIN
     ) THEN
         ALTER TABLE employees
             ALTER COLUMN expiration_date TYPE TIMESTAMP
-            USING expiration_date::timestamp + INTERVAL '1 day' - INTERVAL '1 microsecond';
+            USING expiration_date::timestamp +
+                  INTERVAL '1 day' - INTERVAL '1 microsecond';
     END IF;
 END $$;
 """
@@ -126,8 +127,10 @@ def load_employees():
     delete_expired_employees()
     with get_db_connection() as connection:
         query = """
-        SELECT e.id, e.name, e.registration_date, e.status, e.start_date, e.expiration_date,
-               (SELECT time FROM logs WHERE name = e.name ORDER BY time DESC LIMIT 1) as last_seen
+        SELECT e.id, e.name, e.registration_date, e.status,
+               e.start_date, e.expiration_date,
+               (SELECT time FROM logs WHERE name = e.name
+                ORDER BY time DESC LIMIT 1) as last_seen
         FROM employees e
         ORDER BY e.id;
         """
@@ -143,7 +146,8 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
                     status, start_date, expiration_date
                 )
                 cursor.execute(
-                    "UPDATE employees SET name = %s, status = %s, start_date = %s, expiration_date = %s WHERE id = %s;",
+                    "UPDATE employees SET name = %s, status = %s, "
+                    "start_date = %s, expiration_date = %s WHERE id = %s;",
                     (name, status, start_date, expiration_date, int(employee_id)),
                 )
                 connection.commit()
@@ -187,7 +191,8 @@ def add_employees(name, status, embedding=None, start_date=None, expiration_date
             )
 
             cursor.execute(
-                "INSERT INTO employees (name, status, embedding, start_date, expiration_date) "
+                "INSERT INTO employees (name, status, embedding, "
+                "start_date, expiration_date) "
                 "VALUES (%s, %s, %s, %s, %s);",
                 (name, status, embedding_list, start_date, expiration_date),
             )
