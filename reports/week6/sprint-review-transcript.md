@@ -1,7 +1,7 @@
-# Sprint Review Transcript — Sprint 4, Week 6
+# Sprint Review Transcript — Sprint 4, Week 6  
 
-**Date:** 10.07.2026
-**Participants:** Development team, Customer
+**Date:** 10.07.2026  
+**Participants:** Development team, Customer  
 
 Before recording started, the team requested permission to record the meeting and to publish a sanitized English transcript in the public repository. The customer agreed to both. Since UAT and transition discussion were conducted during the same session, the recording permission covers the Sprint Review, UAT execution, and transition discussion.
 
