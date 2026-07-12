@@ -14,9 +14,9 @@ Before recording started, the team requested permission to record the meeting an
 **Interviewer:** Here I am. [inaudible]
 
 (00:57)   
-**Customer:** Better through the calendar. I specifically took it so that... Seriously? Yes. You could have returned to the previous state. I want to, yes, to...
+**Customer:** Better through the calendar. I specifically took it so that... Seriously? Yes. You could have returned to the previous state. [inaudible]
 
-(01:28)
+(01:28)  
 **Interviewer:** It is running for 60 seconds. Wait, no. I gave myself temporary access. I set it for tomorrow. There is a moment where it might deny access, so it needs to be time-based. Okay, I have a large availability window.
 
 (02:17)  
