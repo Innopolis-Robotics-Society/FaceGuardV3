@@ -63,12 +63,15 @@ For local evaluation, start with Docker and open at: `http://localhost:3000`
 - [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)  
 
 ## 15. Customer-facing Documentation Review
-[TODO]
-[Summary of the customer-facing documentation review, including what the customer found clear, unclear, or missing.]
+The customer reviewed the customer-facing documentation (README.md, CONTRIBUTING.md, AGENTS.md, customer-handover.md) during the Sprint Review. The customer did not confirm the current documentation as sufficient; instead, the customer requested additional documentation describing the system's functions, such as a static documentation page or site.
 
 ## 16. Transition-readiness Summary
-[TODO]
-Transition-readiness summary, including what must still happen in Week 7.
+The system reached the 'Ready for independent use' handover level. The customer confirmed the system works overall and expressed clear approval, noting that background recognition works effectively. However, the following must still happen in Week 7:
+1. Add validation to the temporary access date and time field so past dates cannot be selected (minimum value must be current date and time).
+2. Fix occasional page freezes under load and improve camera stream capture stability on weaker hardware.
+3. Provide the requested dedicated documentation page/site detailing system functions.
+4. Ensure no external databases or cloud resources are used (all data must remain local, as strictly required by the customer).
+Note: Physical door integration is not planned; LED indicators serve as the access signal.
 
 ## 17. Customer Feedback Response
 
@@ -93,8 +96,6 @@ Transition-readiness summary, including what must still happen in Week 7.
 All feedback from the Week 5 Sprint Review was addressed in this Sprint. Feedback received during the Week 6 UAT session has been added to the Product Backlog and is planned for the next Sprint.
 
 ## 19-20. Links to the Documentation
-[TODO]
-[Link to the maintained quality, testing, architecture, development-process, and other customer-relevant documentation updated during Sprint 4.]
 - [docs/roadmap.md](../../docs/roadmap.md)
 - [docs/definition-of-done.md](../../docs/definition-of-done.md)
 - [docs/quality-requirements.md](../../docs/quality-requirements.md)
@@ -105,26 +106,23 @@ All feedback from the Week 5 Sprint Review was addressed in this Sprint. Feedbac
 - [docs/architecture/README.md](../../docs/architecture/README.md)
 
 ## 21. Summary of relevant UAT or customer-trial results.
-[TODO]
 
-User acceptance testing was conducted during an online Sprint Review session on July 4, 2026.
+User acceptance testing was conducted during an offline Sprint Review session on July 10, 2026.
 
 | UAT scenario ID | Scenario | Result |
 |---|---|---|
 | UAT-001 | Register a new employee with permanent access | Passed |
 | UAT-002 | Add a new employee with temporary access | Passed |
-| UAT-003 | Remove a registered employee | Passed |
-| UAT-004 | View the list of all registered employees | Passed |
-| UAT-005 | View the access logs | Passed |
 | UAT-006 | Automatic recognition of a registered employee | Passed |
-| UAT-007 | Rejection of an unregistered person | Passed |
 | UAT-008 | Edit the name or status of an employee | Passed |
-| UAT-009 | Register an already registered employee | Passed |
 
-All nine scenarios passed. No failures were recorded.
+All four scenarios passed. No failures were recorded.
 
 **Most important feedback received:**
-[TODO]
+- No external databases and no cloud resources of any kind must be used (strictly local).
+- Temporary access needs date and time validation to prevent past dates from being selected.
+- The system requires dedicated documentation detailing its functions.
+- The camera stream occasionally does not capture properly on the board, and loading can be slow on weaker hardware.
 
 ## 22-23. Links
 - [3.0.0 - towards MVP v3](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0)  
@@ -154,7 +152,7 @@ The public publication was permitted.
 - Date range filter is available on the Logs page
 - CI pipeline runs linting, formatting, security check, tests, and coverage on every PR
 - All 28 tests pass with coverage exceeding 30% on all critical modules
-- All nine UAT scenarios passed during the Sprint Review session with the customer
+- All four UAT scenarios passed during the Sprint Review session with the customer
 - Hosted documentation site is live at `https://innopolis-robotics-society.github.io/FaceGuardV3/`
 
 ## 29. Next Steps
@@ -166,11 +164,11 @@ The public publication was permitted.
 
 | GitHub username | Issues | PRs/MRs | Review activity | Contribution |
 |---|---|---|---|---|
-| @s0ftach | [#57](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/57) | [#140](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/140), [#159](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/159) | [#143](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/143) | Tests, Documentation, Project Management |
-| @oebarbie |  |  |  | Documentation, Project Management |
-| @Exckernels |  |  |  | Backend, Tests CI, System's Optimization |
-| @ixkci |  |  |  | Backend, System's Optimization, Architecture |
-| @grex861 |  |  |  | Documentation |
+| @s0ftach | [#202](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/202), [#203](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/203), [#218](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/218), [#230](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/230), [#237](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/237) | [#233](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/233), [#228](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/228), [#234](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/234), [#236](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/236), [#238](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/238) | [#222](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/222) | Tests, Documentation, Project Management |
+| @oebarbie | [#199](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/199), [#209](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/209), [#239](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/239) | [#217](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/217), [#221](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/221), [#240](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/240) | [#233](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/233), [#228](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/228), [#234](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/234), [#236](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/236), [#238](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/238) | Documentation, Project Management |
+| @Exckernels | [#226](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/226) | [#227](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/227) |  | Backend, Tests CI, System's Optimization |
+| @ixkci | [#215](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/215) | [#220](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/220) |  | Backend, System's Optimization, Architecture |
+| @grex861 | [#222](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/222) | [#222](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/222) |  | Documentation |
 | @tyajhelo | - | - | - | - |
 
 ## 41. Screenshots
