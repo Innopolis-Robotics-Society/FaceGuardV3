@@ -20,6 +20,9 @@ All notable changes to FaceGuard will be documented in this file.
 ### Fixed
 - Stabilized Docker build process and image sizes
 
+### Removed
+- US-011: Recognize in a crowd (removed based on customer feedback; not needed for current scope)
+
 ## [2.1.0] - 2026-07-05  
 
 ### Added
