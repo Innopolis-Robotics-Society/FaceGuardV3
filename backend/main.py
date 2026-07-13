@@ -166,6 +166,11 @@ def startup_event():
     print("DATABASE INITIALIZATION COMPLETE.")
 
 
+@app.on_event("shutdown")
+def shutdown_event():
+    leds.cleanup()
+
+
 class EmployeeUpdate(BaseModel):
     name: str
     status: str

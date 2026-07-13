@@ -5,6 +5,7 @@ opencv-python
 onnxruntime
 pytest
 gpiozero
+lgpio==0.2.2.0
 RPi.GPIO
 insightface
 fastapi

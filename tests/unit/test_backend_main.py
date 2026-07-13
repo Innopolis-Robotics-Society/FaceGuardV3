@@ -189,6 +189,7 @@ def load_backend_main(monkeypatch, camera_source=None, camera_index=None):
         registration_active=record_led("registration_active"),
         registration_done=record_led("registration_done"),
         all_off=record_led("all_off"),
+        cleanup=record_led("cleanup"),
     )
     fake_cv2 = module(
         "cv2", IMREAD_COLOR=1, imdecode=lambda data, mode: np.zeros((2, 2, 3))
@@ -285,6 +286,14 @@ def test_startup_initializes_both_database_modules(monkeypatch):
 
     assert dependencies.employee_calls == [("init", ())]
     assert dependencies.log_calls == [("init", ())]
+
+
+def test_shutdown_releases_gpio_resources(monkeypatch):
+    backend_main, dependencies = load_backend_main(monkeypatch)
+
+    backend_main.shutdown_event()
+
+    assert dependencies.led_calls == ["cleanup"]
 
 
 def test_employee_and_log_endpoints_delegate_to_adapters(monkeypatch):
