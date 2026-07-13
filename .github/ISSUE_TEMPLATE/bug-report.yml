@@ -93,7 +93,7 @@ body:
     attributes:
       label: Sprint milestone
       description: Required once this bug fix is selected for a Sprint.
-      placeholder: "Sprint 4"
+      placeholder: "Sprint 5"
     validations:
       required: false
   - type: input
