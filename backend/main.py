@@ -59,6 +59,102 @@ face_app = create_face_app()
 liveness_detector = LivenessDetector()
 
 
+def _camera_source_from_environment() -> str:
+    source = os.environ.get("CAMERA_SOURCE", "browser").strip().lower()
+    if source not in {"browser", "backend"}:
+        print(f"Unknown CAMERA_SOURCE={source!r}; falling back to browser")
+        return "browser"
+    return source
+
+
+def _camera_index_from_environment() -> int:
+    value = os.environ.get("CAMERA_INDEX", "0")
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid CAMERA_INDEX={value!r}; falling back to 0")
+        return 0
+
+
+CAMERA_SOURCE = _camera_source_from_environment()
+CAMERA_INDEX = _camera_index_from_environment()
+CAMERA_READ_RETRY_DELAY = 0.1
+camera_lock = asyncio.Lock()
+
+
+class CameraOpenError(RuntimeError):
+    pass
+
+
+class BackendCameraSession:
+    """Own one exclusive, short-lived connection to the backend camera."""
+
+    def __init__(self, camera_index: int):
+        self.camera_index = camera_index
+        self.capture = None
+        self.owns_lock = False
+
+    async def acquire(self):
+        await camera_lock.acquire()
+        self.owns_lock = True
+        try:
+            self.capture = await run_in_threadpool(cv2.VideoCapture, self.camera_index)
+            if self.capture is None or not await run_in_threadpool(
+                self.capture.isOpened
+            ):
+                raise CameraOpenError(
+                    f"Unable to open backend camera index {self.camera_index}"
+                )
+
+            if hasattr(cv2, "CAP_PROP_BUFFERSIZE"):
+                try:
+                    await run_in_threadpool(
+                        self.capture.set, cv2.CAP_PROP_BUFFERSIZE, 1
+                    )
+                except Exception as exc:
+                    print(f"Could not set camera buffer size: {exc}")
+            return self
+        except Exception:
+            await self.close()
+            raise
+
+    async def read(self):
+        success, frame = await run_in_threadpool(self.capture.read)
+        if not success or frame is None:
+            await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
+            return None
+        return frame
+
+    async def close(self):
+        try:
+            if self.capture is not None:
+                try:
+                    await run_in_threadpool(self.capture.release)
+                except Exception as exc:
+                    print(f"Could not release backend camera: {exc}")
+        finally:
+            self.capture = None
+            if self.owns_lock:
+                self.owns_lock = False
+                camera_lock.release()
+
+
+def decode_browser_frame(data: str):
+    if "," in data:
+        data = data.split(",", 1)[1]
+    img_data = base64.b64decode(data)
+    np_arr = np.frombuffer(img_data, np.uint8)
+    return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+
+def encode_preview_frame(frame) -> Optional[str]:
+    success, encoded = cv2.imencode(".jpg", frame)
+    if not success:
+        return None
+    payload = base64.b64encode(encoded.tobytes()).decode("ascii")
+    return f"data:image/jpeg;base64,{payload}"
+
+
 @app.on_event("startup")
 def startup_event():
     print("STARTING UP DATABASE INITIALIZATION...")
@@ -199,17 +295,47 @@ async def websocket_recognize(websocket: WebSocket):
     from faceguard.business_logic import process_access_attempt
 
     recognizer = InsightFaceProvider(face_app, liveness_detector)
+    camera_session = None
 
     try:
-        while True:
-            data = await drain_websocket(websocket)
-            current_time = time.time()
+        if CAMERA_SOURCE == "backend":
+            camera_session = BackendCameraSession(CAMERA_INDEX)
+            await camera_session.acquire()
 
-            if "," in data:
-                data = data.split(",")[1]
-            img_data = base64.b64decode(data)
-            np_arr = np.frombuffer(img_data, np.uint8)
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        while True:
+            preview_frame = None
+            if CAMERA_SOURCE == "backend":
+                img = await camera_session.read()
+                if img is None:
+                    await websocket.send_json(
+                        {
+                            "status": "Camera frame unavailable",
+                            "color": "#FF0000",
+                            "name": "-",
+                            "similarity": "-",
+                        }
+                    )
+                    continue
+                preview_frame = await run_in_threadpool(encode_preview_frame, img)
+                if preview_frame is None:
+                    await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
+                    await websocket.send_json(
+                        {
+                            "status": "Error encoding camera frame",
+                            "color": "#FF0000",
+                            "name": "-",
+                            "similarity": "-",
+                        }
+                    )
+                    continue
+            else:
+                data = await drain_websocket(websocket)
+                try:
+                    img = await run_in_threadpool(decode_browser_frame, data)
+                except Exception:
+                    img = None
+
+            current_time = time.time()
 
             if img is None:
                 await websocket.send_json({"status": "Error decoding image"})
@@ -340,9 +466,24 @@ async def websocket_recognize(websocket: WebSocket):
                         leds.all_off()
                         last_logged_status = "NO_FACE"
 
+            if preview_frame is not None:
+                response["frame"] = preview_frame
             await websocket.send_json(response)
 
+    except CameraOpenError as exc:
+        await websocket.send_json(
+            {
+                "status": str(exc),
+                "color": "#FF0000",
+                "name": "-",
+                "similarity": "-",
+            }
+        )
     except WebSocketDisconnect:
+        pass
+    finally:
+        if camera_session is not None:
+            await camera_session.close()
         leds.all_off()
 
 
@@ -360,23 +501,60 @@ async def websocket_enroll(websocket: WebSocket):
 
     await websocket.accept()
     embeddings = []
+    camera_session = None
+    last_preview_frame = None
 
     try:
+        if CAMERA_SOURCE == "backend":
+            camera_session = BackendCameraSession(CAMERA_INDEX)
+            await camera_session.acquire()
+
         while True:
-            data = await drain_websocket(websocket)
-
             if len(embeddings) >= 30:
-                final_embedding = average_embeddings(embeddings)
-                await websocket.send_json(
-                    {"status": "Finished", "embedding": final_embedding.tolist()}
+                final_embedding = await run_in_threadpool(
+                    average_embeddings, embeddings
                 )
-                continue
+                response = {
+                    "status": "Finished",
+                    "embedding": final_embedding.tolist(),
+                }
+                if last_preview_frame is not None:
+                    response["frame"] = last_preview_frame
+                await websocket.send_json(response)
+                return
 
-            if "," in data:
-                data = data.split(",")[1]
-            img_data = base64.b64decode(data)
-            np_arr = np.frombuffer(img_data, np.uint8)
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            preview_frame = None
+            if CAMERA_SOURCE == "backend":
+                img = await camera_session.read()
+                if img is None:
+                    await websocket.send_json(
+                        {
+                            "status": "Camera frame unavailable",
+                            "color": "#FF0000",
+                            "box": None,
+                            "progress": len(embeddings) / 30.0,
+                        }
+                    )
+                    continue
+                preview_frame = await run_in_threadpool(encode_preview_frame, img)
+                if preview_frame is None:
+                    await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
+                    await websocket.send_json(
+                        {
+                            "status": "Error encoding camera frame",
+                            "color": "#FF0000",
+                            "box": None,
+                            "progress": len(embeddings) / 30.0,
+                        }
+                    )
+                    continue
+                last_preview_frame = preview_frame
+            else:
+                data = await drain_websocket(websocket)
+                try:
+                    img = await run_in_threadpool(decode_browser_frame, data)
+                except Exception:
+                    img = None
 
             if img is None:
                 continue
@@ -387,44 +565,53 @@ async def websocket_enroll(websocket: WebSocket):
             if status_code == "real" and embedding is not None:
                 embeddings.append(embedding)
                 leds.registration_active()
-                await websocket.send_json(
-                    {
-                        "status": f"Collecting: {len(embeddings)}/30",
-                        "color": "#00FF00",
-                        "box": face.bbox.tolist(),
-                        "progress": len(embeddings) / 30.0,
-                    }
-                )
+                response = {
+                    "status": f"Collecting: {len(embeddings)}/30",
+                    "color": "#00FF00",
+                    "box": face.bbox.tolist(),
+                    "progress": len(embeddings) / 30.0,
+                }
             elif status_code == "spoof":
-                await websocket.send_json(
-                    {
-                        "status": "SPOOF DETECTED",
-                        "color": "#FF0000",
-                        "box": face.bbox.tolist() if face is not None else None,
-                        "progress": len(embeddings) / 30.0,
-                    }
-                )
+                response = {
+                    "status": "SPOOF DETECTED",
+                    "color": "#FF0000",
+                    "box": face.bbox.tolist() if face is not None else None,
+                    "progress": len(embeddings) / 30.0,
+                }
             elif status_code == "bad_face":
-                await websocket.send_json(
-                    {
-                        "status": "Look straight",
-                        "color": "#00FFFF",
-                        "box": face.bbox.tolist(),
-                        "progress": len(embeddings) / 30.0,
-                    }
-                )
+                response = {
+                    "status": "Look straight",
+                    "color": "#00FFFF",
+                    "box": face.bbox.tolist(),
+                    "progress": len(embeddings) / 30.0,
+                }
             else:
                 leds.all_off()
-                await websocket.send_json(
-                    {
-                        "status": "No face detected",
-                        "color": "#888888",
-                        "box": None,
-                        "progress": len(embeddings) / 30.0,
-                    }
-                )
+                response = {
+                    "status": "No face detected",
+                    "color": "#888888",
+                    "box": None,
+                    "progress": len(embeddings) / 30.0,
+                }
 
+            if preview_frame is not None:
+                response["frame"] = preview_frame
+            await websocket.send_json(response)
+
+    except CameraOpenError as exc:
+        await websocket.send_json(
+            {
+                "status": str(exc),
+                "color": "#FF0000",
+                "box": None,
+                "progress": len(embeddings) / 30.0,
+            }
+        )
     except WebSocketDisconnect:
+        pass
+    finally:
+        if camera_session is not None:
+            await camera_session.close()
         leds.all_off()
 
 

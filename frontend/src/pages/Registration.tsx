@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import { useCamera } from '../context/CameraContext';
 
 export default function Registration() {
-  const { stream, startEnroll, stopEnroll, enrollData } = useCamera();
+  const { cameraSource, stream, remoteFrame, startEnroll, stopEnroll, enrollData } = useCamera();
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   
@@ -27,7 +27,7 @@ export default function Registration() {
     return () => {
       stopEnroll();
     };
-  }, []);
+  }, [startEnroll, stopEnroll]);
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -71,7 +71,9 @@ export default function Registration() {
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch('http://localhost:8000/api/employees', {
+    const apiProtocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+    const apiHostname = window.location.hostname || 'localhost';
+    fetch(`${apiProtocol}//${apiHostname}:8000/api/employees`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -104,9 +106,28 @@ export default function Registration() {
       
       {!embedding ? (
         <div className="camera-container">
-          <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
+          {cameraSource === 'backend' ? (
+            remoteFrame ? (
+              <img
+                src={remoteFrame}
+                alt="Raspberry Pi camera enrollment preview"
+                className="camera-feed"
+                style={{ transform: 'none' }}
+              />
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222' }}>
+                <p>Connecting to Raspberry Pi camera...</p>
+              </div>
+            )
+          ) : stream ? (
+            <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
+          ) : (
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222' }}>
+              <p>Camera not connected</p>
+            </div>
+          )}
           
-          {box && videoRef.current && (
+          {cameraSource === 'browser' && box && videoRef.current && videoRef.current.videoWidth > 0 && (
             <div style={{
               position: 'absolute',
               border: `2px solid ${color}`,

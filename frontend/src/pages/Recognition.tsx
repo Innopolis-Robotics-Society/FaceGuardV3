@@ -3,7 +3,15 @@ import { useCamera } from '../context/CameraContext';
 import { Play, Square } from 'lucide-react';
 
 export default function Recognition() {
-  const { stream, isRecognizing, startRecognition, stopRecognition, recognitionData } = useCamera();
+  const {
+    cameraSource,
+    stream,
+    remoteFrame,
+    isRecognizing,
+    startRecognition,
+    stopRecognition,
+    recognitionData,
+  } = useCamera();
   const videoRef = useRef<HTMLVideoElement>(null);
   
   useEffect(() => {
@@ -32,10 +40,23 @@ export default function Recognition() {
       </div>
       
       <div className="camera-container">
-        {stream ? (
+        {cameraSource === 'backend' ? (
+          remoteFrame ? (
+            <img
+              src={remoteFrame}
+              alt="Raspberry Pi camera preview"
+              className="camera-feed"
+              style={{ transform: 'none' }}
+            />
+          ) : (
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222' }}>
+              <p>{isRecognizing ? 'Connecting to Raspberry Pi camera...' : 'Start recognition to view the camera'}</p>
+            </div>
+          )
+        ) : stream ? (
           <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
         ) : (
-          <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222', borderRadius: '12px' }}>
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222' }}>
             <p>Camera not connected</p>
           </div>
         )}

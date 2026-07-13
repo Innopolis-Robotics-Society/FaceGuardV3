@@ -64,6 +64,33 @@ class FakeWebSocket:
         pass
 
 
+class DisconnectAfterSendWebSocket(FakeWebSocket):
+    async def send_json(self, value):
+        self.sent.append(value)
+        raise FakeWebSocketDisconnect()
+
+
+class FakeCapture:
+    def __init__(self, frame=None, opened=True):
+        self.frame = frame
+        self.opened = opened
+        self.released = False
+        self.settings = []
+
+    def isOpened(self):
+        return self.opened
+
+    def set(self, prop, value):  # noqa: A003 - mirrors cv2.VideoCapture.set
+        self.settings.append((prop, value))
+        return True
+
+    def read(self):
+        return self.frame is not None, self.frame
+
+    def release(self):
+        self.released = True
+
+
 def module(name, **attributes):
     result = types.ModuleType(name)
     for key, value in attributes.items():
@@ -71,7 +98,15 @@ def module(name, **attributes):
     return result
 
 
-def load_backend_main(monkeypatch):
+def load_backend_main(monkeypatch, camera_source=None, camera_index=None):
+    if camera_source is None:
+        monkeypatch.delenv("CAMERA_SOURCE", raising=False)
+    else:
+        monkeypatch.setenv("CAMERA_SOURCE", camera_source)
+    if camera_index is None:
+        monkeypatch.delenv("CAMERA_INDEX", raising=False)
+    else:
+        monkeypatch.setenv("CAMERA_INDEX", camera_index)
     backend_package = importlib.import_module("backend")
 
     async def default_threadpool(function, *args, **kwargs):
@@ -225,6 +260,22 @@ def load_backend_main(monkeypatch):
         liveness_detector=liveness_detector,
     )
     return backend_main, dependencies
+
+
+def test_camera_configuration_defaults_to_browser(monkeypatch):
+    backend_main, _ = load_backend_main(monkeypatch)
+
+    assert backend_main.CAMERA_SOURCE == "browser"
+    assert backend_main.CAMERA_INDEX == 0
+
+
+def test_camera_configuration_reads_backend_environment(monkeypatch):
+    backend_main, _ = load_backend_main(
+        monkeypatch, camera_source="backend", camera_index="2"
+    )
+
+    assert backend_main.CAMERA_SOURCE == "backend"
+    assert backend_main.CAMERA_INDEX == 2
 
 
 def test_startup_initializes_both_database_modules(monkeypatch):
@@ -382,6 +433,7 @@ def test_recognition_websocket_grants_access_and_logs(monkeypatch):
     websocket = FakeWebSocket()
     encoded = base64.b64encode(b"image").decode("ascii")
     drains = iter([f"data:image/jpeg;base64,{encoded}"])
+    decoded_frames = []
 
     async def fake_drain(received_websocket):
         try:
@@ -397,7 +449,13 @@ def test_recognition_websocket_grants_access_and_logs(monkeypatch):
         98.5,
         face,
     )
+    monkeypatch.setattr(backend_main, "CAMERA_SOURCE", "browser")
     monkeypatch.setattr(backend_main, "drain_websocket", fake_drain)
+    monkeypatch.setattr(
+        dependencies.cv2,
+        "imdecode",
+        lambda data, mode: decoded_frames.append((data, mode)) or np.zeros((2, 2, 3)),
+    )
     monkeypatch.setattr(backend_main.time, "time", lambda: 100.0)
 
     asyncio.run(backend_main.websocket_recognize(websocket))
@@ -413,6 +471,7 @@ def test_recognition_websocket_grants_access_and_logs(monkeypatch):
         }
     ]
     assert dependencies.log_calls == [("add", ("Alice", "ACCESS_GRANTED"))]
+    assert len(decoded_frames) == 1
     assert dependencies.led_calls == [
         "start_recognizing",
         "access_granted",
@@ -478,6 +537,96 @@ def test_recognition_websocket_reports_decode_error(monkeypatch):
     assert dependencies.led_calls == ["all_off"]
 
 
+def test_backend_camera_open_failure_is_reported_and_released(monkeypatch):
+    backend_main, dependencies = load_backend_main(monkeypatch)
+    websocket = FakeWebSocket()
+    capture = FakeCapture(opened=False)
+
+    monkeypatch.setattr(backend_main, "CAMERA_SOURCE", "backend")
+    monkeypatch.setattr(
+        dependencies.cv2, "VideoCapture", lambda index: capture, raising=False
+    )
+    monkeypatch.setattr(dependencies.cv2, "CAP_PROP_BUFFERSIZE", 38, raising=False)
+
+    asyncio.run(backend_main.websocket_recognize(websocket))
+
+    assert websocket.sent == [
+        {
+            "status": "Unable to open backend camera index 0",
+            "color": "#FF0000",
+            "name": "-",
+            "similarity": "-",
+        }
+    ]
+    assert capture.released is True
+    assert backend_main.camera_lock.locked() is False
+
+
+def test_backend_recognition_captures_preview_and_releases_on_disconnect(
+    monkeypatch,
+):
+    backend_main, dependencies = load_backend_main(monkeypatch)
+    websocket = DisconnectAfterSendWebSocket()
+    frame = np.zeros((2, 2, 3), dtype=np.uint8)
+    capture = FakeCapture(frame=frame)
+    face = SimpleNamespace(bbox=np.array([1, 2, 3, 4]))
+
+    monkeypatch.setattr(backend_main, "CAMERA_SOURCE", "backend")
+    monkeypatch.setattr(
+        dependencies.cv2, "VideoCapture", lambda index: capture, raising=False
+    )
+    monkeypatch.setattr(dependencies.cv2, "CAP_PROP_BUFFERSIZE", 38, raising=False)
+    monkeypatch.setattr(
+        dependencies.cv2,
+        "imencode",
+        lambda extension, image: (True, np.frombuffer(b"jpeg", dtype=np.uint8)),
+        raising=False,
+    )
+    dependencies.business_logic.process_access_attempt = lambda **kwargs: (
+        True,
+        "real",
+        "Alice",
+        91.0,
+        face,
+    )
+
+    asyncio.run(backend_main.websocket_recognize(websocket))
+
+    assert websocket.sent[0]["frame"] == "data:image/jpeg;base64,anBlZw=="
+    assert websocket.sent[0]["status"] == "Access Granted"
+    assert capture.settings == [(38, 1)]
+    assert capture.released is True
+    assert backend_main.camera_lock.locked() is False
+
+
+def test_backend_camera_releases_after_inference_error(monkeypatch):
+    backend_main, dependencies = load_backend_main(monkeypatch)
+    websocket = FakeWebSocket()
+    capture = FakeCapture(frame=np.zeros((2, 2, 3), dtype=np.uint8))
+
+    monkeypatch.setattr(backend_main, "CAMERA_SOURCE", "backend")
+    monkeypatch.setattr(
+        dependencies.cv2, "VideoCapture", lambda index: capture, raising=False
+    )
+    monkeypatch.setattr(
+        dependencies.cv2,
+        "imencode",
+        lambda extension, image: (True, np.frombuffer(b"jpeg", dtype=np.uint8)),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        dependencies.business_logic,
+        "process_access_attempt",
+        lambda **kwargs: (_ for _ in ()).throw(RuntimeError("inference failed")),
+    )
+
+    with pytest.raises(RuntimeError, match="inference failed"):
+        asyncio.run(backend_main.websocket_recognize(websocket))
+
+    assert capture.released is True
+    assert backend_main.camera_lock.locked() is False
+
+
 def test_enrollment_websocket_finishes_after_thirty_embeddings(monkeypatch):
     backend_main, dependencies = load_backend_main(monkeypatch)
     websocket = FakeWebSocket()
@@ -513,3 +662,41 @@ def test_enrollment_websocket_finishes_after_thirty_embeddings(monkeypatch):
     assert websocket.sent[-1] == {"status": "Finished", "embedding": [1.0, 0.0]}
     assert dependencies.led_calls.count("registration_active") == 30
     assert dependencies.led_calls[-1] == "all_off"
+
+
+def test_backend_enrollment_captures_preview_and_releases_on_disconnect(monkeypatch):
+    backend_main, dependencies = load_backend_main(monkeypatch)
+    websocket = DisconnectAfterSendWebSocket()
+    capture = FakeCapture(frame=np.zeros((2, 2, 3), dtype=np.uint8))
+    face = SimpleNamespace(bbox=np.array([1, 2, 3, 4]))
+    embedding = np.array([1.0, 0.0], dtype=np.float32)
+
+    monkeypatch.setattr(backend_main, "CAMERA_SOURCE", "backend")
+    monkeypatch.setattr(
+        dependencies.cv2, "VideoCapture", lambda index: capture, raising=False
+    )
+    monkeypatch.setattr(
+        dependencies.cv2,
+        "imencode",
+        lambda extension, image: (True, np.frombuffer(b"jpeg", dtype=np.uint8)),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        backend_main,
+        "extract_embedding_from_frame",
+        lambda *args: (embedding, face, "real"),
+    )
+
+    asyncio.run(backend_main.websocket_enroll(websocket))
+
+    assert websocket.sent == [
+        {
+            "status": "Collecting: 1/30",
+            "color": "#00FF00",
+            "box": [1, 2, 3, 4],
+            "progress": pytest.approx(1 / 30),
+            "frame": "data:image/jpeg;base64,anBlZw==",
+        }
+    ]
+    assert capture.released is True
+    assert backend_main.camera_lock.locked() is False

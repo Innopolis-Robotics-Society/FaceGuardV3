@@ -21,6 +21,8 @@ services:
     environment:
       TZ: Europe/Moscow
       PGTZ: Europe/Moscow
+      CAMERA_SOURCE: backend
+      CAMERA_INDEX: "0"
     env_file:
       - ../backend/.env
     depends_on:
@@ -29,6 +31,8 @@ services:
       - ../backend:/app/backend
       - ../tests:/app/tests
       - ./insightface_models:/root/.insightface/models
+    devices:
+      - /dev/video0:/dev/video0
     restart: unless-stopped
 
   frontend:
@@ -37,6 +41,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      VITE_CAMERA_SOURCE: backend
     volumes:
       - ../frontend/src:/app/src
     restart: unless-stopped
