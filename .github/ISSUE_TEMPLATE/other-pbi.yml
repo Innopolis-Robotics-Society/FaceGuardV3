@@ -81,7 +81,7 @@ body:
     id: sprint
     attributes:
       label: Sprint milestone
-      placeholder: "Sprint 4"
+      placeholder: "Sprint 5"
     validations:
       required: false
   - type: input
