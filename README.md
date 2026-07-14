@@ -73,6 +73,16 @@ ADMIN_LOGIN=myadmin
 ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
 ```
 
+Generate a distinct JWT signing secret and paste it as `JWT_SECRET`:
+
+```bash
+openssl rand -hex 32
+```
+
+If the UI is opened directly by Pi hostname/IP instead of through localhost
+SSH forwarding, add that exact origin to the comma-separated `CORS_ORIGINS`
+allow-list. Do not use `*`.
+
 ### 5. Make sure Docker is running
 **Windows:** Open Docker Desktop and wait until it shows "Engine running" in the bottom left corner.  
 **Mac:** Open the Docker app and wait until the Docker icon appears in the menu bar.  
@@ -83,12 +93,40 @@ ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
 
 ### 6. Build and run the containers
 
-Return to the project root directory and start Docker:
+Return to the project root directory. For laptop development, where the
+browser supplies camera frames with `getUserMedia`, use the base Compose file:
+
 ```bash
 cd ..
-docker compose -f docker/docker-compose.yml build
-docker compose -f docker/docker-compose.yml up
+docker compose --env-file backend/.env -f docker/docker-compose.yml config
+docker compose --env-file backend/.env -f docker/docker-compose.yml up -d --build
 ```
+
+For Raspberry Pi 5, use the hardware override as well. It maps only
+`/dev/video0` and `/dev/gpiochip0`, builds the frontend in backend-camera mode,
+and makes the FastAPI container own camera index 0:
+
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.pi.yml config
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.pi.yml up -d --build
+```
+
+`backend/.env` is a required local file and must not be committed. The database
+and backend read the same file, which prevents credential drift. Vite embeds
+`VITE_CAMERA_SOURCE` at build time, so changing camera mode requires rebuilding
+the frontend image. Optional `VITE_API_BASE_URL` and `VITE_WS_BASE_URL` values
+are also passed as frontend build arguments; leave them unset for the default
+current-hostname/port-8000 routing used by SSH forwarding.
+
+On the first backend start, the pinned InsightFace `buffalo_s` archive
+(approximately 122 MiB) is downloaded into `docker/insightface_models`, checked
+as a ZIP, and then extracted. Keep this cache to make later starts fully
+offline. A corrupt ZIP or storage error is reported explicitly and must be
+investigated rather than bypassed.
 
 ### 7. Access the application
 Once the containers are running, open your browser and navigate to:
@@ -96,7 +134,9 @@ Once the containers are running, open your browser and navigate to:
 http://localhost:3000
 ```
 
+When accessing the Pi over SSH port forwarding, forward both application ports,
+for example `ssh -L 3000:localhost:3000 -L 8000:localhost:8000 pi@<pi-host>`.
+
 ## Hosted Documentation
 
 See the [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/).
-

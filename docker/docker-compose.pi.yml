@@ -1,17 +1,16 @@
+# Raspberry Pi hardware override. Use together with docker-compose.yml:
+# docker compose -f docker/docker-compose.yml -f docker/docker-compose.pi.yml up --build
 services:
-  faceguard:
-    image: ixkci/faceguard:latest
-    ports:
-      - "8501:8501"
+  backend:
     environment:
-      TZ: Europe/Moscow
-      PGTZ: Europe/Moscow
+      CAMERA_SOURCE: backend
+      CAMERA_INDEX: "0"
+      GPIO_CHIP: "0"
     devices:
       - /dev/video0:/dev/video0
-      # /dev/gpiomem is required for hardware LED access on Raspberry Pi
-      - /dev/gpiomem:/dev/gpiomem
-    volumes:
-      - ../backend:/app/backend
-      - ../tests:/app/tests
-      - ./insightface_models:/root/.insightface/models
-    restart: unless-stopped
+      - /dev/gpiochip0:/dev/gpiochip0
+
+  frontend:
+    build:
+      args:
+        VITE_CAMERA_SOURCE: backend

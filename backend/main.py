@@ -1,3 +1,15 @@
+import asyncio
+import base64
+import binascii
+import logging
+import os
+import time
+from typing import List, Optional
+
+import runtime  # noqa: F401 - applies native thread limits before NumPy import.
+import bcrypt
+import cv2
+import numpy as np
 from fastapi import (
     FastAPI,
     WebSocket,
@@ -13,18 +25,10 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from core.security import create_access_token, get_current_user, verify_token
-
-import numpy as np
-import base64
-import cv2
-import time
-from typing import Optional, List
-import asyncio
 from fastapi.concurrency import run_in_threadpool
 
-import os
-import bcrypt
 from datetime import datetime
+from camera import CameraError, CameraFrame, CameraSettings, LatestFrameCamera
 from db.employees_db import (
     add_employees,
     delete_employee,
@@ -37,8 +41,20 @@ from faceguard.recognize import (
     LivenessDetector,
     extract_embedding_from_frame,
     average_embeddings,
+    InsightFaceProvider,
 )
 import leds
+
+
+logger = logging.getLogger(__name__)
+
+WEBSOCKET_APPLICATION_PROTOCOL = "faceguard.jwt"
+WEBSOCKET_BEARER_PREFIX = "bearer."
+OPERATION_HANDOFF_TIMEOUT_SECONDS = float(
+    os.environ.get("OPERATION_HANDOFF_TIMEOUT_SECONDS", "5.0")
+)
+if OPERATION_HANDOFF_TIMEOUT_SECONDS <= 0:
+    raise RuntimeError("OPERATION_HANDOFF_TIMEOUT_SECONDS must be positive")
 
 app = FastAPI()
 
@@ -46,9 +62,19 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+default_cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+configured_cors_origins = os.environ.get("CORS_ORIGINS", "")
+cors_origins = [
+    origin.strip() for origin in configured_cors_origins.split(",") if origin.strip()
+]
+if not cors_origins:
+    cors_origins = default_cors_origins
+if "*" in cors_origins:
+    raise RuntimeError("CORS_ORIGINS must list explicit trusted origins")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,102 +83,13 @@ app.add_middleware(
 # Load models once
 face_app = create_face_app()
 liveness_detector = LivenessDetector()
+camera_settings = CameraSettings.from_env()
+camera_factory = LatestFrameCamera
 
-
-def _camera_source_from_environment() -> str:
-    source = os.environ.get("CAMERA_SOURCE", "browser").strip().lower()
-    if source not in {"browser", "backend"}:
-        print(f"Unknown CAMERA_SOURCE={source!r}; falling back to browser")
-        return "browser"
-    return source
-
-
-def _camera_index_from_environment() -> int:
-    value = os.environ.get("CAMERA_INDEX", "0")
-    try:
-        return int(value)
-    except ValueError:
-        print(f"Invalid CAMERA_INDEX={value!r}; falling back to 0")
-        return 0
-
-
-CAMERA_SOURCE = _camera_source_from_environment()
-CAMERA_INDEX = _camera_index_from_environment()
-CAMERA_READ_RETRY_DELAY = 0.1
-camera_lock = asyncio.Lock()
-
-
-class CameraOpenError(RuntimeError):
-    pass
-
-
-class BackendCameraSession:
-    """Own one exclusive, short-lived connection to the backend camera."""
-
-    def __init__(self, camera_index: int):
-        self.camera_index = camera_index
-        self.capture = None
-        self.owns_lock = False
-
-    async def acquire(self):
-        await camera_lock.acquire()
-        self.owns_lock = True
-        try:
-            self.capture = await run_in_threadpool(cv2.VideoCapture, self.camera_index)
-            if self.capture is None or not await run_in_threadpool(
-                self.capture.isOpened
-            ):
-                raise CameraOpenError(
-                    f"Unable to open backend camera index {self.camera_index}"
-                )
-
-            if hasattr(cv2, "CAP_PROP_BUFFERSIZE"):
-                try:
-                    await run_in_threadpool(
-                        self.capture.set, cv2.CAP_PROP_BUFFERSIZE, 1
-                    )
-                except Exception as exc:
-                    print(f"Could not set camera buffer size: {exc}")
-            return self
-        except Exception:
-            await self.close()
-            raise
-
-    async def read(self):
-        success, frame = await run_in_threadpool(self.capture.read)
-        if not success or frame is None:
-            await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
-            return None
-        return frame
-
-    async def close(self):
-        try:
-            if self.capture is not None:
-                try:
-                    await run_in_threadpool(self.capture.release)
-                except Exception as exc:
-                    print(f"Could not release backend camera: {exc}")
-        finally:
-            self.capture = None
-            if self.owns_lock:
-                self.owns_lock = False
-                camera_lock.release()
-
-
-def decode_browser_frame(data: str):
-    if "," in data:
-        data = data.split(",", 1)[1]
-    img_data = base64.b64decode(data)
-    np_arr = np.frombuffer(img_data, np.uint8)
-    return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-
-def encode_preview_frame(frame) -> Optional[str]:
-    success, encoded = cv2.imencode(".jpg", frame)
-    if not success:
-        return None
-    payload = base64.b64encode(encoded.tobytes()).decode("ascii")
-    return f"data:image/jpeg;base64,{payload}"
+# A deployment has one physical entry point and one pair of model sessions.
+# Holding this lock for the complete WebSocket operation prevents recognition
+# and enrollment from competing for either the USB camera or global inference.
+operation_lock = asyncio.Lock()
 
 
 @app.on_event("startup")
@@ -168,7 +105,7 @@ def startup_event():
 
 @app.on_event("shutdown")
 def shutdown_event():
-    leds.cleanup()
+    leds.shutdown()
 
 
 class EmployeeUpdate(BaseModel):
@@ -215,9 +152,9 @@ def login(request: Request, credentials: dict):
             # Check bcrypt hash
             if bcrypt.checkpw(provided_password, stored_hash.encode("utf-8")):
                 token = create_access_token({"sub": valid_user})
-                return {"status": "ok", "token": token}  # nosec B105
+                return {"status": "ok", "token": token}
     except Exception as e:
-        print("Error reading secrets:", e)
+        logger.warning("Login verification failed: %s", type(e).__name__)
 
     raise HTTPException(status_code=401, detail="Invalid login or password")
 
@@ -275,93 +212,330 @@ async def drain_websocket(websocket: WebSocket) -> str:
     return data
 
 
-@app.websocket("/ws/recognize")
-async def websocket_recognize(websocket: WebSocket):
-    token = websocket.query_params.get("token")
-    if not token:
+def decode_browser_frame(data: str):
+    """Decode one browser data URL without doing CPU work on the event loop."""
+    encoded = data.split(",", maxsplit=1)[1] if "," in data else data
+    try:
+        img_data = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    np_arr = np.frombuffer(img_data, np.uint8)
+    return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+
+def encode_backend_frame(frame, quality: int) -> str:
+    quality_property = getattr(cv2, "IMWRITE_JPEG_QUALITY", 1)
+    success, encoded = cv2.imencode(".jpg", frame, [quality_property, int(quality)])
+    if not success:
+        raise CameraError("Unable to encode backend camera frame as JPEG")
+    payload = base64.b64encode(encoded.tobytes()).decode("ascii")
+    return f"data:image/jpeg;base64,{payload}"
+
+
+def serialize_box(face):
+    if face is None:
+        return None
+    if isinstance(face, dict):
+        bbox = face.get("bbox")
+    else:
+        bbox = getattr(face, "bbox", None)
+    if bbox is None:
+        return None
+    values = np.asarray(bbox).reshape(-1)
+    if values.size != 4:
+        logger.warning("Recognition provider returned an invalid bbox shape")
+        return None
+    return [float(value) for value in values]
+
+
+class StreamMetrics:
+    """Aggregate per-connection timing without logging frames or credentials."""
+
+    def __init__(self, mode: str):
+        self.mode = mode
+        self.started_at = time.perf_counter()
+        self.last_report_at = self.started_at
+        self.frames = 0
+        self.capture_ms = 0.0
+        self.frame_age_ms = 0.0
+        self.inference_ms = 0.0
+        self.encode_ms = 0.0
+        self.send_ms = 0.0
+
+    def record(
+        self,
+        frame: CameraFrame,
+        inference_ms: float,
+        encode_ms: float,
+        send_ms: float,
+    ) -> None:
+        now = time.perf_counter()
+        self.frames += 1
+        self.capture_ms += frame.capture_ms
+        self.frame_age_ms += max(0.0, (now - frame.captured_at) * 1000.0)
+        self.inference_ms += inference_ms
+        self.encode_ms += encode_ms
+        self.send_ms += send_ms
+        if now - self.last_report_at >= 5.0:
+            self._report(now, final=False)
+            self.last_report_at = now
+
+    def _report(self, now: float, final: bool) -> None:
+        if self.frames == 0:
+            return
+        elapsed = max(now - self.started_at, 0.001)
+        divisor = float(self.frames)
+        logger.info(
+            "Camera stream metrics mode=%s final=%s frames=%s fps=%.2f "
+            "capture_ms=%.1f frame_age_ms=%.1f inference_ms=%.1f "
+            "encode_ms=%.1f send_ms=%.1f",
+            self.mode,
+            final,
+            self.frames,
+            self.frames / elapsed,
+            self.capture_ms / divisor,
+            self.frame_age_ms / divisor,
+            self.inference_ms / divisor,
+            self.encode_ms / divisor,
+            self.send_ms / divisor,
+        )
+
+    def finish(self) -> None:
+        self._report(time.perf_counter(), final=True)
+
+
+async def authenticate_websocket(websocket: WebSocket) -> bool:
+    offered_protocols = [
+        value.strip()
+        for value in websocket.headers.get("sec-websocket-protocol", "").split(",")
+        if value.strip()
+    ]
+    token_protocol = next(
+        (
+            value
+            for value in offered_protocols
+            if value.startswith(WEBSOCKET_BEARER_PREFIX)
+        ),
+        None,
+    )
+    if (
+        WEBSOCKET_APPLICATION_PROTOCOL not in offered_protocols
+        or token_protocol is None
+    ):
+        logger.warning("Rejected WebSocket connection without a JWT")
         await websocket.close(code=1008)
-        return
+        return False
+    token = token_protocol[len(WEBSOCKET_BEARER_PREFIX) :]
     try:
         verify_token(token)
     except Exception:
+        logger.warning("Rejected WebSocket connection with an invalid JWT")
+        # Complete the negotiated application handshake before closing so a
+        # browser receives 1008 and does not treat auth rejection as a generic
+        # 1006 network failure eligible for reconnect.
+        await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
         await websocket.close(code=1008)
+        return False
+    return True
+
+
+async def claim_operation(websocket: WebSocket) -> bool:
+    try:
+        await asyncio.wait_for(
+            operation_lock.acquire(),
+            timeout=OPERATION_HANDOFF_TIMEOUT_SECONDS,
+        )
+        return True
+    except asyncio.TimeoutError:
+        await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
+        await websocket.send_json(
+            {
+                "status": "Camera is busy with another operation",
+                "color": "#FF0000",
+                "box": None,
+                "fatal": True,
+                "error_code": "operation_busy",
+            }
+        )
+        await websocket.close(code=1013)
+        return False
+
+
+async def next_input_frame(
+    websocket: WebSocket,
+    camera,
+    last_sequence: int,
+) -> Optional[CameraFrame]:
+    if camera_settings.source == "backend":
+        return await run_in_threadpool(
+            camera.wait_for_frame,
+            last_sequence,
+            camera_settings.frame_timeout,
+        )
+
+    data = await drain_websocket(websocket)
+    started_at = time.perf_counter()
+    image = await run_in_threadpool(decode_browser_frame, data)
+    if image is None:
+        return None
+    return CameraFrame(
+        sequence=last_sequence + 1,
+        captured_at=started_at,
+        image=image,
+        capture_ms=0.0,
+    )
+
+
+async def send_frame_response(
+    websocket: WebSocket,
+    response: dict,
+    frame: CameraFrame,
+    metrics: StreamMetrics,
+    inference_ms: float,
+) -> None:
+    height, width = frame.image.shape[:2]
+    response["box"] = response.get("box")
+    response["frame_width"] = int(width)
+    response["frame_height"] = int(height)
+
+    encode_ms = 0.0
+    if camera_settings.source == "backend":
+        encode_started = time.perf_counter()
+        response["frame"] = await run_in_threadpool(
+            encode_backend_frame, frame.image, camera_settings.jpeg_quality
+        )
+        encode_ms = (time.perf_counter() - encode_started) * 1000.0
+
+    send_started = time.perf_counter()
+    await websocket.send_json(response)
+    send_ms = (time.perf_counter() - send_started) * 1000.0
+    metrics.record(frame, inference_ms, encode_ms, send_ms)
+
+
+async def run_led(action) -> None:
+    try:
+        await run_in_threadpool(action)
+    except Exception:
+        logger.exception("LED action failed: %s", getattr(action, "__name__", action))
+
+
+async def record_event(name: str, status: str, led_action) -> None:
+    try:
+        await run_in_threadpool(add_log, name, status)
+    except Exception:
+        logger.exception("Unable to persist recognition event status=%s", status)
+    await run_led(led_action)
+
+
+async def send_stream_error(websocket: WebSocket, status: str) -> None:
+    try:
+        await websocket.send_json(
+            {
+                "status": status,
+                "color": "#FF0000",
+                "box": None,
+                "fatal": True,
+                "error_code": "stream_error",
+            }
+        )
+    except Exception:
+        logger.debug("Unable to send WebSocket error response", exc_info=True)
+
+
+async def close_stream(websocket: WebSocket, code: int) -> None:
+    try:
+        await websocket.close(code=code)
+    except Exception:
+        logger.debug("Unable to close WebSocket cleanly", exc_info=True)
+
+
+async def cleanup_operation(
+    camera,
+    metrics: Optional[StreamMetrics],
+    turn_leds_off: bool,
+) -> None:
+    """Release an operation even when its request task is cancelled."""
+    try:
+        if camera is not None:
+            try:
+                await run_in_threadpool(camera.stop)
+            except Exception:
+                logger.exception("Unable to stop backend camera cleanly")
+        if metrics is not None:
+            metrics.finish()
+        if turn_leds_off:
+            await run_led(leds.all_off)
+    finally:
+        if operation_lock.locked():
+            operation_lock.release()
+
+
+async def shielded_cleanup(
+    camera,
+    metrics: Optional[StreamMetrics],
+    turn_leds_off: bool,
+) -> None:
+    cleanup_task = asyncio.create_task(
+        cleanup_operation(camera, metrics, turn_leds_off)
+    )
+    try:
+        await asyncio.shield(cleanup_task)
+    except asyncio.CancelledError:
+        await cleanup_task
+        raise
+
+
+@app.websocket("/ws/recognize")
+async def websocket_recognize(websocket: WebSocket):
+    if not await authenticate_websocket(websocket):
+        return
+    if not await claim_operation(websocket):
         return
 
-    await websocket.accept()
-
-    unrecognized_frames = 0
-    access_granted_until = 0
-    last_log_time = 0
-    last_logged_name = None
-    last_logged_status = None
-    log_cooldown = 5.0
-
-    from faceguard.recognize import InsightFaceProvider
-    from faceguard.business_logic import process_access_attempt
-
-    recognizer = InsightFaceProvider(face_app, liveness_detector)
-    camera_session = None
-
+    camera = None
+    metrics = None
     try:
-        if CAMERA_SOURCE == "backend":
-            camera_session = BackendCameraSession(CAMERA_INDEX)
-            await camera_session.acquire()
+        unrecognized_frames = 0
+        access_granted_until = 0
+        last_log_time = 0
+        last_logged_name = None
+        last_logged_status = None
+        led_state = None
+        log_cooldown = 5.0
+        from faceguard.business_logic import process_access_attempt
+
+        recognizer = InsightFaceProvider(face_app, liveness_detector)
+        metrics = StreamMetrics(camera_settings.source)
+        last_sequence = 0
+
+        await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
+        if camera_settings.source == "backend":
+            camera = camera_factory(camera_settings)
+            await run_in_threadpool(camera.start)
 
         while True:
-            preview_frame = None
-            if CAMERA_SOURCE == "backend":
-                img = await camera_session.read()
-                if img is None:
-                    await websocket.send_json(
-                        {
-                            "status": "Camera frame unavailable",
-                            "color": "#FF0000",
-                            "name": "-",
-                            "similarity": "-",
-                        }
-                    )
-                    continue
-                preview_frame = await run_in_threadpool(encode_preview_frame, img)
-                if preview_frame is None:
-                    await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
-                    await websocket.send_json(
-                        {
-                            "status": "Error encoding camera frame",
-                            "color": "#FF0000",
-                            "name": "-",
-                            "similarity": "-",
-                        }
-                    )
-                    continue
-            else:
-                data = await drain_websocket(websocket)
-                try:
-                    img = await run_in_threadpool(decode_browser_frame, data)
-                except Exception:
-                    img = None
-
-            current_time = time.time()
-
-            if img is None:
+            frame = await next_input_frame(websocket, camera, last_sequence)
+            if frame is None:
                 await websocket.send_json({"status": "Error decoding image"})
                 continue
-
+            last_sequence = frame.sequence
+            current_time = time.time()
+            inference_started = time.perf_counter()
             access_granted, status_code, name, score, face = await run_in_threadpool(
-                process_access_attempt, frame=img, recognizer=recognizer
+                process_access_attempt, frame=frame.image, recognizer=recognizer
             )
+            inference_ms = (time.perf_counter() - inference_started) * 1000.0
+            box = serialize_box(face)
 
             response = {
                 "status": "No face detected",
                 "color": "#888888",
                 "name": "-",
                 "similarity": "-",
+                "box": box,
             }
 
             if status_code in ("real", "Access Denied"):
-                if last_logged_status != "RECOGNIZING":
-                    leds.start_recognizing()
-                    last_logged_status = "RECOGNIZING"
-
                 if access_granted:
                     unrecognized_frames = 0
                     access_granted_until = current_time + 3.0
@@ -370,21 +544,18 @@ async def websocket_recognize(websocket: WebSocket):
                         "color": "#00FF00",
                         "name": name,
                         "similarity": f"{score:.1f}%",
-                        "box": face.bbox.tolist() if face is not None else None,
+                        "box": box,
                     }
                     if (
                         current_time - last_log_time > log_cooldown
                         or last_logged_name != name
                         or last_logged_status != "ACCESS_GRANTED"
                     ):
-                        leds.access_granted()
-                        try:
-                            add_log(name, "ACCESS_GRANTED")
-                            last_log_time = current_time
-                            last_logged_name = name
-                            last_logged_status = "ACCESS_GRANTED"
-                        except Exception as e:
-                            print(f"Log error: {e}")
+                        await record_event(name, "ACCESS_GRANTED", leds.access_granted)
+                        last_log_time = current_time
+                        last_logged_name = name
+                        last_logged_status = "ACCESS_GRANTED"
+                        led_state = "ACCESS_GRANTED"
                 else:
                     if current_time < access_granted_until:
                         response = {
@@ -392,7 +563,7 @@ async def websocket_recognize(websocket: WebSocket):
                             "color": "#00FF00",
                             "name": last_logged_name,
                             "similarity": "-",
-                            "box": face.bbox.tolist() if face is not None else None,
+                            "box": box,
                         }
                     else:
                         unrecognized_frames += 1
@@ -402,29 +573,31 @@ async def websocket_recognize(websocket: WebSocket):
                                 "color": "#FF0000",
                                 "name": "Unknown",
                                 "similarity": "0%",
-                                "box": face.bbox.tolist() if face is not None else None,
+                                "box": box,
                             }
                             if (
                                 current_time - last_log_time > log_cooldown
                                 or last_logged_name != "UNKNOWN"
                                 or last_logged_status != "ACCESS_DENIED"
                             ):
-                                leds.access_denied()
-                                try:
-                                    add_log("UNKNOWN", "ACCESS_DENIED")
-                                    last_log_time = current_time
-                                    last_logged_name = "UNKNOWN"
-                                    last_logged_status = "ACCESS_DENIED"
-                                except Exception as e:
-                                    print(f"Log error: {e}")
+                                await record_event(
+                                    "UNKNOWN", "ACCESS_DENIED", leds.access_denied
+                                )
+                                last_log_time = current_time
+                                last_logged_name = "UNKNOWN"
+                                last_logged_status = "ACCESS_DENIED"
+                                led_state = "ACCESS_DENIED"
                         else:
                             response = {
                                 "status": "Recognizing...",
                                 "color": "#FFFF00",
                                 "name": "...",
                                 "similarity": "-",
-                                "box": face.bbox.tolist() if face is not None else None,
+                                "box": box,
                             }
+                            if led_state != "RECOGNIZING":
+                                await run_led(leds.start_recognizing)
+                                led_state = "RECOGNIZING"
             elif status_code == "spoof":
                 if current_time < access_granted_until:
                     pass
@@ -435,20 +608,19 @@ async def websocket_recognize(websocket: WebSocket):
                         "color": "#FF0000",
                         "name": "Unknown",
                         "similarity": "-",
-                        "box": face.bbox.tolist() if face is not None else None,
+                        "box": box,
                     }
                     if (
                         current_time - last_log_time > log_cooldown
                         or last_logged_status != "SPOOF_ATTEMPT"
                     ):
-                        leds.access_denied()
-                        try:
-                            add_log("UNKNOWN", "SPOOF_ATTEMPT")
-                            last_log_time = current_time
-                            last_logged_name = "UNKNOWN"
-                            last_logged_status = "SPOOF_ATTEMPT"
-                        except Exception as e:
-                            print(f"Log error: {e}")
+                        await record_event(
+                            "UNKNOWN", "SPOOF_ATTEMPT", leds.access_denied
+                        )
+                        last_log_time = current_time
+                        last_logged_name = "UNKNOWN"
+                        last_logged_status = "SPOOF_ATTEMPT"
+                        led_state = "SPOOF_ATTEMPT"
             elif status_code == "bad_face":
                 if current_time < access_granted_until:
                     pass
@@ -459,139 +631,118 @@ async def websocket_recognize(websocket: WebSocket):
                         "color": "#00FFFF",
                         "name": "-",
                         "similarity": "-",
-                        "box": face.bbox.tolist() if face is not None else None,
+                        "box": box,
                     }
-                    if last_logged_status != "BAD_FACE":
-                        leds.bad_frame()
-                        last_logged_status = "BAD_FACE"
+                    if led_state != "BAD_FACE":
+                        await run_led(leds.bad_frame)
+                        led_state = "BAD_FACE"
             else:
                 if current_time >= access_granted_until:
                     unrecognized_frames = 0
-                    if last_logged_status != "NO_FACE":
-                        leds.all_off()
-                        last_logged_status = "NO_FACE"
+                    if led_state != "NO_FACE":
+                        await run_led(leds.all_off)
+                        led_state = "NO_FACE"
 
-            if preview_frame is not None:
-                response["frame"] = preview_frame
-            await websocket.send_json(response)
+            await send_frame_response(websocket, response, frame, metrics, inference_ms)
 
-    except CameraOpenError as exc:
-        await websocket.send_json(
-            {
-                "status": str(exc),
-                "color": "#FF0000",
-                "name": "-",
-                "similarity": "-",
-            }
-        )
     except WebSocketDisconnect:
         pass
+    except CameraError as error:
+        logger.error("Backend camera stream failed: %s", error)
+        await send_stream_error(websocket, "Backend camera error")
+        await close_stream(websocket, 1011)
+    except Exception:
+        logger.exception("Recognition WebSocket failed")
+        await send_stream_error(websocket, "Recognition stream error")
+        await close_stream(websocket, 1011)
     finally:
-        if camera_session is not None:
-            await camera_session.close()
-        leds.all_off()
+        await shielded_cleanup(camera, metrics, turn_leds_off=True)
 
 
 @app.websocket("/ws/enroll")
 async def websocket_enroll(websocket: WebSocket):
-    token = websocket.query_params.get("token")
-    if not token:
-        await websocket.close(code=1008)
+    if not await authenticate_websocket(websocket):
         return
-    try:
-        verify_token(token)
-    except Exception:
-        await websocket.close(code=1008)
+    if not await claim_operation(websocket):
         return
 
-    await websocket.accept()
-    embeddings = []
-    camera_session = None
-    last_preview_frame = None
-
+    camera = None
+    metrics = None
+    finished = False
     try:
-        if CAMERA_SOURCE == "backend":
-            camera_session = BackendCameraSession(CAMERA_INDEX)
-            await camera_session.acquire()
+        embeddings = []
+        metrics = StreamMetrics(camera_settings.source)
+        last_sequence = 0
+        registration_led_active = False
+
+        await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
+        if camera_settings.source == "backend":
+            camera = camera_factory(camera_settings)
+            await run_in_threadpool(camera.start)
 
         while True:
-            if len(embeddings) >= 30:
-                final_embedding = await run_in_threadpool(
-                    average_embeddings, embeddings
-                )
-                response = {
-                    "status": "Finished",
-                    "embedding": final_embedding.tolist(),
-                }
-                if last_preview_frame is not None:
-                    response["frame"] = last_preview_frame
-                await websocket.send_json(response)
-                return
-
-            preview_frame = None
-            if CAMERA_SOURCE == "backend":
-                img = await camera_session.read()
-                if img is None:
-                    await websocket.send_json(
-                        {
-                            "status": "Camera frame unavailable",
-                            "color": "#FF0000",
-                            "box": None,
-                            "progress": len(embeddings) / 30.0,
-                        }
-                    )
-                    continue
-                preview_frame = await run_in_threadpool(encode_preview_frame, img)
-                if preview_frame is None:
-                    await asyncio.sleep(CAMERA_READ_RETRY_DELAY)
-                    await websocket.send_json(
-                        {
-                            "status": "Error encoding camera frame",
-                            "color": "#FF0000",
-                            "box": None,
-                            "progress": len(embeddings) / 30.0,
-                        }
-                    )
-                    continue
-                last_preview_frame = preview_frame
-            else:
-                data = await drain_websocket(websocket)
-                try:
-                    img = await run_in_threadpool(decode_browser_frame, data)
-                except Exception:
-                    img = None
-
-            if img is None:
+            frame = await next_input_frame(websocket, camera, last_sequence)
+            if frame is None:
+                await websocket.send_json({"status": "Error decoding image"})
                 continue
+            last_sequence = frame.sequence
 
+            inference_started = time.perf_counter()
             embedding, face, status_code = await run_in_threadpool(
-                extract_embedding_from_frame, face_app, liveness_detector, img
+                extract_embedding_from_frame,
+                face_app,
+                liveness_detector,
+                frame.image,
             )
+            inference_ms = (time.perf_counter() - inference_started) * 1000.0
+            box = serialize_box(face)
+
             if status_code == "real" and embedding is not None:
                 embeddings.append(embedding)
-                leds.registration_active()
+                if not registration_led_active:
+                    await run_led(leds.registration_active)
+                    registration_led_active = True
+                if len(embeddings) == 30:
+                    final_embedding = await run_in_threadpool(
+                        average_embeddings, embeddings
+                    )
+                    response = {
+                        "status": "Finished",
+                        "color": "#00FF00",
+                        "box": box,
+                        "progress": 1.0,
+                        "embedding": final_embedding.tolist(),
+                    }
+                    await send_frame_response(
+                        websocket, response, frame, metrics, inference_ms
+                    )
+                    await run_led(leds.registration_done)
+                    finished = True
+                    return
                 response = {
                     "status": f"Collecting: {len(embeddings)}/30",
                     "color": "#00FF00",
-                    "box": face.bbox.tolist(),
+                    "box": box,
                     "progress": len(embeddings) / 30.0,
                 }
             elif status_code == "spoof":
                 response = {
                     "status": "SPOOF DETECTED",
                     "color": "#FF0000",
-                    "box": face.bbox.tolist() if face is not None else None,
+                    "box": box,
                     "progress": len(embeddings) / 30.0,
                 }
             elif status_code == "bad_face":
                 response = {
                     "status": "Look straight",
                     "color": "#00FFFF",
-                    "box": face.bbox.tolist(),
+                    "box": box,
                     "progress": len(embeddings) / 30.0,
                 }
             else:
-                leds.all_off()
+                if registration_led_active:
+                    await run_led(leds.all_off)
+                    registration_led_active = False
                 response = {
                     "status": "No face detected",
                     "color": "#888888",
@@ -599,25 +750,20 @@ async def websocket_enroll(websocket: WebSocket):
                     "progress": len(embeddings) / 30.0,
                 }
 
-            if preview_frame is not None:
-                response["frame"] = preview_frame
-            await websocket.send_json(response)
+            await send_frame_response(websocket, response, frame, metrics, inference_ms)
 
-    except CameraOpenError as exc:
-        await websocket.send_json(
-            {
-                "status": str(exc),
-                "color": "#FF0000",
-                "box": None,
-                "progress": len(embeddings) / 30.0,
-            }
-        )
     except WebSocketDisconnect:
         pass
+    except CameraError as error:
+        logger.error("Backend enrollment camera stream failed: %s", error)
+        await send_stream_error(websocket, "Backend camera error")
+        await close_stream(websocket, 1011)
+    except Exception:
+        logger.exception("Enrollment WebSocket failed")
+        await send_stream_error(websocket, "Enrollment stream error")
+        await close_stream(websocket, 1011)
     finally:
-        if camera_session is not None:
-            await camera_session.close()
-        leds.all_off()
+        await shielded_cleanup(camera, metrics, turn_leds_off=not finished)
 
 
 if __name__ == "__main__":

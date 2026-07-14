@@ -22,72 +22,72 @@ def run_recognition(
     saved_embedding = load_embedding(embedding_path)
 
     cap = cv2.VideoCapture(camera_index)
+    try:
+        if not cap.isOpened():
+            raise RuntimeError("Cannot open camera.")
 
-    if not cap.isOpened():
-        raise RuntimeError("Cannot open camera.")
+        while True:
+            ret, frame = cap.read()
 
-    while True:
-        ret, frame = cap.read()
+            if not ret:
+                break
 
-        if not ret:
-            break
-
-        current_embedding, face, status = extract_embedding_from_frame(
-            app, liveness_detector, frame
-        )
-
-        if status == "real" and current_embedding is not None and face is not None:
-            verified, score = verify_embedding(
-                current_embedding=current_embedding,
-                saved_embedding=saved_embedding,
-                threshold=threshold,
+            current_embedding, face, status = extract_embedding_from_frame(
+                app, liveness_detector, frame
             )
 
-            if verified:
-                label = f"ACCESS GRANTED | score={score:.3f}"
-                color = (0, 255, 0)
+            if status == "real" and current_embedding is not None and face is not None:
+                verified, score = verify_embedding(
+                    current_embedding=current_embedding,
+                    saved_embedding=saved_embedding,
+                    threshold=threshold,
+                )
+
+                if verified:
+                    label = f"ACCESS GRANTED | score={score:.3f}"
+                    color = (0, 255, 0)
+                else:
+                    label = f"ACCESS DENIED | score={score:.3f}"
+                    color = (0, 0, 255)
+
+                draw_face_box(frame, face, label, color=color)
+
+            elif status == "spoof":
+                draw_face_box(frame, face, "ACCESS DENIED: SPOOF", color=(0, 0, 255))
+
+            elif status == "bad_face":
+                draw_face_box(frame, face, "Look straight", color=(0, 255, 255))
+
             else:
-                label = f"ACCESS DENIED | score={score:.3f}"
-                color = (0, 0, 255)
+                cv2.putText(
+                    frame,
+                    "No valid face detected",
+                    (30, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (255, 0, 0),  # было (0, 0, 255)
+                    2,
+                )
 
-            draw_face_box(frame, face, label, color=color)
-
-        elif status == "spoof":
-            draw_face_box(frame, face, "ACCESS DENIED: SPOOF", color=(0, 0, 255))
-
-        elif status == "bad_face":
-            draw_face_box(frame, face, "Look straight", color=(0, 255, 255))
-
-        else:
             cv2.putText(
                 frame,
-                "No valid face detected",
-                (30, 40),
+                "Recognition mode | Press ESC to stop",
+                (30, frame.shape[0] - 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                (255, 0, 0),  # было (0, 0, 255)
+                0.65,
+                (255, 255, 255),
                 2,
             )
 
-        cv2.putText(
-            frame,
-            "Recognition mode | Press ESC to stop",
-            (30, frame.shape[0] - 30),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.65,
-            (255, 255, 255),
-            2,
-        )
+            cv2.imshow("Recognition", frame)
 
-        cv2.imshow("Recognition", frame)
+            key = cv2.waitKey(1) & 0xFF
 
-        key = cv2.waitKey(1) & 0xFF
-
-        if key == 27:
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+            if key == 27:
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
 
 def main():

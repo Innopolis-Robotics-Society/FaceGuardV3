@@ -408,4 +408,9 @@ def cleanup():
         LOGGER.info("[LED] GPIO resources closed")
 
 
+def shutdown():
+    """Release GPIO resources during the FastAPI shutdown lifecycle."""
+    cleanup()
+
+
 initialize_gpio()

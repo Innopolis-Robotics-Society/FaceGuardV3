@@ -1,19 +1,32 @@
-numpy
-pandas
-psycopg2-binary
-opencv-python
-onnxruntime
-pytest
-gpiozero
+# Production runtime dependencies for Python 3.10 on ARM64.
+numpy==1.26.4
+pandas==2.2.3
+psycopg2-binary==2.9.10
+opencv-python-headless==4.11.0.86
+onnx==1.17.0
+onnxruntime==1.23.2
+scipy==1.14.1
+scikit-image==0.24.0
+tqdm==4.67.1
+requests==2.32.3
+
+fastapi==0.115.6
+uvicorn==0.34.0
+pydantic==2.10.4
+python-multipart==0.0.20
+websockets==14.1
+bcrypt==4.2.1
+python-dotenv==1.0.1
+PyJWT==2.10.1
+slowapi==0.1.9
+
+# Raspberry Pi 5 GPIO support. The LED controller constructs gpiozero's
+# LGPIOFactory directly for the configured gpiochip; no RPi.GPIO compatibility
+# package is installed alongside it.
+gpiozero==2.0.1
 lgpio==0.2.2.0
-RPi.GPIO
-insightface
-fastapi
-uvicorn[standard]
-python-multipart
-websockets
-tomli
-bcrypt
-python-dotenv
-PyJWT
-slowapi
+
+# InsightFace 1.0.1 declares opencv-python as a dependency even for headless
+# servers. The Dockerfiles install it separately with --no-deps so that only
+# opencv-python-headless is present; all of its non-GUI runtime dependencies
+# are pinned above.

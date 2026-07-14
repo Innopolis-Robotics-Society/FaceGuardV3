@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Edit2, Search, ArrowUp, ArrowDown, AlertCircle } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 interface Employee {
   id: number;
@@ -36,9 +37,7 @@ export default function Employees() {
   const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth()+1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
 
   const fetchEmployees = () => {
-    fetch('http://localhost:8000/api/employees', {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch('/api/employees')
       .then(res => res.json())
       .then(data => {
         setEmployees(data);
@@ -52,10 +51,7 @@ export default function Employees() {
 
   const handleDelete = (id: number) => {
     if (!confirm('Are you sure you want to delete this employee?')) return;
-    fetch(`http://localhost:8000/api/employees/${id}`, { 
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch(`/api/employees/${id}`, { method: 'DELETE' })
       .then(() => {
         setSelectedIds(prev => {
           const newSet = new Set(prev);
@@ -71,10 +67,7 @@ export default function Employees() {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} employees?`)) return;
 
     for (const id of Array.from(selectedIds)) {
-      await fetch(`http://localhost:8000/api/employees/${id}`, { 
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-      });
+      await apiFetch(`/api/employees/${id}`, { method: 'DELETE' });
     }
     
     setSelectedIds(new Set());
@@ -156,11 +149,10 @@ export default function Employees() {
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://localhost:8000/api/employees/${editingEmp.id}`, {
+    apiFetch(`/api/employees/${editingEmp.id}`, {
       method: 'PUT',
       headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name: editName,

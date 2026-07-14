@@ -12,8 +12,12 @@ participant "LED Indicator" as LED
 
 == Frame capture ==
 User -> Camera: Approaches camera
-Camera -> Client: Capture frame (WebRTC)
-Client -> Server: Send frame (WebSocket Base64)
+alt browser camera mode
+    Camera -> Client: Capture frame (WebRTC)
+    Client -> Server: Send JPEG frame (authenticated WebSocket)
+else Raspberry Pi backend camera mode
+    Camera -> Server: Capture latest frame (/dev/video0, V4L2)
+end
 
 == Face recognition ==
 Server -> Recognition: Extract face embedding
@@ -34,7 +38,7 @@ Server -> Server: Approve access
 == Physical response and logging ==
 Server -> Logs: Write successful access log
 Server -> LED: Turn on blue LED
-Server --> Client: Return Access Granted JSON
+Server --> Client: Return result, bbox, frame size, and optional JPEG
 Client -> Client: Update UI (Green Box & Text)
 
 @enduml

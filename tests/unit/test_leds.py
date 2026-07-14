@@ -370,3 +370,15 @@ def test_cleanup_closes_leds_and_factory_once(monkeypatch):
     assert leds.PIN_FACTORY is None
     assert all(device.close_calls == 1 for device in devices)
     assert factory.close_calls == 1
+
+
+def test_shutdown_uses_idempotent_gpio_cleanup(monkeypatch):
+    factory, devices = initialize_fake_gpio(monkeypatch)
+
+    leds.shutdown()
+    leds.shutdown()
+
+    assert leds.GPIO_AVAILABLE is False
+    assert leds.PIN_FACTORY is None
+    assert all(device.close_calls == 1 for device in devices)
+    assert factory.close_calls == 1

@@ -9,6 +9,7 @@ import numpy as np  # noqa: E402
 from faceguard.interfaces import FaceProviderInterface  # noqa: E402
 
 from faceguard.detect import select_closest_face, is_good_face  # noqa: E402
+from model_assets import ensure_buffalo_s_model  # noqa: E402
 
 DEFAULT_MODEL_NAME = "buffalo_s"
 
@@ -88,6 +89,9 @@ class LivenessDetector:
 
 def create_face_app(model_name: str = DEFAULT_MODEL_NAME):
     from insightface.app import FaceAnalysis
+
+    if model_name == DEFAULT_MODEL_NAME:
+        ensure_buffalo_s_model()
 
     app = FaceAnalysis(
         name=model_name,

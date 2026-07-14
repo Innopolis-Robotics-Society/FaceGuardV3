@@ -23,7 +23,7 @@ package "Local Database Container" {
 }
 
 ' Interfaces
-interface "Video Stream (WebRTC)" as IVideo
+interface "Camera Frames (WebRTC or V4L2)" as IVideo
 interface "REST / WebSockets" as IAPI
 interface "SQL Interface" as ISQL
 interface "Hardware Control" as IHW
@@ -35,6 +35,7 @@ Employee --> Cam : Looks at
 ' Connections
 Cam - IVideo
 Frontend -( IVideo : " Requires (Browser)"
+Backend -( IVideo : " Requires (Backend mode)"
 
 Frontend - IAPI
 Backend -( IAPI : " Serves"

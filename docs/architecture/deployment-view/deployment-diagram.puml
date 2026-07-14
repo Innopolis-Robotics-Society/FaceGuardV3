@@ -7,6 +7,7 @@ skinparam node {
 
 node "Admin Workstation" <<Physical Device>> as PC {
     component "Web Browser" as Browser
+    node "Optional Browser Camera" <<Hardware>> as BrowserCam
 }
 
 node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
@@ -34,17 +35,17 @@ node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
         folder "pgdata" as PgData <<Docker Volume>>
     }
     
-    BackendApp ..> EnvFile : " Mounts"
+    BackendApp ..> EnvFile : " Reads via Compose env_file"
+    DB ..> EnvFile : " Reads database credentials"
     BackendApp ..> Models : " Mounts"
     DB ..> PgData : " Mounts"
-    FrontendApp ..> BackendDir : " Mounts (Source Code)"
-    
     ' Physical connections inside the Pi
-    Browser --> Cam : " Uses WebRTC (via Frontend UI)"
-    BackendApp --> LEDCtrl : " Controls via GPIO"
+    Cam --> BackendApp : " /dev/video0 (backend mode)"
+    BackendApp --> LEDCtrl : " /dev/gpiochip0"
 }
 
 ' Network Connections
+BrowserCam --> Browser : " WebRTC (browser mode)"
 Browser --> FrontendApp : " HTTP :3000 (React UI)"
 Browser --> BackendApp : " HTTP/WS :8000 (API & Video Stream)"
 BackendApp --> DB : " TCP/IP :5432 (Internal Docker Network)"
