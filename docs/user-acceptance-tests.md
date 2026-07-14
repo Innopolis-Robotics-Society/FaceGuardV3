@@ -40,6 +40,13 @@
 **Comments:**  The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -66,6 +73,7 @@
 - The employee was registered
 - The system recognizes them during the allowed period
 - The name, registration date, the type of the access (status), start date and time, and expiration date and time are displayed in the list of all registered employees on the page 'Employees'
+- Input time is validated
 - After the expiration date and time, the access for that employee is automatically removed, and the system rejects the attempt
 ---
 
@@ -92,6 +100,13 @@
 **Comments:** Add a field with automatic validation so the admin is able to input only the valid date.  
 **Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -121,6 +136,14 @@
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** All good.  
 **Resulting PBIs:** -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -158,6 +181,13 @@
 **Comments:** All good.  
 **Resulting PBIs:** -  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -196,6 +226,13 @@
 **Comments:** Works well.  
 **Resulting PBIs:** -  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -238,6 +275,13 @@
 **Comments:** The recognition shall run in the background.  
 **Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -279,6 +323,13 @@
 **Comments:** The recognition shall run in the background.  
 **Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -313,6 +364,14 @@
 **Resulting PBIs:** -  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
+
+---
 ## UAT-009: Register an already registered employee
 
 **Status:** Active
@@ -339,6 +398,14 @@
 **Executed by:** Customer (role: admin)  
 **Comments:**  Works correctly.  
 **Resulting PBIs:**  -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -374,6 +441,14 @@
 **Resulting PBIs:**  -  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
+
+---
 
 ## UAT-011: Admin authentication  
 
@@ -399,6 +474,14 @@
 **Executed by:** Customer (role: admin)  
 **Comments:**  Okay.  
 **Resulting PBIs:**  -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
 
 ---
 
@@ -428,3 +511,11 @@
 **Executed by:** Customer (role: admin)  
 **Comments:**  All good!  
 **Resulting PBIs:**  -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed or Failed
+**Executed by:** Customer (role: admin)
+**Comments:** -
+**Resulting PBIs:** -
