@@ -36,7 +36,7 @@
   - [#PBI: Change employee's name and status after registration](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113),
   - [#PBI: Add the time of the employee's last entry](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114),
   - [#PBI: Add filtering logs by date range](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116),
-  - [#PBI: Change the provision of temporary access](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117),
+  - [#PBI: Change the provision of temporary access](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
 
 ## Sprint 4 (MVP v2, towards MVP v3) — July 6-12, 2026
 - **Milestone:** [Sprint 4](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/4)  
@@ -54,6 +54,10 @@
 
 ## Sprint 5 (MVP v3) — July 13-19, 2026
 - **Milestone:** [Sprint 5](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/milestone/5)  
-- **Sprint Goal:** Complete final transition based on customer feedback and deliver MVP v3 with polished documentation.
-- **Focus:** Customer feedback implementation, documentation updates, final release
-- **Items:** TBD
+- **Sprint Goal:** Resolve Week 6 customer feedback (page freeze, temporary access date validation, function-description documentation), deliver the final MVP v3 release, and confirm the final transition outcome and handover status with the customer.
+- **Focus:** Customer feedback implementation, documentation updates, bug fix, final release
+- **Items:**
+  - [#PBI: Continue system optimization](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/224),
+  - [#PBI: Form validation for temporary access dates](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219),
+  - [#PBI: Extend the documentation](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/235),
+  - [#Bug: Use Raspberry Pi camera in remote web interface](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/244)
