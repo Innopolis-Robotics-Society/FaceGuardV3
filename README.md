@@ -24,6 +24,7 @@ Laboratory access control must be secure and fast. FaceGuard removes the problem
 | [Testing status](docs/testing.md) | Coverage, QRTs, CI gates, and QA checks |
 | [Quality requirements](docs/quality-requirements.md) | Measurable non-functional requirements |
 | [User acceptance tests](docs/user-acceptance-tests.md) | Maintained UAT scenarios with execution history |
+| [System Functions](docs/system-functions.md) | Plain-language user guide and function descriptions |
 
 ## Documentation Links
 | Documentation | Link |
