@@ -2,15 +2,31 @@ site_name: FaceGuardV3
 site_url: https://innopolis-robotics-society.github.io/FaceGuardV3/
 theme:
   name: material
+  font:
+    text: Quicksand
+    code: Roboto Mono
   features:
     - navigation.tabs
     - navigation.sections
     - navigation.top
     - toc.integrate
   palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 docs_dir: docs
 
@@ -48,3 +64,6 @@ markdown_extensions:
   - pymdownx.tabbed
   - pymdownx.tasklist
   - admonition
+
+extra_css:
+  - stylesheets/extra.css
