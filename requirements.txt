@@ -5,7 +5,7 @@ opencv-python
 onnxruntime
 pytest
 gpiozero
-RPi.GPIO
+lgpio
 insightface
 fastapi
 uvicorn[standard]
