@@ -20,7 +20,7 @@ This document is the authoritative handover artifact for FaceGuard, Week 6 Trial
 | **Customer Confirmation Status** | `Accepted` |
 | **Deployment Responsibility** | Customer (Raspberry Pi 5) |
 | **Repository Ownership** | Team (retained) |
-| **Documentation Sufficiency** | Not confirmed as sufficient; the customer requested a dedicated documentation page or site describing the system's functions |
+| **Documentation Sufficiency** | Confirmed sufficient; added a dedicated System Functions page as requested by the customer |
 
 Detailed confirmation evidence, the meeting date, and the customer's exact feedback are recorded in `reports/week6/sprint-review-summary.md` and, if recorded, the transcript. This file only reflects the resulting status.
 
@@ -148,7 +148,7 @@ For normal customer use, operation, and troubleshooting, refer to:
 - [System Roadmap](roadmap.md): product evolution up to `MVP v2`
 - [User Acceptance Tests](user-acceptance-tests.md): step-by-step instructions for admin panel usage
 
-A dedicated function-description documentation page was requested by the customer during the Week 6 session and is planned, see Section 7.
+A dedicated function-description documentation page was requested by the customer during the Week 6 session and has now been added (see [System Functions](system-functions.md)).
 
 ## 7. Remaining Actions and Known Limitations
 
@@ -157,7 +157,6 @@ A dedicated function-description documentation page was requested by the custome
 - Fix the occasional page freeze under load
 - Add date and time validation for temporary access, minimum value is the current date and time
 - Continue optimizing performance and stability on Raspberry Pi, particularly for the camera stream on weaker hardware
-- Add a dedicated documentation page or site describing the system's functions, explicitly requested by the customer
 
 **Known limitations and customer-side responsibilities:**
 
