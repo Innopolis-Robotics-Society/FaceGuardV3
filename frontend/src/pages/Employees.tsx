@@ -36,7 +36,7 @@ export default function Employees() {
   const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth() + 1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
 
   const fetchEmployees = () => {
-    fetch('http://localhost:8000/api/employees', {
+    fetch(`http://${window.location.hostname}:8000/api/employees`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
     })
       .then(res => res.json())
@@ -52,7 +52,7 @@ export default function Employees() {
 
   const handleDelete = (id: number) => {
     if (!confirm('Are you sure you want to delete this employee?')) return;
-    fetch(`http://localhost:8000/api/employees/${id}`, {
+    fetch(`http://${window.location.hostname}:8000/api/employees/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
     })
@@ -71,7 +71,7 @@ export default function Employees() {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} employees?`)) return;
 
     for (const id of Array.from(selectedIds)) {
-      await fetch(`http://localhost:8000/api/employees/${id}`, {
+      await fetch(`http://${window.location.hostname}:8000/api/employees/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
       });
@@ -162,7 +162,7 @@ export default function Employees() {
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://localhost:8000/api/employees/${editingEmp.id}`, {
+    fetch(`http://${window.location.hostname}:8000/api/employees/${editingEmp.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
