@@ -30,10 +30,10 @@ export default function Registration() {
   }, []);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
+    if (videoRef.current && stream && videoRef.current.srcObject !== stream) {
       videoRef.current.srcObject = stream;
     }
-  }, [stream]);
+  });
 
   const handleSave = () => {
     setErrorMsg('');
@@ -52,6 +52,12 @@ export default function Registration() {
       
       const startDt = new Date(startDate);
       const endDt = new Date(endDate);
+      
+      if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
+        setErrorMsg('Please enter valid dates.');
+        return;
+      }
+
       const now = new Date();
       now.setSeconds(0, 0);
       
@@ -152,7 +158,6 @@ export default function Registration() {
                   min={minDateTimeStr}
                   value={startDate} 
                   onChange={e => setStartDate(e.target.value)} 
-                  onKeyDown={e => e.preventDefault()}
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
@@ -163,7 +168,6 @@ export default function Registration() {
                   min={startDate || minDateTimeStr}
                   value={endDate} 
                   onChange={e => setEndDate(e.target.value)} 
-                  onKeyDown={e => e.preventDefault()}
                 />
               </div>
             </div>
