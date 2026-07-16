@@ -31,10 +31,10 @@ services:
       PGTZ: Europe/Moscow
       CAMERA_SOURCE: backend
       CAMERA_INDEX: "0"
-      GPIO_CHIP: "4"
+      GPIO_CHIP: "0"
     devices:
       - /dev/video0:/dev/video0
-      - /dev/gpiochip4:/dev/gpiochip4
+      - /dev/gpiochip0:/dev/gpiochip0
     depends_on:
       db:
         condition: service_healthy
