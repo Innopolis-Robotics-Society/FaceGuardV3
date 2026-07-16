@@ -1,9 +1,9 @@
 # Sprint Review Summary — Sprint 5, Week 7
 
-**Date:** 16.07.2026
-**Format:** Offline in person
-**Participants:** Development team, Customer (role: admin)
-**Recording:** The meeting was recorded with the customer's permission. A sanitized transcript was published, since the customer approved publication. UAT execution and the final transition confirmation were conducted during the same session, so this recording also covers both.
+**Date:** 16.07.2026   
+**Format:** Offline, in person  
+**Participants:** Development team, Customer (role: admin)  
+**Recording:** The meeting was recorded with the customer's permission. A sanitized transcript was published, since the customer approved publication. UAT execution and the final transition confirmation were conducted during the same session, so this recording also covers both.  
 
 ## Scope reviewed
 
