@@ -24,3 +24,4 @@ env/
 docker/insightface_models/buffalo_s/
 .env
 backend/.env
+insightface_models/
