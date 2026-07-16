@@ -11,16 +11,16 @@ Sprint 5, Week 7: final MVP v3 release.
 
 ## Artifacts demonstrated
 
-- Admin login and password management, including generating a new password hash
+- Admin login and password management, including generating a new password hash and changing login credentials at any time
 - Login lockout after 5 failed attempts within one minute
 - Employee registration with permanent access
 - Temporary access with future-only date and time validation
-- Recognition quality guidance and configurable camera parameters (640×480 default resolution, adjustable settings)
+- Recognition quality guidance
 - Recognition with accessories: glasses recognized correctly, masks intentionally rejected
 - Anti-spoofing: a photograph presented to the camera instead of a real face was rejected
 - Employee list, including sorting, search, activity logs, deleting, and last access time
-- Hosted documentation site, covering authentication, registration, recognition status colors, and deployment steps, in light and dark themes
-- Performance improvements on Raspberry Pi and reduction of the registration black-screen issue
+- Hosted documentation site, covering authentication, registration, recognition status colors, deployment steps, and how to generate password hashes, in light and dark themes
+- Performance improvements on Raspberry Pi (optimized as much as possible within hardware limitations) and reduction of the registration black-screen issue
 - Logs list
 - Customer confirmation of independent system operation, transition readiness, and final product acceptance
 
