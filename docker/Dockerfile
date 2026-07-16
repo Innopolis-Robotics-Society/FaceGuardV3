@@ -23,7 +23,8 @@ COPY requirements.txt ./requirements.txt
 # InsightFace's base metadata requires the GUI OpenCV distribution. Install
 # its explicitly pinned dependencies first, then install the pure-Python wheel
 # without dependencies to keep one headless cv2 implementation in the image.
-RUN python -m pip install --no-cache-dir -r requirements.txt \
+RUN python -m pip install --upgrade pip \
+    && python -m pip install --no-cache-dir -r requirements.txt \
     && python -m pip install --no-cache-dir --only-binary=:all: \
         --no-deps insightface==1.0.1
 
