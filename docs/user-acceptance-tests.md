@@ -2,19 +2,19 @@
 
 ## UAT-001: Register a new employee with permanent access
 
-**Status:** Active
-**User goal:** Grant permanent access to a new employee so the system recognizes them any time they approach the camera.
+**Status:** Active  
+**User goal:** Grant permanent access to a new employee so the system recognizes them any time they approach the camera.  
 
 **Preconditions:**
-- The system is active, powered on
-- The admin is on the page 'Add a new employee'
+- The system is active, powered on  
+- The admin is on the page 'Add a new employee'  
 
 **Steps:**
-1. Place employee with clearly visible face in front of the camera in its view
-2. Capture employee's face
-3. Enter the name of the employee
-4. Choose access type 'Permanent'
-5. Press the button 'Save'
+1. Place employee with clearly visible face in front of the camera in its view  
+2. Capture employee's face  
+3. Enter the name of the employee  
+4. Choose access type 'Permanent'  
+5. Press the button 'Save'  
 
 **Expected outcome:**
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
@@ -27,36 +27,36 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.
-**Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.  
+**Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)  
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-04)
+### Execution: Sprint Review & UAT Session (2026-07-04)  
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** The system shall be faster.
-**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)
-
----
-### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
-
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Registration demonstrated live. Slower on Raspberry Pi than on a laptop, otherwise works as expected. Camera resolution fixed at 640x480 to preserve recognition accuracy.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The system shall be faster.  
+**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)  
 
-## UAT-002: Add a new employee with temporary access
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Registration demonstrated live. Slower on Raspberry Pi than on a laptop, otherwise works as expected. Camera resolution fixed at 640x480 to preserve recognition accuracy.  
+**Resulting PBIs:** -  
 
-**Status:** Active
-**User goal:**  Grant temporary access to a new employee so the system recognizes them if they approach the camera during the allowed period.
+---
+
+## UAT-002: Add a new employee with temporary access  
+
+**Status:** Active  
+**User goal:**  Grant temporary access to a new employee so the system recognizes them if they approach the camera during the allowed period.  
 
 **Preconditions:**
-- The system is active, powered on
+- The system is active, powered on  
 - The admin is on the page 'Add a new employee'
 
 **Steps:**
@@ -80,43 +80,43 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.
-**Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.  
+**Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)  
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-04)
+### Execution: Sprint Review & UAT Session (2026-07-04)  
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** The system shall be faster.
-**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)
-
----
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
-
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Add a field with automatic validation so the admin is able to input only the valid date.
-**Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The system shall be faster.  
+**Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
 ---
-### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Date validation now confirmed working.
-**Resulting PBIs:** - 
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Add a field with automatic validation so the admin is able to input only the valid date.  
+**Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Date validation now confirmed working.  
+**Resulting PBIs:** -   
 
 ---
 
 ## UAT-003: Remove a registered employee
 
-**Status:** Active
-**User goal:** Remove the registered employee so they do not have the access to enter the laboratory
+**Status:** Active  
+**User goal:** Remove the registered employee so they do not have the access to enter the laboratory  
 
-**Preconditions:**
+**Preconditions:**  
 - The admin is on the 'Employees' page
 
 **Steps:**
@@ -132,25 +132,25 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** All good.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** All good.  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** -
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -  
+**Resulting PBIs:** -  
 
 ---
 
 ## UAT-004: View the list of all registered employees
 
-**Status:** Active
-**User goal:** View the list with information of all registered employees so the admin can monitor registered employees
+**Status:** Active  
+**User goal:** View the list with information of all registered employees so the admin can monitor registered employees  
 
 **Preconditions:**
 - The admin is on the 'Employees' page
@@ -168,33 +168,33 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry
-**Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry  
+**Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** All good.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** All good.  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** All demonstrated and confirmed working.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** All demonstrated and confirmed working.  
+**Resulting PBIs:** -  
 
 ---
 
 
 ## UAT-005: View the access logs
 
-**Status:** Active
+**Status:** Active  
 **User goal:** View logs of all attempts so the admin can monitor access attempts
 
 **Preconditions:**
@@ -213,34 +213,34 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** Add filtering by date range
-**Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** Add filtering by date range  
+**Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Works well.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Works well.  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** -
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -  
+**Resulting PBIs:** -  
 
 ---
 
 
 ## UAT-006: Automatic recognition of a registered employee
 
-**Status:** Active
-**User goal:** The system shall grant the access to a registered employee so they can enter the laboratory
+**Status:** Active  
+**User goal:** The system shall grant the access to a registered employee so they can enter the laboratory  
 
 **Preconditions:**
 - The employee was registered
@@ -262,34 +262,34 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:** Very good!
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:** Very good!  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** The recognition shall run in the background.
-**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The recognition shall run in the background.  
+**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** -  
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -    
+**Resulting PBIs:** -  
 
 ---
 
 
 ## UAT-007: Rejection of an unregistered person
 
-**Status:** Active
-**User goal:** The system shall deny the access to an unregistered person so they cannot enter the laboratory
+**Status:** Active  
+**User goal:** The system shall deny the access to an unregistered person so they cannot enter the laboratory  
 
 **Preconditions:**
 - The person is not registered
@@ -310,34 +310,34 @@
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.
-**Comments:**  Very good!
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
+**Comments:**  Very good!  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** The recognition shall run in the background.
-**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** The recognition shall run in the background.  
+**Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Anti-spoofing tested specifically: a photograph presented to the camera instead of a real face was correctly rejected. A live unregistered person was not separately tested this session; the underlying rejection path is the same as verified in earlier sessions.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Anti-spoofing tested specifically: a photograph presented to the camera instead of a real face was correctly rejected. A live unregistered person was not separately tested this session; the underlying rejection path is the same as verified in earlier sessions.  
+**Resulting PBIs:** -  
 
 ---
 
 
 ## UAT-008: Edit the name or status of an employee
 
-**Status:** Active
-**User goal:** Change the name or status of an already registered employee in the employees' table
+**Status:** Active  
+**User goal:** Change the name or status of an already registered employee in the employees' table  
 
 **Preconditions:**
 - The admin is on the 'Employees' page
@@ -357,24 +357,24 @@
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
-
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Great job!
-**Resulting PBIs:** -
+ 
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Great job!  
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** -  
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -    
+**Resulting PBIs:** -  
 
 ---
 ## UAT-009: Register an already registered employee
 
-**Status:** Active
+**Status:** Active  
 **User goal:** Prevent duplication of registered employees
 
 **Preconditions:**
@@ -394,24 +394,24 @@
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:**  Works correctly.
-**Resulting PBIs:**  -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  Works correctly.  
+**Resulting PBIs:**  -   
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** - 
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -   
+**Resulting PBIs:** -  
 
 ---
 
 ## UAT-010: Face recognition with accessories
 
-**Status:** Active
+**Status:** Active  
 **User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats)
 
 **Preconditions:**
@@ -437,24 +437,24 @@
 ---
 ### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:**  Works.
-**Resulting PBIs:**  -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  Works.  
+**Resulting PBIs:**  -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Glasses recognized correctly, confirmed twice during the session. Masks intentionally rejected for security reasons, this is now documented as expected behavior rather than a gap. Scenario and expected outcome updated to remove masks from the supported accessory list.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Glasses recognized correctly, confirmed twice during the session. Masks intentionally rejected for security reasons, this is now documented as expected behavior rather than a gap. Scenario and expected outcome updated to remove masks from the supported accessory list.  
+**Resulting PBIs:** -  
 
 ---
 
 ## UAT-011: Admin authentication
 
-**Status:** Active
+**Status:** Active  
 **User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.
 
 **Preconditions:**
@@ -473,25 +473,25 @@
 ---
 ### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:**  Okay.
-**Resulting PBIs:**  -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  Okay.  
+**Resulting PBIs:**  -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:** Works.
-**Resulting PBIs:** -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Works.  
+**Resulting PBIs:** -  
 
 ---
 
 ## UAT-012: Background recognition
 
-**Status:** Active
-**User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.
+**Status:** Active  
+**User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.  
 
 **Preconditions:**
 - The system is active, powered on
@@ -510,15 +510,15 @@
 ---
 ### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)
-**Comments:**  All good!
-**Resulting PBIs:**  -
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:**  All good!  
+**Resulting PBIs:**  -  
 
 ---
 ### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-**Result:** Passed
-**Executed by:** Customer (role: admin)  
+**Result:** Passed  
+**Executed by:** Customer (role: admin)    
 **Comments:** -  
-**Resulting PBIs:** -
+**Resulting PBIs:** -  
