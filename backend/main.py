@@ -60,7 +60,7 @@ liveness_detector = LivenessDetector()
 
 
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     print("STARTING UP DATABASE INITIALIZATION...")
     import db.employees_db
     import db.logs_db
@@ -68,6 +68,16 @@ def startup_event():
     db.employees_db.init_db()
     db.logs_db.init_db()
     print("DATABASE INITIALIZATION COMPLETE.")
+
+    async def log_cleanup_task():
+        while True:
+            try:
+                db.logs_db.delete_old_logs()
+            except Exception as e:
+                print(f"Log cleanup error: {e}")
+            await asyncio.sleep(3600)  # Run every hour
+
+    asyncio.create_task(log_cleanup_task())
 
 
 class EmployeeUpdate(BaseModel):
