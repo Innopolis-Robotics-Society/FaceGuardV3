@@ -4,6 +4,15 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-19  
+
+### Added
+- Working web-camera in the remote web interface
+- Extended Documentation
+
+### Changed
+- Formed validation for temporary access dates
+
 ## [3.0.0] - 2026-07-12  
 
 ### Added
@@ -76,3 +85,4 @@ All notable changes to FaceGuard will be documented in this file.
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
 [2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
 [3.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.1.0...v3.0.0
+[3.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v3.0.0...v3.1.0
