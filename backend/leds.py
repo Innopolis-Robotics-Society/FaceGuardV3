@@ -7,7 +7,14 @@ RED = None
 GPIO_AVAILABLE = False
 
 try:
+    import os
     import gpiozero
+    from gpiozero.pins.lgpio import LGPIOFactory
+
+    # Explicitly set the chip because /proc/device-tree is not mounted in Docker
+    # so gpiozero cannot auto-detect Raspberry Pi 5.
+    chip_num = int(os.environ.get("GPIO_CHIP", 4))
+    gpiozero.Device.pin_factory = LGPIOFactory(chip=chip_num)
 
     YELLOW = gpiozero.LED(17)
     BLUE = gpiozero.LED(27)
