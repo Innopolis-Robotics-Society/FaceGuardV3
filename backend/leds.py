@@ -13,8 +13,11 @@ try:
     BLUE = gpiozero.LED(27)
     RED = gpiozero.LED(22)
     GPIO_AVAILABLE = True
-except Exception:  # nosec B110
-    pass
+except Exception as e:
+    print(f"[LED] Failed to initialize GPIO: {e}")
+    import traceback
+    traceback.print_exc()
+    GPIO_AVAILABLE = False
 
 
 def all_leds_off():
