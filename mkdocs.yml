@@ -61,7 +61,6 @@ nav:
 
 plugins:
   - search
-  - include-markdown
 
 markdown_extensions:
   - pymdownx.tabbed
