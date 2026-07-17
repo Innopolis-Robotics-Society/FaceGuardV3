@@ -1,53 +1,47 @@
 @startuml deployment-view
 skinparam componentStyle rectangle
-skinparam node {
-    BackgroundColor white
-    BorderColor black
+
+node "Client device" as ClientDevice {
+  component "Web browser" as Browser
+  node "Optional browser camera" as ClientCamera
+  ClientCamera --> Browser : getUserMedia\n(browser mode)
 }
 
-node "Admin Workstation" <<Physical Device>> as PC {
-    component "Web Browser" as Browser
-    node "Optional Browser Camera" <<Hardware>> as BrowserCam
+node "Raspberry Pi 5" as Pi {
+  node "Docker Engine / Compose" {
+    component "frontend service\nReact preview :3000" as Frontend
+    component "backend service\nFastAPI/InsightFace :8000" as Backend
+    database "db service\nPostgreSQL 15 :5432 internal" as Database
+    cloud "faceguard bridge network" as Network
+    Frontend -- Network
+    Backend -- Network
+    Database -- Network
+  }
+
+  node "V4L2 camera\nUSB or explicitly V4L2-exposed Pi camera" as Camera
+  node "GPIO LEDs\nBCM 17/27/22" as GPIO
+  folder "docker/insightface_models\nbind mount" as Models
+  database "pgdata named volume" as PgData
+  file "backend/.env\nservice environment source" as Env
+
+  Camera --> Backend : /dev/videoN mapping\nPi override only
+  GPIO --> Backend : /dev/gpiochipN mapping\nPi override only
+  Models --> Backend : /root/.insightface/models
+  PgData --> Database : /var/lib/postgresql/data
+  Env ..> Backend
 }
 
-node "Raspberry Pi (Edge Device)" <<Lab Entrance>> as RPi {
-    node "Camera" <<Hardware (USB/CSI)>> as Cam
-    node "LEDs" <<Hardware (GPIO)>> as LEDCtrl
+Browser --> Frontend : HTTP(S) :3000
+Browser --> Backend : REST + WebSocket :8000
+Backend --> Database : TCP 5432 on bridge only
 
-    node "Docker Engine" as Docker {
-        component "docker-frontend:latest" <<Docker Container>> as FrontendApp {
-            artifact "React SPA (Vite)"
-        }
-        component "docker-backend:latest" <<Docker Container>> as BackendApp {
-            artifact "FastAPI Server"
-            artifact "InsightFace Model"
-        }
-        component "docker-db-1:latest" <<Docker Container>> as DB {
-            artifact "PostgreSQL"
-        }
-    }
-    
-    folder "Local Storage" as Storage {
-        folder "backend" as BackendDir {
-            file ".env" as EnvFile
-        }
-        folder "insightface_models" as Models
-        folder "pgdata" as PgData <<Docker Volume>>
-    }
-    
-    BackendApp ..> EnvFile : " Reads via Compose env_file"
-    DB ..> EnvFile : " Reads database credentials"
-    BackendApp ..> Models : " Mounts"
-    DB ..> PgData : " Mounts"
-    ' Physical connections inside the Pi
-    Cam --> BackendApp : " /dev/video0 (backend mode)"
-    BackendApp --> LEDCtrl : " /dev/gpiochip0"
-}
+note right of Database
+  Base development Compose may expose 5432.
+  The Pi override resets that host port.
+end note
 
-' Network Connections
-BrowserCam --> Browser : " WebRTC (browser mode)"
-Browser --> FrontendApp : " HTTP :3000 (React UI)"
-Browser --> BackendApp : " HTTP/WS :8000 (API & Video Stream)"
-BackendApp --> DB : " TCP/IP :5432 (Internal Docker Network)"
-
+note bottom of Pi
+  No door/motor controller is implemented.
+  Normal CI has no camera or GPIO device mappings.
+end note
 @enduml

@@ -40,6 +40,13 @@ BEGIN
 END $$;
 """
 
+DUPLICATE_SIMILARITY_THRESHOLD = 0.56
+DUPLICATE_REGISTRATION_LOCK_ID = 1178682181
+
+
+class DuplicateEmployeeError(ValueError):
+    """Raised when a name or biometric identity is already registered."""
+
 
 def _as_access_datetime(value, *, end_of_day=False):
     if value is None:
@@ -104,25 +111,23 @@ def init_db():
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                print(f"Error: {e}")
+                raise RuntimeError("Unable to initialize employees schema") from e
 
 
 def delete_expired_employees():
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             try:
-                cursor.execute(
-                    """
+                cursor.execute("""
                     DELETE FROM employees
                     WHERE status = 'Temporary'
                     AND expiration_date IS NOT NULL
                     AND expiration_date < LOCALTIMESTAMP;
-                """
-                )
+                """)
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                print(f"Error: {e}")
+                raise RuntimeError("Unable to delete expired employees") from e
 
 
 def load_employees():
@@ -155,9 +160,9 @@ def update_employee(employee_id, name, status, start_date=None, expiration_date=
                 connection.commit()
                 global _embedding_cache
                 _embedding_cache = None
-            except Exception as e:
+            except Exception:
                 connection.rollback()
-                print(f"Error: {e}")
+                raise
 
 
 def delete_employee(employee_id):
@@ -170,35 +175,57 @@ def delete_employee(employee_id):
                 connection.commit()
                 global _embedding_cache
                 _embedding_cache = None
-            except Exception as e:
+            except Exception:
                 connection.rollback()
-                print(f"Error: {e}")
+                raise
 
 
 def add_employees(name, status, embedding=None, start_date=None, expiration_date=None):
-    if embedding is not None:
-        match = find_closest_embedding(embedding)
-        if match:
-            raise ValueError(f"Face already registered as {match[1]}")
-
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
-            if cursor.fetchone() is not None:
-                raise ValueError("Employee with this name already exists")
+            try:
+                # Serialize the similarity check and INSERT across processes.
+                cursor.execute(
+                    "SELECT pg_advisory_xact_lock(%s)",
+                    (DUPLICATE_REGISTRATION_LOCK_ID,),
+                )
+                if embedding is not None:
+                    cursor.execute(
+                        "SELECT id, name, embedding, status, start_date, "
+                        "expiration_date FROM employees "
+                        "WHERE embedding IS NOT NULL"
+                    )
+                    stored_embeddings = _stored_embeddings(cursor.fetchall())
+                    match = _find_closest_in_embeddings(
+                        embedding,
+                        stored_embeddings,
+                        DUPLICATE_SIMILARITY_THRESHOLD,
+                    )
+                    if match:
+                        raise DuplicateEmployeeError(
+                            f"Face already registered as {match[1]}"
+                        )
 
-            embedding_list = embedding.tolist() if embedding is not None else None
-            start_date, expiration_date = _normalize_access_window(
-                status, start_date, expiration_date
-            )
+                cursor.execute("SELECT id FROM employees WHERE name = %s", (name,))
+                if cursor.fetchone() is not None:
+                    raise DuplicateEmployeeError(
+                        "Employee with this name already exists"
+                    )
 
-            cursor.execute(
-                "INSERT INTO employees (name, status, embedding, "
-                "start_date, expiration_date) "
-                "VALUES (%s, %s, %s, %s, %s);",
-                (name, status, embedding_list, start_date, expiration_date),
-            )
-            connection.commit()
+                embedding_list = embedding.tolist() if embedding is not None else None
+                start_date, expiration_date = _normalize_access_window(
+                    status, start_date, expiration_date
+                )
+                cursor.execute(
+                    "INSERT INTO employees (name, status, embedding, "
+                    "start_date, expiration_date) "
+                    "VALUES (%s, %s, %s, %s, %s);",
+                    (name, status, embedding_list, start_date, expiration_date),
+                )
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
 
     global _embedding_cache
     _embedding_cache = None
@@ -223,39 +250,63 @@ def get_all_embeddings():
             )
             rows = cursor.fetchall()
 
-    now_dt = _current_access_time()
-
-    embeddings = []
-    for row in rows:
-        emp_id, name, embedding, status, start_date, expiration_date = row
-        if not embedding:
-            continue
-        if status == "Temporary":
-            if not _temporary_access_is_active(start_date, expiration_date, now_dt):
-                continue
-        embeddings.append((emp_id, name, np.array(embedding)))
+    embeddings = _active_embeddings(rows)
 
     _embedding_cache = embeddings
     _embedding_cache_time = time.time()
     return embeddings
 
 
-def find_closest_embedding(target_embedding, threshold=0.56):
-    """Find the closest matching embedding in the database"""
+def _active_embeddings(rows, now=None):
+    now_dt = _current_access_time() if now is None else now
+    embeddings = []
+    for row in rows:
+        emp_id, name, embedding, status, start_date, expiration_date = row
+        if not embedding:
+            continue
+        if status == "Temporary" and not _temporary_access_is_active(
+            start_date,
+            expiration_date,
+            now_dt,
+        ):
+            continue
+        embeddings.append((emp_id, name, np.asarray(embedding, dtype=np.float32)))
+    return embeddings
+
+
+def _stored_embeddings(rows):
+    """Return every stored identity for duplicate checks, regardless of access."""
+
+    return [
+        (emp_id, name, np.asarray(embedding, dtype=np.float32))
+        for emp_id, name, embedding, _status, _start, _expiration in rows
+        if embedding
+    ]
+
+
+def _find_closest_in_embeddings(target_embedding, embeddings_data, threshold):
     from faceguard.recognize import cosine_similarity
 
+    best_match = None
+    best_similarity = 0.0
+    for emp_id, name, db_embedding in embeddings_data:
+        similarity = cosine_similarity(target_embedding, db_embedding)
+        if similarity >= threshold and similarity > best_similarity:
+            best_similarity = similarity
+            best_match = (emp_id, name, similarity)
+    return best_match
+
+
+def find_closest_embedding(
+    target_embedding,
+    threshold=DUPLICATE_SIMILARITY_THRESHOLD,
+):
+    """Find the closest matching embedding in the database"""
     embeddings_data = get_all_embeddings()
     if not embeddings_data:
         return None
-
-    best_match = None
-    best_similarity = 0
-
-    for emp_id, name, db_embedding in embeddings_data:
-        similarity = cosine_similarity(target_embedding, db_embedding)
-        is_match = similarity >= threshold
-        if is_match and similarity > best_similarity:
-            best_similarity = similarity
-            best_match = (emp_id, name, similarity)
-
-    return best_match
+    return _find_closest_in_embeddings(
+        target_embedding,
+        embeddings_data,
+        threshold,
+    )

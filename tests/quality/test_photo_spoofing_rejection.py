@@ -1,7 +1,9 @@
 import numpy as np
+from types import SimpleNamespace
 
 from faceguard.business_logic import process_access_attempt
 from faceguard.interfaces import FaceProviderInterface
+from faceguard.recognize import InsightFaceProvider
 
 
 class FakeSpoofRecognizer(FaceProviderInterface):
@@ -59,32 +61,26 @@ def test_qrt_sec_002_rejects_no_face_input():
     assert score == 0.0
 
 
-def test_qrt_sec_002_rejects_at_least_9_out_of_10_low_similarity_attempts():
-    dummy_frame = np.zeros((640, 480, 3), dtype=np.uint8)
-    dummy_db_vector = np.ones(512, dtype=np.float32)
+def test_qrt_sec_002_production_provider_propagates_liveness_rejection():
+    frame = np.zeros((200, 200, 3), dtype=np.uint8)
+    matching_embedding = np.ones(512, dtype=np.float32)
+    face = SimpleNamespace(
+        bbox=np.array([20, 20, 160, 160], dtype=np.float32),
+        det_score=0.99,
+        normed_embedding=matching_embedding,
+    )
+    face_app = SimpleNamespace(get=lambda image: [face])
+    liveness_detector = SimpleNamespace(analyze=lambda image, bbox: (False, 0.1))
+    recognizer = InsightFaceProvider(face_app, liveness_detector)
 
-    rejected = 0
+    access_granted, status_code, name, score, returned_face = process_access_attempt(
+        frame=frame,
+        recognizer=recognizer,
+        test_db_vector=matching_embedding,
+    )
 
-    for index in range(10):
-        spoof_embedding = np.zeros(512, dtype=np.float32)
-        spoof_embedding[index] = 1.0
-
-        recognizer = FakeSpoofRecognizer(
-            embedding=spoof_embedding,
-            status_code="real",
-        )
-
-        access_granted, status_code, name, score, _ = process_access_attempt(
-            frame=dummy_frame,
-            recognizer=recognizer,
-            test_db_vector=dummy_db_vector,
-        )
-
-        if access_granted is False:
-            rejected += 1
-
-        assert status_code == "Access Denied"
-        assert name == "Unknown"
-        assert score == 0.0
-
-    assert rejected >= 9
+    assert access_granted is False
+    assert status_code == "spoof"
+    assert name == "Unknown"
+    assert score == 0.0
+    assert returned_face is face

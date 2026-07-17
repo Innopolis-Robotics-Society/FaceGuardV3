@@ -1,71 +1,58 @@
-# Architecture Documentation
+# Architecture
 
-## Architecture Decision Records
+FaceGuardV3 is a three-service edge application: a React SPA, a FastAPI backend, and local PostgreSQL. The frontend owns presentation and, in browser-camera mode, capture. The backend owns authentication, operation serialization, frame processing, liveness/recognition orchestration, persistence, and optional GPIO feedback.
 
-The ADRs capture the main architectural decisions that connect the current
-FaceGuardV3 implementation to the quality requirements:
+## Static view
 
-- [ADR-001: Introduce a Face Recognition Provider Abstraction](adr/ADR-001-face-recognition-provider-abstraction.md) supports the Static View by defining the `FaceProviderInterface` boundary between business logic and the recognition provider. It supports QR-003 by allowing provider swaps to be tested without changing the access-decision flow.
-- [ADR-002: Reject Access Based on Provider Status Code Before Embedding Comparison](adr/ADR-002-reject-on-status-code-before-embedding-match.md) supports the Dynamic View by fixing the order of the recognition flow: provider status is checked before embedding comparison. It supports QR-002 by making spoof/no-face rejection part of the backend access decision.
-- [ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response](adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md) supports the Dynamic and Deployment Views by keeping recognition in the local FaceGuard application process for the current single-entry-point deployment. It supports QR-001 by keeping response-time measurement focused on the direct capture, extraction, comparison, and decision path.
-- [ADR-004: Enforce Temporary Access Window in Application Logic with TIMESTAMP Normalization](adr/ADR-004-temporary-access-window-enforcement.md) supports the Dynamic View by fixing the identity-verification step to exclude expired or not-yet-started temporary access before comparison. It supports QR-004 by ensuring access decisions respect the configured time window regardless of admin activity.
-- [ADR-005: Decouple Frontend and Backend for WebSocket Streaming](adr/ADR-005-decouple-frontend-backend-for-websocket-streaming.md) supports all views by documenting the shift from a Streamlit monolith to a decoupled React and FastAPI architecture. It supports QR-001 by introducing WebSockets to eliminate UI rendering bottlenecks and achieve sub-3-second end-to-end response times.
-- [ADR-006: Local PostgreSQL Database for Offline Reliability](adr/ADR-006-local-database-for-offline-reliability.md) supports all views by transitioning state management from the cloud to the local edge device. It supports reliability and performance by ensuring the system operates fully offline without internet dependency.
-- [ADR-007: Asynchronous GPIO Hardware Integration for Edge Devices](adr/ADR-007-gpio-hardware-integration.md) supports the Deployment View by defining how the application integrates with physical edge hardware. It supports QR-006 by ensuring that hardware feedback is instantaneous without blocking the asynchronous recognition pipeline.
+[Component diagram source](static-view/component-diagram.puml)
 
-Together, these decisions match the current architecture shown below: the system is divided into a React frontend for the UI and a FastAPI backend that coordinates camera input via WebSockets, recognition, PostgreSQL-backed embedding lookup, logging, and hardware outputs. The ADRs document why recognition is behind a provider contract, why non-real provider statuses are rejected before identity matching, why the current response-time target is handled in-process, why the database is hosted locally for offline operation, and how hardware outputs are managed asynchronously.
+The implemented components are:
 
-## Static View
+- React/Vite UI with authenticated REST calls, authenticated WebSockets, browser/backend camera modes, and exact-frame bounding-box projection.
+- FastAPI REST and WebSocket boundary. Recognition and enrollment share one `asyncio.Lock`, so model state and a backend camera cannot be used concurrently.
+- `LatestFrameCamera`, which owns at most one OpenCV `VideoCapture` worker process-wide and replaces a single latest-frame slot. There is no frame queue.
+- `FaceProviderInterface` and the InsightFace/MiniFASNet implementation. Liveness status is evaluated before identity similarity matching.
+- PostgreSQL access through a `ThreadedConnectionPool`. Employee writes, duplicate checks, temporary-access validation, and logs remain in the backend data-access layer.
+- Generation-safe `leds.py` GPIO control using `gpiozero`/`LGPIOFactory`. GPIO absence disables feedback without disabling the API.
 
-[Component Diagram Source (PlantUML)](static-view/component-diagram.puml)
+The deployed FastAPI camera source is deliberately an adapter boundary. `browser` mode sends one JPEG at a time and waits for its response. `backend` mode reads a V4L2 device in one capture loop and gives slow consumers only the newest frame. Legacy maintenance CLIs under `backend/faceguard/` predate this runtime and open OpenCV directly; they are not container entry points and must not share a device with the service.
 
-**What the diagram shows:**
-The diagram illustrates the core decoupled client-server architecture of FaceGuardV3. The `React Frontend` handles the presentation layer and, in browser mode, WebRTC camera capture. In Raspberry Pi backend mode the `FastAPI Backend` owns `/dev/video0` and the frontend only renders JPEG frames and metadata returned over WebSockets. The Backend coordinates face recognition by calling the internal `Face Recognition Module` (based on InsightFace), handles persistent state by requiring the `SQL Interface` from the `PostgreSQL` database, and enforces rate-limiting to prevent brute-force attacks. API endpoints and WebSockets are secured via JWT authentication. Finally, it issues commands to the `LED Controller` to manage physical access indication.
+## Dynamic view
 
-**Coupling and Cohesion:**
-*   **Coupling:** The system exhibits low coupling across all layers. The UI is completely decoupled from the ML logic and database via a clean REST/WebSocket API. By logically separating the `Face Recognition Module` behind an `Internal Python Interface`, the `FastAPI Backend` is decoupled from the specific ML implementation details.
-*   **Cohesion:** The `Face Recognition Module` has high functional cohesion, dedicated entirely to extracting embeddings and anti-spoofing. The `FastAPI Backend` maintains cohesion by focusing on orchestrating the access control flow and API serving.
+[Sequence diagram source](dynamic-view/sequence-diagram.puml)
 
-**Maintainability implications:**
-The decoupled approach simplifies scaling. The extraction of the UI into a React SPA means multiple independent frontends (e.g., mobile apps) can now easily consume the FastAPI endpoints. The `SQL Interface` (via `psycopg2`) and the face recognition logic can be mocked during unit testing.
+The sequence source covers the maintained runtime scenarios rather than only a happy path:
 
-**Quality requirements:**
-*   **Supports:** *Testability* (internal components can be mocked), *Scalability* (separated frontend and backend), and *Performance* (WebSockets drastically reduce UI latency).
-*   **Constrains:** *Complexity* (maintaining two separate tech stacks: Node.js and Python).
+- REST login and JWT-authenticated WebSocket opening;
+- normal recognition, temporary-access-aware matching, and exact frame/bbox response;
+- enrollment and duplicate registration through the REST/database boundary;
+- liveness rejection before matching;
+- LED mapping and generation replacement;
+- operation-busy handling; and
+- disconnect/shutdown cleanup of camera, GPIO, task, lock, and database pool.
 
-## Dynamic View
+The JPEG/bbox contract is important: `frame_width`, `frame_height`, `frame_sequence`, and `box` describe the same image. In backend mode that image is returned by the server; in browser mode the client retains the one in-flight JPEG until its response arrives.
 
-[Sequence Diagram Source (PlantUML)](dynamic-view/sequence-diagram.puml)
+## Deployment view
 
-**What the diagram shows:**
-The diagram maps a successful "happy path" access attempt in either camera mode. Browser mode captures and sends a frame from the `React Client`; backend mode captures the latest frame directly in the `FastAPI Server`. The server delegates face extraction to the `Recognition Module` (which interacts with the ML `Model`), and then explicitly calls the `Storage` database layer to find the closest matching identity. Upon a successful match, the server records the event in `Logs`, turns on the `LED Indicator` (blue), and returns the result plus preview metadata to the client.
+[Deployment diagram source](deployment-view/deployment-diagram.puml)
 
-**What scenario the diagram represents:**
-The diagram represents the primary access control workflow: a user attempting to enter the lab. It traces the sequence of events from the physical approach of the user to the camera, through the extraction and verification of face embeddings, down to the final physical response (illuminating LEDs) and database logging.
+The base Compose file exposes frontend `3000`, backend `8000`, and PostgreSQL `5432` for development. All services share the `faceguard` bridge network; `pgdata` persists database state and `docker/insightface_models` is mounted into the backend.
 
-**Why that scenario is important to the product:**
-This scenario is the core value proposition of FaceGuardV3. It demonstrates how the system combines hardware inputs (Camera), heavy machine learning tasks (InsightFace models), and hardware outputs (LEDs) within a single coordinated flow to ensure secure, automated access.
+The Raspberry Pi override must be applied together with the base file. It removes the PostgreSQL host port, selects backend camera mode, and maps exactly the configured `/dev/videoN` and `/dev/gpiochipN` devices. The current adapter requires a V4L2-visible camera; native libcamera capture is outside the implementation. Browser mode instead uses the client device camera and maps no camera into the backend.
 
-**Architecture decisions, integration boundaries, and quality requirements:**
-*   **Architecture Decisions:** The diagram clarifies the decision to perform face embedding matching *in memory* (the `FastAPI Server` requests the database layer to fetch all known embeddings and compare them internally via cosine similarity), rather than performing vector similarity search directly inside the database using extensions.
-*   **Integration Boundaries:** It highlights the critical boundaries between the presentation layer (`React Client`), the software backend (`FastAPI Server`), and the physical edge hardware (Camera, LEDs), showing exactly when and where the software triggers physical state changes.
-*   **Quality Requirements:** It helps reason about *Performance* (latency from frame capture to LED illumination depends heavily on the ML model execution, database retrieval times, and WebSocket transmission) and *Security/Reliability* (ensuring the LED only signals success and logs are written strictly after a successful database match).
+There is no motor or physical door actuator in this repository. GPIO controls only the three documented LEDs. Ordinary GitHub-hosted CI validates the software adapters but has neither Raspberry Pi device mappings nor physical latency evidence.
 
+## Architecture decision records
 
-## Deployment View
+- [ADR-001 — Face recognition provider abstraction](adr/ADR-001-face-recognition-provider-abstraction.md) (`QR-003`).
+- [ADR-002 — Reject non-real provider status before matching](adr/ADR-002-reject-on-status-code-before-embedding-match.md) (`QR-002`).
+- [ADR-003 — In-process recognition pipeline](adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md) (`QR-001`).
+- [ADR-004 — Temporary-access timestamps and application enforcement](adr/ADR-004-temporary-access-window-enforcement.md) (`QR-004`).
+- [ADR-005 — React/FastAPI WebSocket separation](adr/ADR-005-decouple-frontend-backend-for-websocket-streaming.md) (`QR-001`).
+- [ADR-006 — Local PostgreSQL](adr/ADR-006-local-database-for-offline-reliability.md).
+- [ADR-007 — Non-blocking, generation-safe GPIO feedback](adr/ADR-007-gpio-hardware-integration.md) (`QR-006`).
+- [ADR-008 — Atomic duplicate registration prevention](adr/ADR-008-atomic-duplicate-registration-prevention.md) (`QR-005`).
+- [ADR-009 — Dual camera sources with a latest-frame pipeline](adr/ADR-009-dual-camera-latest-frame-pipeline.md) (`QR-001`).
 
-[Deployment Diagram Source (PlantUML)](deployment-view/deployment-diagram.puml)
-
-**What the diagram shows:**
-The deployment view illustrates how the FaceGuardV3 system is deployed at the edge. The application runs as separate Docker containers (`docker-frontend`, `docker-backend`, and `docker-db-1`) orchestrated by Docker Compose on a `Raspberry Pi` located at the lab entrance. The backend container receives only the required host devices: USB camera `/dev/video0` and GPIO character device `/dev/gpiochip0`. The frontend container exposes port 3000 for the `Admin Workstation`, while the backend exposes port 8000 for API and WebSocket traffic. State management is handled locally by PostgreSQL using the persistent `pgdata` volume.
-
-**Why the selected deployment model was chosen:**
-*   **Docker Containerization:** Machine learning libraries (like OpenCV and InsightFace) often have complex system-level dependencies. Packaging the application in Docker ensures that it runs reliably and reproducibly on any host machine without dependency conflicts. Volume mounts are used to persist `.env` and downloaded `insightface_models`, preventing the need to re-download heavy models on every container restart.
-*   **Local Database Container:** Using a local PostgreSQL database removes the dependency on an external internet connection, which is critical for edge deployments where network stability is not guaranteed.
-
-**How the current deployment supports or constrains the product:**
-*   **Supports:** *Portability* and *Ease of Installation* are highly supported. Deploying the system in a new lab only requires Docker Compose and an initial internet connection. *Reliability* is strongly supported since the system can function completely offline.
-*   **Constrains:** *Local Storage Management* is constrained, as the database data now consumes space on the edge device itself.
-
-**What must be considered when deploying or operating:**
-Administrators must populate `backend/.env` before running Compose and use both `docker-compose.yml` and `docker-compose.pi.yml` for Pi hardware deployments. The database and backend consume the same env file. The `insightface_models` directory must remain mounted for ONNX models, and the `pgdata` volume must be preserved on rebuilds and restarts. On Raspberry Pi 5, current Raspberry Pi OS exposes the header GPIO controller as `gpiochip0`, so the LED controller constructs gpiozero's `LGPIOFactory` explicitly with `GPIO_CHIP=0`; the legacy `RPi.GPIO` package and privileged containers are not required.
+ADRs describe durable choices and their consequences. Passing a software adapter test does not, by itself, prove camera/liveness accuracy or physical GPIO latency; those limitations remain explicit in the QRT documentation.

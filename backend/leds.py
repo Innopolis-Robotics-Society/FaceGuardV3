@@ -245,7 +245,17 @@ def blink(led, stop_event, interval=0.5, _generation=None):
         _finish_action(generation, stop_event)
 
 
-def _start_background_action(action, kind, target, args):
+def _hold_then_off(led, duration, generation, stop_event):
+    try:
+        stop_event.wait(duration)
+        with _state_lock:
+            if _action_is_current_locked(generation, stop_event):
+                _call_led_locked(led, "off")
+    finally:
+        _finish_action(generation, stop_event)
+
+
+def _start_background_action(action, kind, led, duration):
     global _action_thread
 
     with _state_lock:
@@ -253,9 +263,16 @@ def _start_background_action(action, kind, target, args):
             _log_skipped(action)
             return False
         generation, stop_event = _begin_action_locked(kind)
+        # Dispatch the hardware command before starting the duration worker.
+        # This is the software-side latency boundary exercised by QRT-006's
+        # precheck; physical transition time still requires Pi HIL evidence.
+        if not _call_led_locked(led, "on"):
+            _cancel_action_locked()
+            _all_leds_off_locked()
+            return False
         thread = threading.Thread(
-            target=target,
-            args=(*args, generation, stop_event),
+            target=_hold_then_off,
+            args=(led, duration, generation, stop_event),
             daemon=True,
         )
         _action_thread = thread
@@ -312,17 +329,17 @@ def stop_recognizing():
 
 
 def access_granted():
-    if _start_background_action("access_granted", "solid", solid, (BLUE, 5)):
+    if _start_background_action("access_granted", "solid", BLUE, 5):
         LOGGER.info("[LED] access_granted: solid blue for 5 seconds")
 
 
 def access_denied():
-    if _start_background_action("access_denied", "solid", solid, (RED, 5)):
+    if _start_background_action("access_denied", "solid", RED, 5):
         LOGGER.info("[LED] access_denied: solid red for 5 seconds")
 
 
 def bad_frame():
-    if _start_background_action("bad_frame", "solid", solid, (YELLOW, 5)):
+    if _start_background_action("bad_frame", "solid", YELLOW, 5):
         LOGGER.info("[LED] bad_frame: solid yellow for 5 seconds")
 
 

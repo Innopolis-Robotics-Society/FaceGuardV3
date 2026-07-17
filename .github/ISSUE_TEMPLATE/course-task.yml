@@ -1,5 +1,5 @@
 name: Course Task
-description: Create an Assignment 6 course-process task
+description: Create an Assignment 6 course-process task for Sprint 5
 title: "Course Task: "
 labels:
   - "type: course task"
@@ -7,13 +7,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for Assignment 6 administrative, reporting, evidence, review, release, transition, demo, or documentation tasks.
+        Use this template for Assignment 6 administrative, reporting, evidence, review, release, transition, demo, or documentation tasks in Sprint 5.
         Course Task issues do not count toward the required qualifying PBIs.
   - type: input
     id: task-title
     attributes:
       label: Task title
-      placeholder: "Prepare Week 6 report screenshots"
+      placeholder: "Prepare Week 7 report screenshots"
     validations:
       required: true
   - type: dropdown
@@ -78,12 +78,13 @@ body:
     attributes:
       label: Expected artifacts or links
       placeholder: |
-        - reports/week6/README.md
-        - reports/week6/images/...
+        - reports/week7/README.md
+        - reports/week7/images/...
         - GitHub Project link
         - Release link
         - docs/customer-handover.md
         - Demo video link
+        - Sprint 5 milestone
     validations:
       required: false
   - type: textarea
@@ -93,8 +94,9 @@ body:
       placeholder: |
         - [ ] Required file created or updated
         - [ ] Links verified
-        - [ ] Evidence added to Week 6/7 report
+        - [ ] Evidence added to Week 7 report
         - [ ] PR reviewed
+        - [ ] Linked from reports/week7/README.md
     validations:
       required: false
   - type: textarea

@@ -81,7 +81,7 @@ def test_jwt_signed_with_another_secret_is_rejected(security):
             "sub": "admin",
             "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
         },
-        "forged-secret",
+        "forged-unit-test-secret-that-is-at-least-32-bytes",
         algorithm=security.ALGORITHM,
     )
 

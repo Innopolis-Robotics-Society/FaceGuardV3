@@ -12,7 +12,6 @@ from urllib.error import URLError
 from urllib.request import urlopen
 import zipfile
 
-
 logger = logging.getLogger(__name__)
 
 DEFAULT_INSIGHTFACE_ROOT = "/root/.insightface"

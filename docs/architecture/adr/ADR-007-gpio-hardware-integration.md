@@ -1,33 +1,39 @@
-# ADR-007: Asynchronous GPIO Hardware Integration for Edge Devices
+# ADR-007: Non-Blocking, Generation-Safe GPIO LED Feedback
 
-## Status
-
-Accepted
+**ID:** ADR-007
+**Status:** Accepted
 
 ## Context
 
-During the deployment on Raspberry Pi 5 for MVP v2 and MVP v3, the system needed to actuate physical hardware (LEDs and eventually a motor for the door) based on face recognition results. 
-The FaceGuardV3 backend is built using FastAPI, which relies on an asynchronous event loop (asyncio) to efficiently handle multiple WebSocket connections (for video streaming) and REST API requests concurrently.
-
-Using synchronous hardware control libraries or blocking `time.sleep()` calls to hold LED states (e.g., turning an LED on for 5 seconds) would block the main event loop. If the event loop is blocked, the backend cannot process incoming video frames, causing the video stream to lag or drop connections, completely degrading the core recognition performance.
+Recognition continues while an LED remains on for several seconds. Blocking sleeps would stop WebSocket work, while detached old blink/hold threads could later turn off a newer result. Raspberry Pi gpiochip numbering also varies, and development/CI usually has no GPIO device.
 
 ## Decision
 
-We decided to handle GPIO interactions asynchronously, decoupling them from the main recognition pipeline:
+Implement LED feedback in `backend/leds.py` with `gpiozero.LED` and `LGPIOFactory(chip=GPIO_CHIP)` using BCM pins 17 (yellow), 27 (blue), and 22 (red).
 
-1. **Hardware Abstraction:** We will wrap GPIO interactions (using lightweight libraries like `gpiozero` or standard `RPi.GPIO`) in an abstraction layer (`LEDController` / `MotorController`). This allows us to mock the hardware during CI testing or when developing on non-ARM devices (like laptops).
-2. **Asynchronous Execution:** 
-   - State changes (e.g., "turn on blue LED") are triggered instantly.
-   - Durations (e.g., "keep it on for 5 seconds") are managed either using `asyncio.sleep()` inside `async` tasks or through FastAPI's `BackgroundTasks`.
-3. **Decoupled Invocation:** Hardware commands are fired asynchronously after the database transaction has been successfully committed, ensuring that hardware actuation does not delay the API response sent to the React frontend.
+- The adapter `.on()` command is issued synchronously when feedback is selected.
+- Only blink/hold duration waits run in daemon worker threads.
+- Every action receives a generation and cancellation event. A stale worker may mutate LEDs only if it still owns the current generation.
+- Recognition/enrollment orchestration invokes GPIO through FastAPI's worker-thread boundary.
+- Initialization failure enters an explicit no-GPIO mode rather than failing the API.
+- Shutdown cancels and joins the owned worker, turns all LEDs off, closes LED objects, and closes the pin factory.
+
+The repository implements LEDs only; it has no motor or door-controller adapter.
+
+## Considered alternatives
+
+- Blocking `sleep` in the request/event-loop path: rejected because it stops frame processing.
+- An unmanaged thread per signal: rejected because stale threads race newer states and leak resources.
+- Hard-code a Raspberry Pi gpiochip: rejected because host/controller numbering differs.
+- Treat a fake GPIO timing test as physical evidence: rejected because it cannot measure the electrical LED transition.
 
 ## Consequences
 
-**Positive:**
-- The FastAPI event loop remains unblocked, allowing seamless WebSocket streaming and high FPS throughput.
-- Developers can run the backend locally using dummy/mock hardware classes without requiring a Raspberry Pi.
-- System feedback (LEDs) accurately reflects the real-time processing state without degrading performance.
+- Software dispatch is immediate and independently testable, and old workers cannot override a new result.
+- The Pi Compose override must map the selected `/dev/gpiochipN` to the same container-visible number configured in `GPIO_CHIP`.
+- GPIO absence is observable through logs and `/health`, while recognition remains usable.
+- The software precheck in `tests/quality/test_hardware_feedback.py` proves call ordering only. QR-006 still needs automated Raspberry Pi hardware-in-the-loop measurement, so QRT-006 remains Planned.
 
-**Negative:**
-- Managing asynchronous tasks for hardware means we must handle potential race conditions (e.g., a new recognition event comes in while the LED is still holding the state for the previous one). We will address this by resetting the task or maintaining a state lock per pin.
-- Testing hardware interactions in CI requires robust mocking, which slightly complicates the test suite.
+## Quality requirements addressed
+
+- [QR-006](../../quality-requirements.md#qr-006-hardware-feedback-latency).

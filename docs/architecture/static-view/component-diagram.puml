@@ -1,55 +1,59 @@
 @startuml static-view
 skinparam componentStyle rectangle
 
-actor Admin
-actor Employee
+actor Administrator
+actor Person
 
-package "Lab Entrance (Edge)" {
-    component "Camera" as Cam
-    component "LED Controller" as LEDCtrl <<Planned>>
+package "React SPA" {
+  component "Authentication and employee UI" as UI
+  component "CameraContext" as CameraContext
+  component "CameraPreview / bbox projection" as Preview
+  component "Browser camera adapter\n(one JPEG in flight)" as BrowserCamera
 }
 
-package "Web Application Layer" {
-    component "React Frontend" as Frontend <<Web UI (Vite/Node)>>
-    component "FastAPI Backend" as Backend <<API & Logic Orchestrator>>
+package "FastAPI backend" {
+  component "REST API" as Rest
+  component "Authenticated WebSockets" as WS
+  component "Operation lock" as Lock
+  component "LatestFrameCamera\n(single capture, replace-only buffer)" as LatestCamera
+  component "Recognition/enrollment orchestrator" as Orchestrator
+  component "FaceProviderInterface" as Provider
+  component "InsightFace provider" as InsightFace
+  component "MiniFASNet liveness detector" as Liveness
+  component "Employee/log data access" as DataAccess
+  component "Generation-safe LED control" as LEDs
 }
 
-package "ML & Processing Subsystem" {
-    component "Face Recognition Module" as FaceRec <<InsightFace>>
-}
+database "PostgreSQL 15" as PostgreSQL
+component "V4L2 camera" as V4L2
+component "GPIO LEDs\nBCM 17/27/22" as GPIO
 
-package "Local Database Container" {
-    database "PostgreSQL" as DB
-}
+Administrator --> UI
+Person --> BrowserCamera
+Person --> V4L2
+UI --> Rest : HTTPS/JSON + Bearer JWT
+CameraContext --> WS : WSS + JWT subprotocol
+BrowserCamera --> CameraContext : browser mode JPEG
+CameraContext --> Preview : exact response frame + bbox + dimensions
+WS --> Lock
+Lock --> Orchestrator
+LatestCamera --> Orchestrator : backend mode latest frame
+V4L2 --> LatestCamera : OpenCV VideoCapture
+Orchestrator --> Provider
+Provider <|.. InsightFace
+InsightFace --> Liveness
+Orchestrator --> DataAccess
+DataAccess --> PostgreSQL : psycopg2 pool / SQL
+Orchestrator --> LEDs
+LEDs --> GPIO : gpiozero + LGPIOFactory
 
-' Interfaces
-interface "Camera Frames (WebRTC or V4L2)" as IVideo
-interface "REST / WebSockets" as IAPI
-interface "SQL Interface" as ISQL
-interface "Hardware Control" as IHW
+note right of Lock
+  Recognition and enrollment
+  cannot run concurrently.
+end note
 
-' Actor interactions
-Admin --> Frontend : Uses (Web UI)
-Employee --> Cam : Looks at
-
-' Connections
-Cam - IVideo
-Frontend -( IVideo : " Requires (Browser)"
-Backend -( IVideo : " Requires (Backend mode)"
-
-Frontend - IAPI
-Backend -( IAPI : " Serves"
-
-DB - ISQL
-Backend -( ISQL : " Requires (psycopg2)"
-    
-LEDCtrl - IHW
-Backend -( IHW : " Requires (Commands)"
-
-interface "Internal Python Interface" as IFace
-
-' Internal components
-FaceRec - IFace
-Backend -( IFace : " Requires"
-
+note bottom of GPIO
+  Optional: application continues
+  with GPIO_AVAILABLE=false.
+end note
 @enduml

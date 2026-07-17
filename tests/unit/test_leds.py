@@ -287,7 +287,9 @@ def test_stale_solid_thread_cannot_override_newer_status(monkeypatch):
     threads[0].run()
     threads[1].run()
 
-    assert "on" not in blue.calls
+    # Blue is dispatched immediately, then cancelled when the newer red
+    # generation begins. Running its stale worker must not touch red.
+    assert blue.calls == ["off", "on", "off"]
     assert red.calls[-2:] == ["on", "off"]
 
 

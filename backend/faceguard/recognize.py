@@ -20,7 +20,10 @@ class LivenessDetector:
 
         self.threshold = threshold
         self.session = onnxruntime.InferenceSession(
-            "/root/.insightface/models/minifasnet.onnx",
+            os.environ.get(
+                "LIVENESS_MODEL_PATH",
+                "/root/.insightface/models/minifasnet.onnx",
+            ),
             providers=["CPUExecutionProvider"],
         )
 

@@ -3,7 +3,6 @@
 import logging
 import os
 
-
 for thread_variable in (
     "OMP_NUM_THREADS",
     "OPENBLAS_NUM_THREADS",

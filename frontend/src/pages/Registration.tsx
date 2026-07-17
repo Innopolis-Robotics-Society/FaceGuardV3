@@ -16,9 +16,9 @@ export default function Registration() {
     enrollData,
   } = useCamera();
   const navigate = useNavigate();
-  
+
   const { status, color, progress, embedding, box, frameWidth, frameHeight } = enrollData;
-  
+
   const [name, setName] = useState('');
   const [accessType, setAccessType] = useState('Permanent');
   const [startDate, setStartDate] = useState('');
@@ -44,7 +44,7 @@ export default function Registration() {
       setErrorMsg('Please enter a name.');
       return;
     }
-    
+
     let finalStart = null;
     let finalEnd = null;
     if (accessType === 'Temporary') {
@@ -52,12 +52,18 @@ export default function Registration() {
         setErrorMsg('Please enter both start and expiration dates.');
         return;
       }
-      
+
       const startDt = new Date(startDate);
       const endDt = new Date(endDate);
+
+      if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
+        setErrorMsg('Please enter valid dates.');
+        return;
+      }
+
       const now = new Date();
       now.setSeconds(0, 0);
-      
+
       if (startDt < now) {
         setErrorMsg('Start time cannot be in the past.');
         return;
@@ -66,17 +72,17 @@ export default function Registration() {
         setErrorMsg('Expiration time must be at least 1 minute after start time.');
         return;
       }
-      
+
       const pad = (n: number) => n.toString().padStart(2, '0');
       const getLocalISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00.000`;
-      
+
       finalStart = getLocalISO(startDt);
       finalEnd = getLocalISO(endDt);
     }
 
     apiFetch('/api/employees', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -103,7 +109,7 @@ export default function Registration() {
       <div className="page-header">
         <h2>Add Employee</h2>
       </div>
-      
+
       {!embedding ? (
         <CameraPreview
           cameraSource={cameraSource}
@@ -130,7 +136,7 @@ export default function Registration() {
             <label>Name</label>
             <input className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="Ivan Ivanov" />
           </div>
-          
+
           <div className="form-group">
             <label>Access Type</label>
             <select className="form-control" value={accessType} onChange={e => setAccessType(e.target.value)}>
@@ -143,24 +149,22 @@ export default function Registration() {
             <div style={{ display: 'flex', gap: '1rem' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Start Date & Time</label>
-                <input 
-                  type="datetime-local" 
-                  className="form-control" 
+                <input
+                  type="datetime-local"
+                  className="form-control"
                   min={minDateTimeStr}
-                  value={startDate} 
-                  onChange={e => setStartDate(e.target.value)} 
-                  onKeyDown={e => e.preventDefault()}
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Expiration Date & Time</label>
-                <input 
-                  type="datetime-local" 
-                  className="form-control" 
+                <input
+                  type="datetime-local"
+                  className="form-control"
                   min={startDate || minDateTimeStr}
-                  value={endDate} 
-                  onChange={e => setEndDate(e.target.value)} 
-                  onKeyDown={e => e.preventDefault()}
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
                 />
               </div>
             </div>

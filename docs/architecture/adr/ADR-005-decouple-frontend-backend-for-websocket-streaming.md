@@ -1,33 +1,38 @@
-# ADR-005: Decouple Frontend and Backend for WebSocket Streaming
+# ADR-005: Decouple React Presentation from FastAPI Processing
 
+**ID:** ADR-005
+**Status:** Accepted
 **Date:** 2026-07-09
 
-## Status
-Accepted
-
 ## Context
-The FaceGuardV3 MVP was initially built as a monolithic Streamlit application. While Streamlit allowed rapid UI prototyping, it suffered from severe performance issues when applied to real-time face recognition. Streamlit's architecture requires re-executing the entire Python script and reloading the page state on every frame processed (via `st.rerun()`). This resulted in a bottleneck where the UI could not keep up with the backend model, causing significant lag, flickering, and end-to-end response times frequently exceeding the 3.0-second limit defined in **QR-001**. Furthermore, capturing video server-side via OpenCV tied the UI rendering and the ML inference to the same process loop, exacerbating the performance issues.
+
+The previous Streamlit UI reran server-side presentation code during frame processing and coupled page state to inference. FaceGuard needs a responsive SPA, an explicit authenticated API, and the ability to use either a client-attached camera or a camera attached to a remote Raspberry Pi.
 
 ## Decision
-We decided to completely decouple the presentation layer from the backend application logic. The architecture now consists of:
 
-1. **React Frontend (Vite)**: A lightweight Single Page Application that handles presentation. In `browser` mode it captures video natively through WebRTC; in `backend` mode it only renders JPEG preview frames and recognition metadata received from the server.
-2. **FastAPI Backend**: An asynchronous Python server that exposes REST endpoints and authenticated WebSocket endpoints. In `backend` mode it is the sole owner of the Raspberry Pi USB camera and captures `/dev/video0` through V4L2.
+Use a React/Vite SPA for presentation and FastAPI for REST, WebSocket, recognition, persistence, and GPIO orchestration.
 
-The selected mode is explicit at deployment time (`CAMERA_SOURCE` for FastAPI and the build-time `VITE_CAMERA_SOURCE` for Vite). In browser mode, the client sends captured JPEG frames over the WebSocket. In backend mode, the client does not call `getUserMedia`; the server keeps only the latest captured frame, performs inference without building a frame queue, and returns the JPEG preview, `[x1, y1, x2, y2]` bounding box, and source frame dimensions over the same WebSocket.
+- REST requests carry a Bearer JWT.
+- Recognition/enrollment WebSockets carry `faceguard.jwt` plus `bearer.<JWT>` subprotocols; tokens are not URL query parameters.
+- In `browser` mode the SPA captures JPEGs and permits only one outstanding frame.
+- In `backend` mode FastAPI owns the Pi V4L2 camera and returns the processed JPEG.
+- Both modes return bbox, dimensions, and sequence for the exact processed frame.
+- Service URL and camera mode `VITE_*` settings are compiled at frontend build time.
+
+## Considered alternatives
+
+- Continue with Streamlit: rejected because it couples UI reruns and inference state.
+- Browser-only capture: rejected because a remote administration browser cannot access the camera physically attached to the Pi.
+- Put JWTs in WebSocket query strings: rejected because URLs are commonly logged.
+- A single HTTP request per frame: rejected due to repeated request setup and poorer stream lifecycle semantics.
 
 ## Consequences
 
-**Positive:**
-- **Response Time (QR-001)**: Removes Streamlit page reruns and permits latest-frame-only buffering so stale camera frames are discarded instead of accumulating.
-- **Scalability**: Decoupling the frontend allows the system to easily support multiple remote clients or edge displays in the future.
-- **Maintainability**: The separation of concerns is much clearer. ML logic and database access are strictly isolated from UI rendering.
-- **Remote operation**: Backend camera mode always uses the camera attached to the Pi, even when the UI is opened from a workstation through SSH forwarding.
+- UI, data APIs, and ML logic have clear boundaries and independent tests.
+- Two technology stacks and compatible runtime URL configuration must be maintained.
+- A reverse proxy must forward WebSocket upgrades and subprotocol headers.
+- This decision removes the old UI bottleneck but does not itself prove the real-hardware 3-second QR-001 target; no unsupported 1.1-second claim is made.
 
-**Negative:**
-- **Complexity**: The development team now has to maintain two distinct codebases with two different technology stacks (Python/FastAPI and Node.js/React).
-- **Deployment Overhead**: Requires orchestrating multiple Docker containers (`docker-frontend` and `docker-backend`) instead of a single monolith.
-- **Hardware mapping**: Backend camera mode requires explicit access to `/dev/video0`; GPIO access on current Raspberry Pi OS requires `/dev/gpiochip0`. Neither mapping requires a privileged container.
+## Quality requirements addressed
 
-## Quality Requirements Addressed
-- **QR-001: Recognition Response Time**: Sub-3-second end-to-end latency achieved by eliminating Streamlit's polling constraints.
+- [QR-001](../../quality-requirements.md#qr-001-recognition-response-time).

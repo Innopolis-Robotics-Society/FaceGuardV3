@@ -4,6 +4,8 @@ import binascii
 import logging
 import os
 import time
+from contextlib import asynccontextmanager, suppress
+from datetime import datetime
 from typing import List, Optional
 
 import runtime  # noqa: F401 - applies native thread limits before NumPy import.
@@ -27,9 +29,10 @@ from slowapi.errors import RateLimitExceeded
 from core.security import create_access_token, get_current_user, verify_token
 from fastapi.concurrency import run_in_threadpool
 
-from datetime import datetime
 from camera import CameraError, CameraFrame, CameraSettings, LatestFrameCamera
+from db.connection import close_pool
 from db.employees_db import (
+    DuplicateEmployeeError,
     add_employees,
     delete_employee,
     update_employee,
@@ -45,7 +48,6 @@ from faceguard.recognize import (
 )
 import leds
 
-
 logger = logging.getLogger(__name__)
 
 WEBSOCKET_APPLICATION_PROTOCOL = "faceguard.jwt"
@@ -56,10 +58,21 @@ OPERATION_HANDOFF_TIMEOUT_SECONDS = float(
 if OPERATION_HANDOFF_TIMEOUT_SECONDS <= 0:
     raise RuntimeError("OPERATION_HANDOFF_TIMEOUT_SECONDS must be positive")
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    try:
+        await startup_event()
+        yield
+    finally:
+        await shutdown_event()
+
+
+app = FastAPI(lifespan=lifespan)
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
+app.state.active_camera = None
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 default_cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -80,11 +93,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load models once
-face_app = create_face_app()
-liveness_detector = LivenessDetector()
+# Models are loaded once during startup. Keeping import side effects light lets
+# CI exercise the real application boundary without downloading model assets.
+face_app = None
+liveness_detector = None
 camera_settings = CameraSettings.from_env()
 camera_factory = LatestFrameCamera
+log_cleanup_task = None
 
 # A deployment has one physical entry point and one pair of model sessions.
 # Holding this lock for the complete WebSocket operation prevents recognition
@@ -92,20 +107,52 @@ camera_factory = LatestFrameCamera
 operation_lock = asyncio.Lock()
 
 
-@app.on_event("startup")
-def startup_event():
-    print("STARTING UP DATABASE INITIALIZATION...")
+def initialize_models() -> None:
+    global face_app, liveness_detector
+    if face_app is None:
+        face_app = create_face_app()
+    if liveness_detector is None:
+        liveness_detector = LivenessDetector()
+
+
+async def log_cleanup_loop() -> None:
+    from db.logs_db import delete_old_logs
+
+    while True:
+        try:
+            await run_in_threadpool(delete_old_logs)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Periodic access-log cleanup failed")
+        await asyncio.sleep(3600)
+
+
+async def startup_event() -> None:
+    global log_cleanup_task
     import db.employees_db
     import db.logs_db
 
-    db.employees_db.init_db()
-    db.logs_db.init_db()
-    print("DATABASE INITIALIZATION COMPLETE.")
+    await run_in_threadpool(db.employees_db.init_db)
+    await run_in_threadpool(db.logs_db.init_db)
+    await run_in_threadpool(initialize_models)
+    if log_cleanup_task is None or log_cleanup_task.done():
+        log_cleanup_task = asyncio.create_task(log_cleanup_loop())
 
 
-@app.on_event("shutdown")
-def shutdown_event():
-    leds.shutdown()
+async def shutdown_event() -> None:
+    global log_cleanup_task
+    if log_cleanup_task is not None:
+        log_cleanup_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await log_cleanup_task
+        log_cleanup_task = None
+    active_camera = app.state.active_camera
+    if active_camera is not None:
+        await run_in_threadpool(active_camera.stop)
+        app.state.active_camera = None
+    await run_in_threadpool(leds.shutdown)
+    await run_in_threadpool(close_pool)
 
 
 class EmployeeUpdate(BaseModel):
@@ -117,6 +164,16 @@ class EmployeeUpdate(BaseModel):
 
 class EmployeeAdd(EmployeeUpdate):
     embedding: List[float]
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "camera_source": camera_settings.source,
+        "models_ready": face_app is not None and liveness_detector is not None,
+        "gpio_available": leds.GPIO_AVAILABLE,
+    }
 
 
 @app.get("/api/employees")
@@ -137,25 +194,20 @@ def delete_emp(emp_id: int, user: dict = Depends(get_current_user)):
 @app.post("/api/login")
 @limiter.limit("5/minute")
 def login(request: Request, credentials: dict):
+    valid_user = os.environ.get("ADMIN_LOGIN", "admin")
+    stored_hash = os.environ.get("ADMIN_PASSWORD_HASH", "")
+    supplied_user = credentials.get("username")
+    supplied_password = credentials.get("password", "").encode("utf-8")
     try:
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        valid_user = os.environ.get("ADMIN_LOGIN", "admin")
-        stored_hash = os.environ.get("ADMIN_PASSWORD_HASH", "")
-
-        provided_username = credentials.get("username")
-        provided_password = credentials.get("password", "").encode("utf-8")
-
-        if provided_username == valid_user and stored_hash:
-            # Check bcrypt hash
-            if bcrypt.checkpw(provided_password, stored_hash.encode("utf-8")):
-                token = create_access_token({"sub": valid_user})
-                return {"status": "ok", "token": token}
-    except Exception as e:
-        logger.warning("Login verification failed: %s", type(e).__name__)
-
+        valid_password = bool(stored_hash) and bcrypt.checkpw(
+            supplied_password,
+            stored_hash.encode("utf-8"),
+        )
+    except (TypeError, ValueError):
+        logger.warning("ADMIN_PASSWORD_HASH is not a valid bcrypt hash")
+        valid_password = False
+    if supplied_user == valid_user and valid_password:
+        return {"status": "ok", "token": create_access_token({"sub": valid_user})}
     raise HTTPException(status_code=401, detail="Invalid login or password")
 
 
@@ -168,8 +220,8 @@ def update_emp(
             emp_id, emp.name, emp.status, emp.start_date, emp.expiration_date
         )
         return {"status": "ok"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
 
 @app.post("/api/employees")
@@ -178,13 +230,15 @@ def add_emp(emp: EmployeeAdd, user: dict = Depends(get_current_user)):
         add_employees(
             emp.name,
             emp.status,
-            np.array(emp.embedding),
+            np.asarray(emp.embedding, dtype=np.float32),
             emp.start_date,
             emp.expiration_date,
         )
         return {"status": "ok"}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except DuplicateEmployeeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
 
 @app.get("/api/logs")
@@ -193,9 +247,7 @@ def get_logs(
     end_date: Optional[str] = None,
     user: dict = Depends(get_current_user),
 ):
-    sd = start_date if start_date else None
-    ed = end_date if end_date else None
-    return get_all_logs(sd, ed)
+    return get_all_logs(start_date or None, end_date or None)
 
 
 async def drain_websocket(websocket: WebSocket) -> str:
@@ -328,7 +380,7 @@ async def authenticate_websocket(websocket: WebSocket) -> bool:
     token = token_protocol[len(WEBSOCKET_BEARER_PREFIX) :]
     try:
         verify_token(token)
-    except Exception:
+    except HTTPException:
         logger.warning("Rejected WebSocket connection with an invalid JWT")
         # Complete the negotiated application handshake before closing so a
         # browser receives 1008 and does not treat auth rejection as a generic
@@ -397,6 +449,7 @@ async def send_frame_response(
     response["box"] = response.get("box")
     response["frame_width"] = int(width)
     response["frame_height"] = int(height)
+    response["frame_sequence"] = frame.sequence
 
     encode_ms = 0.0
     if camera_settings.source == "backend":
@@ -461,6 +514,8 @@ async def cleanup_operation(
                 await run_in_threadpool(camera.stop)
             except Exception:
                 logger.exception("Unable to stop backend camera cleanly")
+            if app.state.active_camera is camera:
+                app.state.active_camera = None
         if metrics is not None:
             metrics.finish()
         if turn_leds_off:
@@ -495,6 +550,8 @@ async def websocket_recognize(websocket: WebSocket):
     camera = None
     metrics = None
     try:
+        if face_app is None or liveness_detector is None:
+            raise RuntimeError("Recognition models are not initialized")
         unrecognized_frames = 0
         access_granted_until = 0
         last_log_time = 0
@@ -511,6 +568,7 @@ async def websocket_recognize(websocket: WebSocket):
         await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
         if camera_settings.source == "backend":
             camera = camera_factory(camera_settings)
+            app.state.active_camera = camera
             await run_in_threadpool(camera.start)
 
         while True:
@@ -670,14 +728,17 @@ async def websocket_enroll(websocket: WebSocket):
     metrics = None
     finished = False
     try:
+        if face_app is None or liveness_detector is None:
+            raise RuntimeError("Recognition models are not initialized")
         embeddings = []
         metrics = StreamMetrics(camera_settings.source)
         last_sequence = 0
-        registration_led_active = False
+        enrollment_led_state = None
 
         await websocket.accept(subprotocol=WEBSOCKET_APPLICATION_PROTOCOL)
         if camera_settings.source == "backend":
             camera = camera_factory(camera_settings)
+            app.state.active_camera = camera
             await run_in_threadpool(camera.start)
 
         while True:
@@ -699,9 +760,9 @@ async def websocket_enroll(websocket: WebSocket):
 
             if status_code == "real" and embedding is not None:
                 embeddings.append(embedding)
-                if not registration_led_active:
+                if enrollment_led_state != "REGISTRATION_ACTIVE":
                     await run_led(leds.registration_active)
-                    registration_led_active = True
+                    enrollment_led_state = "REGISTRATION_ACTIVE"
                 if len(embeddings) == 30:
                     final_embedding = await run_in_threadpool(
                         average_embeddings, embeddings
@@ -726,6 +787,9 @@ async def websocket_enroll(websocket: WebSocket):
                     "progress": len(embeddings) / 30.0,
                 }
             elif status_code == "spoof":
+                if enrollment_led_state != "SPOOF":
+                    await run_led(leds.access_denied)
+                    enrollment_led_state = "SPOOF"
                 response = {
                     "status": "SPOOF DETECTED",
                     "color": "#FF0000",
@@ -733,6 +797,9 @@ async def websocket_enroll(websocket: WebSocket):
                     "progress": len(embeddings) / 30.0,
                 }
             elif status_code == "bad_face":
+                if enrollment_led_state != "BAD_FRAME":
+                    await run_led(leds.bad_frame)
+                    enrollment_led_state = "BAD_FRAME"
                 response = {
                     "status": "Look straight",
                     "color": "#00FFFF",
@@ -740,9 +807,9 @@ async def websocket_enroll(websocket: WebSocket):
                     "progress": len(embeddings) / 30.0,
                 }
             else:
-                if registration_led_active:
+                if enrollment_led_state != "OFF":
                     await run_led(leds.all_off)
-                    registration_led_active = False
+                    enrollment_led_state = "OFF"
                 response = {
                     "status": "No face detected",
                     "color": "#888888",
