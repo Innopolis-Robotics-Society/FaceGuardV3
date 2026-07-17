@@ -14,7 +14,7 @@ openssl rand -hex 32
 docker compose --env-file backend/.env \
   -f docker/docker-compose.yml up --build -d --wait
 ```
-Use the base file plus `docker/docker-compose.pi.yml` only for Raspberry Pi backend-camera/GPIO deployment. See the root [README](../README.md) before mapping `/dev/videoN` or `/dev/gpiochipN`. Frontend `VITE_*` settings are compiled at build time.
+Use the base file plus `docker/docker-compose.pi.yml` only for Raspberry Pi backend-camera/GPIO deployment. See the root [README](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md) before mapping `/dev/videoN` or `/dev/gpiochipN`. Frontend `VITE_*` settings are compiled at build time.
 ## Backend verification
 Use Python 3.10/3.11:
 ```bash
