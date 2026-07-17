@@ -17,7 +17,7 @@ def init_db():
                 connection.commit()
             except Exception as e:
                 connection.rollback()
-                print(f"Error: {e}")
+                raise RuntimeError("Unable to initialize access-log schema") from e
 
 
 def add_log(name: str, status: str):

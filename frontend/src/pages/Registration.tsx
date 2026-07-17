@@ -1,14 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
+import CameraPreview from '../components/CameraPreview';
 import { useCamera } from '../context/CameraContext';
+import { apiFetch } from '../lib/api';
 
 export default function Registration() {
-  const { stream, startEnroll, stopEnroll, enrollData } = useCamera();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const {
+    cameraSource,
+    stream,
+    remoteFrame,
+    isEnrolling,
+    startEnroll,
+    stopEnroll,
+    enrollData,
+  } = useCamera();
   const navigate = useNavigate();
   
-  const { status, color, progress, embedding, box } = enrollData;
+  const { status, color, progress, embedding, box, frameWidth, frameHeight } = enrollData;
   
   const [name, setName] = useState('');
   const [accessType, setAccessType] = useState('Permanent');
@@ -27,13 +36,7 @@ export default function Registration() {
     return () => {
       stopEnroll();
     };
-  }, []);
-
-  useEffect(() => {
-    if (videoRef.current && stream && videoRef.current.srcObject !== stream) {
-      videoRef.current.srcObject = stream;
-    }
-  });
+  }, [startEnroll, stopEnroll]);
 
   const handleSave = () => {
     setErrorMsg('');
@@ -77,11 +80,10 @@ export default function Registration() {
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://${window.location.hostname}:8000/api/employees`, {
+    apiFetch('/api/employees', {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name,
@@ -109,30 +111,25 @@ export default function Registration() {
       </div>
       
       {!embedding ? (
-        <div className="camera-container">
-          <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
-          
-          {box && videoRef.current && (
-            <div style={{
-              position: 'absolute',
-              border: `2px solid ${color}`,
-              borderRadius: '8px',
-              left: `${(1 - box[2] / videoRef.current.videoWidth) * 100}%`,
-              top: `${(box[1] / videoRef.current.videoHeight) * 100}%`,
-              width: `${((box[2] - box[0]) / videoRef.current.videoWidth) * 100}%`,
-              height: `${((box[3] - box[1]) / videoRef.current.videoHeight) * 100}%`,
-              transition: 'all 0.1s ease',
-              pointerEvents: 'none'
-            }} />
-          )}
-
+        <CameraPreview
+          cameraSource={cameraSource}
+          stream={stream}
+          remoteFrame={remoteFrame}
+          box={box}
+          frameWidth={frameWidth}
+          frameHeight={frameHeight}
+          boxColor={color}
+          placeholder={isEnrolling
+            ? `Connecting to ${cameraSource === 'backend' ? 'Raspberry Pi' : 'browser'} camera...`
+            : status}
+        >
           <div className="camera-overlay" style={{ borderColor: color }}>
             <div className="status-indicator" style={{ color }}>{status}</div>
             <div style={{ width: '100%', background: 'rgba(255,255,255,0.2)', height: '4px', marginTop: '8px' }}>
               <div style={{ width: `${progress * 100}%`, background: color, height: '100%', transition: 'width 0.3s' }} />
             </div>
           </div>
-        </div>
+        </CameraPreview>
       ) : (
         <div className="glass-panel">
           <div className="form-group">
