@@ -15,9 +15,9 @@
 ## 5. Sprint Goal
 **Sprint Goal:** Resolve Week 6 customer feedback (page freeze, temporary access date validation, function-description documentation), deliver the final MVP v3 release, and confirm the final transition outcome and handover status with the customer.
 
-**Sprint dates:**
-Start date: Jul 13, 2026
-Finish date: Jul 19, 2026
+**Sprint dates:**  
+Start date: Jul 13, 2026  
+Finish date: Jul 19, 2026  
 
 **Short scope summary:**
 - Added password hashing and login credential management
