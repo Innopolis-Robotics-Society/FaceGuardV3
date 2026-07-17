@@ -1,0 +1,15 @@
+:root {
+  /* Pastel Purple for Light Mode */
+  --md-primary-fg-color:        #b19cd9;
+  --md-primary-fg-color--light: #e4d7f5;
+  --md-primary-fg-color--dark:  #8b72b8;
+  --md-primary-bg-color:        #ffffff;
+}
+
+[data-md-color-scheme="slate"] {
+  /* Slightly adjusted Pastel Purple for Dark Mode so it's visible */
+  --md-primary-fg-color:        #c9b6eb;
+  --md-primary-fg-color--light: #e4d7f5;
+  --md-primary-fg-color--dark:  #9d81cd;
+  --md-primary-bg-color:        #000000;
+}
