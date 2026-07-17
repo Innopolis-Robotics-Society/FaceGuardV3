@@ -106,10 +106,30 @@ def test_run_recognition_handles_statuses_and_releases_camera(monkeypatch):
 
 def test_run_recognition_rejects_unavailable_camera(monkeypatch):
     capture = FakeCapture(opened=False)
-    configure_recognition(monkeypatch, capture)
+    _, _, _, destroyed = configure_recognition(monkeypatch, capture)
 
     with pytest.raises(RuntimeError, match="Cannot open camera"):
         faceguard_main.run_recognition(camera_index=7)
+
+    assert capture.released is True
+    assert destroyed == [True]
+
+
+def test_run_recognition_releases_camera_after_processing_failure(monkeypatch):
+    frame = np.zeros((20, 20, 3), dtype=np.uint8)
+    capture = FakeCapture([frame])
+    _, _, _, destroyed = configure_recognition(monkeypatch, capture)
+    monkeypatch.setattr(
+        faceguard_main,
+        "extract_embedding_from_frame",
+        lambda *args: (_ for _ in ()).throw(RuntimeError("inference failed")),
+    )
+
+    with pytest.raises(RuntimeError, match="inference failed"):
+        faceguard_main.run_recognition()
+
+    assert capture.released is True
+    assert destroyed == [True]
 
 
 @pytest.mark.parametrize("mode", ["enroll", "recognize"])

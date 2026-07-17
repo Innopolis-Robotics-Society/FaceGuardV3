@@ -5,10 +5,19 @@ import types
 import pytest
 
 
+class FakeConnection:
+    def __init__(self):
+        self.rollback_calls = 0
+
+    def rollback(self):
+        self.rollback_calls += 1
+
+
 class FakePool:
     def __init__(self):
-        self.connection = object()
+        self.connection = FakeConnection()
         self.returned = []
+        self.closeall_calls = 0
 
     def getconn(self):
         return self.connection
@@ -16,12 +25,15 @@ class FakePool:
     def putconn(self, connection):
         self.returned.append(connection)
 
+    def closeall(self):
+        self.closeall_calls += 1
+
 
 def load_connection_module(monkeypatch, pool_factory):
     db_package = importlib.import_module("db")
     psycopg2 = types.ModuleType("psycopg2")
     pool_module = types.ModuleType("psycopg2.pool")
-    pool_module.SimpleConnectionPool = pool_factory
+    pool_module.ThreadedConnectionPool = pool_factory
     psycopg2.pool = pool_module
     dotenv = types.ModuleType("dotenv")
     dotenv.load_dotenv = lambda: None
@@ -43,6 +55,7 @@ def test_get_pool_builds_configured_pool_once(monkeypatch):
         return fake_pool
 
     monkeypatch.setenv("DB_HOST", "postgres.internal")
+    monkeypatch.setenv("DB_PORT", "5432")
     monkeypatch.setenv("POSTGRES_DB", "guard")
     monkeypatch.setenv("POSTGRES_USER", "guard-user")
     monkeypatch.setenv("POSTGRES_PASSWORD", "secret")
@@ -56,6 +69,7 @@ def test_get_pool_builds_configured_pool_once(monkeypatch):
             20,
             {
                 "host": "postgres.internal",
+                "port": 5432,
                 "database": "guard",
                 "user": "guard-user",
                 "password": "secret",
@@ -72,7 +86,13 @@ def test_get_pool_uses_documented_defaults(monkeypatch):
         calls.append(kwargs)
         return FakePool()
 
-    for variable in ("DB_HOST", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"):
+    for variable in (
+        "DB_HOST",
+        "DB_PORT",
+        "POSTGRES_DB",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+    ):
         monkeypatch.delenv(variable, raising=False)
     connection = load_connection_module(monkeypatch, pool_factory)
 
@@ -81,6 +101,7 @@ def test_get_pool_uses_documented_defaults(monkeypatch):
     assert calls == [
         {
             "host": "db",
+            "port": 5432,
             "database": "faceguard",
             "user": "postgres",
             "password": "postgres",
@@ -108,3 +129,18 @@ def test_get_db_connection_returns_connection_to_pool_after_failure(monkeypatch)
             raise RuntimeError("query failed")
 
     assert fake_pool.returned == [fake_pool.connection]
+    assert fake_pool.connection.rollback_calls == 1
+
+
+def test_close_pool_releases_all_connections_and_allows_reinitialization(monkeypatch):
+    pools = [FakePool(), FakePool()]
+    connection = load_connection_module(
+        monkeypatch, lambda *args, **kwargs: pools.pop(0)
+    )
+
+    first_pool = connection.get_pool()
+    connection.close_pool()
+    second_pool = connection.get_pool()
+
+    assert first_pool.closeall_calls == 1
+    assert second_pool is not first_pool

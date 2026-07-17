@@ -6,9 +6,14 @@ import urllib.request
 import cv2
 import numpy as np
 import json
+import os
 
 
 async def test_latency():
+    token = os.environ.get("FACEGUARD_JWT", "").strip()
+    if not token:
+        raise RuntimeError("FACEGUARD_JWT must contain a current admin JWT")
+
     url = "https://raw.githubusercontent.com/opencv/opencv/master/samples/data/lena.jpg"
     print("Downloading sample image...")
     req = urllib.request.urlopen(url)
@@ -18,11 +23,14 @@ async def test_latency():
     b64_str = base64.b64encode(buffer).decode("utf-8")
     payload = f"data:image/jpeg;base64,{b64_str}"
 
-    uri = "ws://localhost:8000/ws/recognize"
+    uri = os.environ.get("FACEGUARD_WS_URL", "ws://localhost:8000/ws/recognize")
     print(f"Connecting to {uri}...")
 
     # Do 5 iterations to see average latency and warm up
-    async with websockets.connect(uri) as websocket:
+    async with websockets.connect(
+        uri,
+        subprotocols=["faceguard.jwt", f"bearer.{token}"],
+    ) as websocket:
         print("Connected.")
 
         for i in range(5):

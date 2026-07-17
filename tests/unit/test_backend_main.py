@@ -1,515 +1,443 @@
 import asyncio
-import base64
-import importlib
-import sys
-import types
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
+import jwt
 import numpy as np
 import pytest
 
-
-class FakeHTTPException(Exception):
-    def __init__(self, status_code, detail):
-        super().__init__(detail)
-        self.status_code = status_code
-        self.detail = detail
-
-
-class FakeWebSocketDisconnect(Exception):
-    pass
-
-
-class FakeFastAPI:
-    def __init__(self):
-        self.middleware = []
-        self.state = SimpleNamespace()
-
-    def add_middleware(self, middleware, **kwargs):
-        self.middleware.append((middleware, kwargs))
-
-    def add_exception_handler(self, exc_class, handler):
-        pass
-
-    def _decorator(self, *args, **kwargs):
-        return lambda function: function
-
-    on_event = _decorator
-    get = _decorator
-    delete = _decorator
-    post = _decorator
-    put = _decorator
-    websocket = _decorator
-
-
-class FakeBaseModel:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+import main as backend_main
+from core import security
 
 
 class FakeWebSocket:
-    def __init__(self):
+    def __init__(self, token="test-token"):
+        self.headers = {"sec-websocket-protocol": f"faceguard.jwt, bearer.{token}"}
         self.accepted = False
+        self.accepted_subprotocol = None
         self.sent = []
-        self.query_params = {"token": "fake"}
+        self.closed_codes = []
 
-    async def accept(self):
+    async def accept(self, subprotocol=None):
         self.accepted = True
+        self.accepted_subprotocol = subprotocol
 
     async def send_json(self, value):
         self.sent.append(value)
 
     async def close(self, code=None):
-        pass
+        self.closed_codes.append(code)
 
 
-def module(name, **attributes):
-    result = types.ModuleType(name)
-    for key, value in attributes.items():
-        setattr(result, key, value)
-    return result
-
-
-def load_backend_main(monkeypatch):
-    backend_package = importlib.import_module("backend")
-
-    async def default_threadpool(function, *args, **kwargs):
+@pytest.fixture(autouse=True)
+def reset_runtime(monkeypatch):
+    async def run_inline(function, *args, **kwargs):
         return function(*args, **kwargs)
 
-    fastapi = module(
-        "fastapi",
-        FastAPI=FakeFastAPI,
-        WebSocket=FakeWebSocket,
-        WebSocketDisconnect=FakeWebSocketDisconnect,
-        HTTPException=FakeHTTPException,
-        Depends=lambda x: None,
-        Request=object,
-    )
-    fastapi.__path__ = []
-    middleware = module("fastapi.middleware")
-    middleware.__path__ = []
-    cors = module("fastapi.middleware.cors", CORSMiddleware=object())
-    concurrency = module("fastapi.concurrency", run_in_threadpool=default_threadpool)
-    pydantic = module("pydantic", BaseModel=FakeBaseModel)
-
-    employee_calls = []
-    employees_db = module(
-        "db.employees_db",
-        add_employees=lambda *args: employee_calls.append(("add", args)),
-        delete_employee=lambda *args: employee_calls.append(("delete", args)),
-        update_employee=lambda *args: employee_calls.append(("update", args)),
-        load_employees=lambda: None,
-        init_db=lambda: employee_calls.append(("init", ())),
-    )
-    log_calls = []
-    logs_db = module(
-        "db.logs_db",
-        get_all_logs=lambda *args: log_calls.append(("get", args)) or [],
-        add_log=lambda *args: log_calls.append(("add", args)),
-        init_db=lambda: log_calls.append(("init", ())),
-    )
-    db = module("db", employees_db=employees_db, logs_db=logs_db)
-    db.__path__ = []
-
-    face_app = object()
-    liveness_detector = object()
-
-    class FakeLivenessDetector:
-        def __new__(cls):
-            return liveness_detector
-
-    class FakeInsightFaceProvider:
-        def __init__(self, app, detector):
-            self.app = app
-            self.detector = detector
-
-    recognize = module(
-        "faceguard.recognize",
-        create_face_app=lambda: face_app,
-        LivenessDetector=FakeLivenessDetector,
-        InsightFaceProvider=FakeInsightFaceProvider,
-        extract_embedding_from_frame=lambda *args: (None, None, "no_face"),
-        average_embeddings=lambda embeddings: np.mean(embeddings, axis=0),
-    )
-    business_logic = module(
-        "faceguard.business_logic",
-        process_access_attempt=lambda **kwargs: (False, "no_face", "Unknown", 0, None),
-    )
-    faceguard = module("faceguard", recognize=recognize, business_logic=business_logic)
-    faceguard.__path__ = []
-
-    led_calls = []
-
-    def record_led(name):
-        return lambda: led_calls.append(name)
-
-    fake_leds = module(
-        "leds",
-        start_recognizing=record_led("start_recognizing"),
-        stop_recognizing=record_led("stop_recognizing"),
-        access_granted=record_led("access_granted"),
-        access_denied=record_led("access_denied"),
-        bad_frame=record_led("bad_frame"),
-        registration_active=record_led("registration_active"),
-        registration_done=record_led("registration_done"),
-        all_off=record_led("all_off"),
-    )
-    fake_cv2 = module(
-        "cv2", IMREAD_COLOR=1, imdecode=lambda data, mode: np.zeros((2, 2, 3))
-    )
-    bcrypt = module("bcrypt", checkpw=lambda provided, stored: False)
-    dotenv = module("dotenv", load_dotenv=lambda: None)
-
-    class FakeLimiter:
-        def __init__(self, **kwargs):
-            pass
-
-        def limit(self, *args, **kwargs):
-            return lambda f: f
-
-    slowapi = module(
-        "slowapi", Limiter=FakeLimiter, _rate_limit_exceeded_handler=object()
-    )
-    slowapi_util = module("slowapi.util", get_remote_address=lambda: "127.0.0.1")
-    slowapi_errors = module("slowapi.errors", RateLimitExceeded=Exception)
-    slowapi.util = slowapi_util
-    slowapi.errors = slowapi_errors
-
-    security = module(
-        "core.security",
-        create_access_token=lambda d: "fake_token",
-        get_current_user=lambda: {"sub": "admin"},
-        verify_token=lambda t: {"sub": "admin"},
-    )
-
-    replacements = {
-        "fastapi": fastapi,
-        "fastapi.middleware": middleware,
-        "fastapi.middleware.cors": cors,
-        "fastapi.concurrency": concurrency,
-        "pydantic": pydantic,
-        "db": db,
-        "db.employees_db": employees_db,
-        "db.logs_db": logs_db,
-        "faceguard": faceguard,
-        "faceguard.recognize": recognize,
-        "faceguard.business_logic": business_logic,
-        "leds": fake_leds,
-        "cv2": fake_cv2,
-        "bcrypt": bcrypt,
-        "dotenv": dotenv,
-        "slowapi": slowapi,
-        "slowapi.util": slowapi_util,
-        "slowapi.errors": slowapi_errors,
-        "core.security": security,
-    }
-    for name, replacement in replacements.items():
-        monkeypatch.setitem(sys.modules, name, replacement)
-    monkeypatch.setattr(backend_package, "main", None, raising=False)
-    monkeypatch.setitem(sys.modules, "backend.main", None)
-    del sys.modules["backend.main"]
-    backend_main = importlib.import_module("backend.main")
-    dependencies = SimpleNamespace(
-        employees_db=employees_db,
-        employee_calls=employee_calls,
-        logs_db=logs_db,
-        log_calls=log_calls,
-        recognize=recognize,
-        business_logic=business_logic,
-        leds=fake_leds,
-        led_calls=led_calls,
-        cv2=fake_cv2,
-        bcrypt=bcrypt,
-        face_app=face_app,
-        liveness_detector=liveness_detector,
-    )
-    return backend_main, dependencies
-
-
-def test_startup_initializes_both_database_modules(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
-
-    backend_main.startup_event()
-
-    assert dependencies.employee_calls == [("init", ())]
-    assert dependencies.log_calls == [("init", ())]
-
-
-def test_employee_and_log_endpoints_delegate_to_adapters(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
-
-    class FakeFrame:
-        def __init__(self):
-            self.replacements = []
-
-        def replace(self, values):
-            self.replacements.append(values)
-            return self
-
-        def select_dtypes(self, include):
-            assert include == ["datetime64"]
-            return SimpleNamespace(columns=[])
-
-        def to_dict(self, orient):
-            assert orient == "records"
-            return [{"id": 1, "name": "Alice"}]
-
-    frame = FakeFrame()
-    monkeypatch.setattr(backend_main, "load_employees", lambda: frame)
-    deleted = []
-    updated = []
-    added = []
-    monkeypatch.setattr(
-        backend_main, "delete_employee", lambda emp_id: deleted.append(emp_id)
-    )
-    monkeypatch.setattr(
-        backend_main, "update_employee", lambda *args: updated.append(args)
-    )
-    monkeypatch.setattr(backend_main, "add_employees", lambda *args: added.append(args))
+    # Unit tests exercise orchestration deterministically. The real AnyIO
+    # worker-pool boundary is covered by application-boundary integration tests.
+    monkeypatch.setattr(backend_main, "run_in_threadpool", run_inline)
+    monkeypatch.setattr(backend_main, "operation_lock", asyncio.Lock())
     monkeypatch.setattr(
         backend_main,
-        "get_all_logs",
-        lambda *args: dependencies.log_calls.append(("get-alias", args)) or ["log"],
+        "camera_settings",
+        backend_main.CameraSettings(source="browser"),
     )
-    update = backend_main.EmployeeUpdate(name="Alice", status="Permanent")
-    addition = backend_main.EmployeeAdd(
-        name="Bob", status="Permanent", embedding=[0.25, 0.75]
-    )
-
-    assert backend_main.get_employees(user={"sub": "admin"}) == [
-        {"id": 1, "name": "Alice"}
-    ]
-    assert backend_main.delete_emp(3, user={"sub": "admin"}) == {"status": "ok"}
-    assert backend_main.update_emp(4, update, user={"sub": "admin"}) == {"status": "ok"}
-    assert backend_main.add_emp(addition, user={"sub": "admin"}) == {"status": "ok"}
-    assert backend_main.get_logs("2026-07-01", "2026-08-01", user={"sub": "admin"}) == [
-        "log"
-    ]
-
-    assert frame.replacements[0] == {np.nan: None}
-    assert deleted == [3]
-    assert updated == [(4, "Alice", "Permanent", None, None)]
-    assert added[0][0:2] == ("Bob", "Permanent")
-    np.testing.assert_array_equal(added[0][2], np.array([0.25, 0.75]))
-    assert added[0][3:] == (None, None)
-    assert dependencies.log_calls == [("get-alias", ("2026-07-01", "2026-08-01"))]
+    monkeypatch.setattr(backend_main, "face_app", object())
+    monkeypatch.setattr(backend_main, "liveness_detector", object())
+    monkeypatch.setattr(backend_main, "log_cleanup_task", None)
+    monkeypatch.setattr(backend_main.app.state, "active_camera", None)
+    monkeypatch.setattr(backend_main, "verify_token", lambda token: {"sub": "admin"})
 
 
-def test_employee_endpoints_translate_adapter_errors(monkeypatch):
-    backend_main, _ = load_backend_main(monkeypatch)
-    update = backend_main.EmployeeUpdate(name="Alice", status="Permanent")
-    addition = backend_main.EmployeeAdd(name="Bob", status="Permanent", embedding=[1.0])
+def test_startup_and_shutdown_manage_owned_resources(monkeypatch):
+    import db.employees_db
+    import db.logs_db
+
+    calls = []
+    monkeypatch.setattr(db.employees_db, "init_db", lambda: calls.append("employees"))
+    monkeypatch.setattr(db.logs_db, "init_db", lambda: calls.append("logs"))
     monkeypatch.setattr(
-        backend_main,
-        "update_employee",
-        lambda *args: (_ for _ in ()).throw(RuntimeError("update failed")),
+        backend_main, "initialize_models", lambda: calls.append("models")
     )
+    monkeypatch.setattr(backend_main.leds, "shutdown", lambda: calls.append("gpio"))
+    monkeypatch.setattr(backend_main, "close_pool", lambda: calls.append("pool"))
 
-    with pytest.raises(FakeHTTPException) as update_error:
-        backend_main.update_emp(1, update, user={"sub": "admin"})
+    async def dormant_cleanup():
+        await asyncio.Event().wait()
 
-    assert update_error.value.status_code == 400
-    assert update_error.value.detail == "update failed"
+    monkeypatch.setattr(backend_main, "log_cleanup_loop", dormant_cleanup)
+
+    async def scenario():
+        await backend_main.startup_event()
+        assert backend_main.log_cleanup_task is not None
+        await backend_main.shutdown_event()
+
+    asyncio.run(scenario())
+
+    assert calls == ["employees", "logs", "models", "gpio", "pool"]
+    assert backend_main.log_cleanup_task is None
+
+
+def test_shutdown_stops_active_camera_even_without_websocket_cleanup(monkeypatch):
+    calls = []
+    camera = SimpleNamespace(stop=lambda: calls.append("camera"))
+    backend_main.app.state.active_camera = camera
+    monkeypatch.setattr(backend_main.leds, "shutdown", lambda: calls.append("gpio"))
+    monkeypatch.setattr(backend_main, "close_pool", lambda: calls.append("pool"))
+
+    asyncio.run(backend_main.shutdown_event())
+
+    assert calls == ["camera", "gpio", "pool"]
+    assert backend_main.app.state.active_camera is None
+
+
+def test_employee_endpoint_maps_duplicate_to_conflict(monkeypatch):
+    employee = backend_main.EmployeeAdd(
+        name="Duplicate",
+        status="Permanent",
+        embedding=[1.0, 0.0],
+    )
     monkeypatch.setattr(
         backend_main,
         "add_employees",
-        lambda *args: (_ for _ in ()).throw(ValueError("duplicate face")),
+        lambda *args: (_ for _ in ()).throw(
+            backend_main.DuplicateEmployeeError("Face already registered as Alice")
+        ),
     )
 
-    with pytest.raises(FakeHTTPException) as add_error:
-        backend_main.add_emp(addition, user={"sub": "admin"})
+    with pytest.raises(backend_main.HTTPException) as error:
+        backend_main.add_emp(employee, user={"sub": "admin"})
 
-    assert add_error.value.status_code == 400
-    assert add_error.value.detail == "duplicate face"
+    assert error.value.status_code == 409
+    assert error.value.detail == "Face already registered as Alice"
 
 
-def test_login_accepts_valid_bcrypt_credentials(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
-    checked = []
+def test_login_checks_bcrypt_and_returns_real_signed_token(monkeypatch):
     monkeypatch.setenv("ADMIN_LOGIN", "operator")
-    monkeypatch.setenv("ADMIN_PASSWORD_HASH", "$2b$fake")
+    monkeypatch.setenv("ADMIN_PASSWORD_HASH", "$2b$test")
     monkeypatch.setattr(
-        dependencies.bcrypt,
+        backend_main.bcrypt,
         "checkpw",
-        lambda password, stored: checked.append((password, stored)) or True,
+        lambda supplied, stored: supplied == b"secret" and stored == b"$2b$test",
     )
 
-    result = backend_main.login(None, {"username": "operator", "password": "secret"})
+    request = backend_main.Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/api/login",
+            "headers": [],
+            "client": ("127.0.0.1", 12345),
+        }
+    )
+    result = backend_main.login(
+        request,
+        {"username": "operator", "password": "secret"},
+    )
 
-    assert result == {"status": "ok", "token": "fake_token"}
-    assert checked == [(b"secret", b"$2b$fake")]
+    assert result["status"] == "ok"
+    decoded = jwt.decode(
+        result["token"],
+        security.SECRET_KEY,
+        algorithms=["HS256"],
+    )
+    assert decoded["sub"] == "operator"
 
 
-@pytest.mark.parametrize(
-    "credentials",
-    [
-        {"username": "wrong", "password": "secret"},
-        {"username": "admin", "password": "wrong"},
-        {},
-    ],
-)
-def test_login_rejects_invalid_credentials(monkeypatch, credentials):
-    backend_main, _ = load_backend_main(monkeypatch)
+def test_login_rejects_invalid_or_misconfigured_credentials(monkeypatch):
     monkeypatch.setenv("ADMIN_LOGIN", "admin")
-    monkeypatch.setenv("ADMIN_PASSWORD_HASH", "$2b$fake")
+    monkeypatch.setenv("ADMIN_PASSWORD_HASH", "invalid")
+    monkeypatch.setattr(
+        backend_main.bcrypt,
+        "checkpw",
+        lambda *args: (_ for _ in ()).throw(ValueError("bad hash")),
+    )
 
-    with pytest.raises(FakeHTTPException) as error:
-        backend_main.login(None, credentials)
+    request = backend_main.Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/api/login",
+            "headers": [],
+            "client": ("127.0.0.2", 12345),
+        }
+    )
+    with pytest.raises(backend_main.HTTPException) as error:
+        backend_main.login(request, {"username": "admin", "password": "x"})
 
     assert error.value.status_code == 401
 
 
-def test_drain_websocket_returns_latest_queued_message(monkeypatch):
-    backend_main, _ = load_backend_main(monkeypatch)
-
+def test_drain_websocket_discards_queued_stale_frames():
     class QueuedWebSocket:
         def __init__(self):
-            self.messages = ["first", "latest"]
+            self.messages = ["stale", "latest"]
 
         async def receive_text(self):
             if self.messages:
                 return self.messages.pop(0)
-            await asyncio.sleep(1)
+            await asyncio.Event().wait()
 
     result = asyncio.run(backend_main.drain_websocket(QueuedWebSocket()))
 
     assert result == "latest"
 
 
-def test_recognition_websocket_grants_access_and_logs(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
-    websocket = FakeWebSocket()
-    encoded = base64.b64encode(b"image").decode("ascii")
-    drains = iter([f"data:image/jpeg;base64,{encoded}"])
+def test_websocket_rejects_missing_or_invalid_jwt(monkeypatch):
+    missing = FakeWebSocket()
+    missing.headers = {}
+    assert asyncio.run(backend_main.authenticate_websocket(missing)) is False
+    assert missing.accepted is False
+    assert missing.closed_codes == [1008]
 
-    async def fake_drain(received_websocket):
-        try:
-            return next(drains)
-        except StopIteration:
-            raise FakeWebSocketDisconnect()
-
-    face = SimpleNamespace(bbox=np.array([1, 2, 3, 4]))
-    dependencies.business_logic.process_access_attempt = lambda **kwargs: (
-        True,
-        "real",
-        "Alice",
-        98.5,
-        face,
+    invalid = FakeWebSocket()
+    monkeypatch.setattr(
+        backend_main,
+        "verify_token",
+        lambda token: (_ for _ in ()).throw(
+            backend_main.HTTPException(status_code=401, detail="invalid")
+        ),
     )
-    monkeypatch.setattr(backend_main, "drain_websocket", fake_drain)
-    monkeypatch.setattr(backend_main.time, "time", lambda: 100.0)
+    assert asyncio.run(backend_main.authenticate_websocket(invalid)) is False
+    assert invalid.accepted_subprotocol == "faceguard.jwt"
+    assert invalid.closed_codes == [1008]
+
+
+def test_websocket_accepts_a_valid_signed_jwt(monkeypatch):
+    secret = "unit-test-websocket-secret-at-least-32-bytes"
+    token = jwt.encode(
+        {
+            "sub": "admin",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+        },
+        secret,
+        algorithm="HS256",
+    )
+    websocket = FakeWebSocket(token)
+    monkeypatch.setattr(
+        backend_main,
+        "verify_token",
+        lambda value: jwt.decode(value, secret, algorithms=["HS256"]),
+    )
+
+    assert asyncio.run(backend_main.authenticate_websocket(websocket)) is True
+
+
+def _one_frame_then_disconnect(monkeypatch, image):
+    calls = 0
+
+    async def next_frame(websocket, camera, last_sequence):
+        nonlocal calls
+        calls += 1
+        if calls > 1:
+            raise backend_main.WebSocketDisconnect()
+        return backend_main.CameraFrame(1, 0.0, image, 0.0)
+
+    monkeypatch.setattr(backend_main, "next_input_frame", next_frame)
+
+
+def test_recognition_response_keeps_box_and_dimensions_with_processed_frame(
+    monkeypatch,
+):
+    import faceguard.business_logic
+
+    image = np.zeros((4, 6, 3), dtype=np.uint8)
+    face = SimpleNamespace(bbox=np.array([1, 1, 5, 3], dtype=np.float32))
+    websocket = FakeWebSocket()
+    _one_frame_then_disconnect(monkeypatch, image)
+    monkeypatch.setattr(
+        faceguard.business_logic,
+        "process_access_attempt",
+        lambda **kwargs: (True, "real", "Alice", 98.5, face),
+    )
+    logs = []
+    leds = []
+    monkeypatch.setattr(backend_main, "add_log", lambda *args: logs.append(args))
+    monkeypatch.setattr(
+        backend_main.leds, "access_granted", lambda: leds.append("blue")
+    )
+    monkeypatch.setattr(backend_main.leds, "all_off", lambda: leds.append("off"))
 
     asyncio.run(backend_main.websocket_recognize(websocket))
 
-    assert websocket.accepted is True
     assert websocket.sent == [
         {
             "status": "Access Granted",
             "color": "#00FF00",
             "name": "Alice",
             "similarity": "98.5%",
-            "box": [1, 2, 3, 4],
+            "box": [1.0, 1.0, 5.0, 3.0],
+            "frame_width": 6,
+            "frame_height": 4,
+            "frame_sequence": 1,
         }
     ]
-    assert dependencies.log_calls == [("add", ("Alice", "ACCESS_GRANTED"))]
-    assert dependencies.led_calls == [
-        "start_recognizing",
-        "access_granted",
-        "all_off",
-    ]
+    assert logs == [("Alice", "ACCESS_GRANTED")]
+    assert leds == ["blue", "off"]
 
 
-def test_recognition_websocket_requires_two_denied_frames(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
+def test_backend_mode_starts_one_camera_and_returns_matching_jpeg(monkeypatch):
+    import faceguard.business_logic
+
+    image = np.zeros((4, 6, 3), dtype=np.uint8)
     websocket = FakeWebSocket()
-    encoded = base64.b64encode(b"image").decode("ascii")
-    drains = iter([encoded, encoded])
+    events = []
 
-    async def fake_drain(received_websocket):
-        try:
-            return next(drains)
-        except StopIteration:
-            raise FakeWebSocketDisconnect()
+    class FakeCamera:
+        def start(self):
+            events.append("start")
 
-    face = SimpleNamespace(bbox=np.array([1, 2, 3, 4]))
-    dependencies.business_logic.process_access_attempt = lambda **kwargs: (
-        False,
-        "Access Denied",
-        "Unknown",
-        0.0,
-        face,
+        def wait_for_frame(self, after_sequence, timeout):
+            if after_sequence:
+                raise backend_main.WebSocketDisconnect()
+            return backend_main.CameraFrame(1, 0.0, image, 0.0)
+
+        def stop(self):
+            events.append("stop")
+
+    monkeypatch.setattr(
+        backend_main,
+        "camera_settings",
+        backend_main.CameraSettings(source="backend"),
     )
-    monkeypatch.setattr(backend_main, "drain_websocket", fake_drain)
-    monkeypatch.setattr(backend_main.time, "time", lambda: 100.0)
+    monkeypatch.setattr(backend_main, "camera_factory", lambda settings: FakeCamera())
+    monkeypatch.setattr(
+        faceguard.business_logic,
+        "process_access_attempt",
+        lambda **kwargs: (False, "no_face", "Unknown", 0.0, None),
+    )
+    monkeypatch.setattr(
+        backend_main,
+        "encode_backend_frame",
+        lambda frame, quality: "data:image/jpeg;base64,exact-frame",
+    )
+    monkeypatch.setattr(backend_main.leds, "all_off", lambda: None)
 
     asyncio.run(backend_main.websocket_recognize(websocket))
 
-    assert [response["status"] for response in websocket.sent] == [
-        "Recognizing...",
-        "Access Denied",
-    ]
-    assert dependencies.log_calls == [("add", ("UNKNOWN", "ACCESS_DENIED"))]
-    assert dependencies.led_calls == [
-        "start_recognizing",
-        "access_denied",
-        "all_off",
-    ]
+    assert events == ["start", "stop"]
+    assert websocket.sent[0]["frame"] == "data:image/jpeg;base64,exact-frame"
+    assert websocket.sent[0]["frame_width"] == 6
+    assert websocket.sent[0]["frame_height"] == 4
+    assert websocket.sent[0]["box"] is None
 
 
-def test_recognition_websocket_reports_decode_error(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
+def test_enrollment_finishes_once_and_preserves_completion_feedback(monkeypatch):
     websocket = FakeWebSocket()
-    drains = iter([base64.b64encode(b"invalid").decode("ascii")])
+    image = np.zeros((4, 6, 3), dtype=np.uint8)
+    face = SimpleNamespace(bbox=np.array([1, 1, 5, 3], dtype=np.float32))
+    count = 0
 
-    async def fake_drain(received_websocket):
-        try:
-            return next(drains)
-        except StopIteration:
-            raise FakeWebSocketDisconnect()
+    async def next_frame(websocket, camera, last_sequence):
+        nonlocal count
+        count += 1
+        return backend_main.CameraFrame(count, 0.0, image, 0.0)
 
-    monkeypatch.setattr(backend_main, "drain_websocket", fake_drain)
-    monkeypatch.setattr(dependencies.cv2, "imdecode", lambda data, mode: None)
-
-    asyncio.run(backend_main.websocket_recognize(websocket))
-
-    assert websocket.sent == [{"status": "Error decoding image"}]
-    assert dependencies.log_calls == []
-    assert dependencies.led_calls == ["all_off"]
-
-
-def test_enrollment_websocket_finishes_after_thirty_embeddings(monkeypatch):
-    backend_main, dependencies = load_backend_main(monkeypatch)
-    websocket = FakeWebSocket()
-    encoded = base64.b64encode(b"image").decode("ascii")
-    remaining_messages = 31
-
-    async def fake_drain(received_websocket):
-        nonlocal remaining_messages
-        if remaining_messages == 0:
-            raise FakeWebSocketDisconnect()
-        remaining_messages -= 1
-        return encoded
-
-    face = SimpleNamespace(bbox=np.array([1, 2, 3, 4]))
-    embedding = np.array([1.0, 0.0], dtype=np.float32)
-    monkeypatch.setattr(backend_main, "drain_websocket", fake_drain)
+    monkeypatch.setattr(backend_main, "next_input_frame", next_frame)
     monkeypatch.setattr(
         backend_main,
         "extract_embedding_from_frame",
-        lambda *args: (embedding, face, "real"),
+        lambda *args: (np.array([1.0, 0.0]), face, "real"),
     )
+    led_calls = []
+    monkeypatch.setattr(
+        backend_main.leds, "registration_active", lambda: led_calls.append("active")
+    )
+    monkeypatch.setattr(
+        backend_main.leds, "registration_done", lambda: led_calls.append("done")
+    )
+    monkeypatch.setattr(backend_main.leds, "all_off", lambda: led_calls.append("off"))
 
     asyncio.run(backend_main.websocket_enroll(websocket))
 
-    assert websocket.accepted is True
-    assert len(websocket.sent) == 31
-    assert websocket.sent[0] == {
-        "status": "Collecting: 1/30",
-        "color": "#00FF00",
-        "box": [1, 2, 3, 4],
-        "progress": pytest.approx(1 / 30),
-    }
-    assert websocket.sent[-1] == {"status": "Finished", "embedding": [1.0, 0.0]}
-    assert dependencies.led_calls.count("registration_active") == 30
-    assert dependencies.led_calls[-1] == "all_off"
+    assert len(websocket.sent) == 30
+    assert websocket.sent[-1]["status"] == "Finished"
+    assert websocket.sent[-1]["progress"] == 1.0
+    assert websocket.sent[-1]["frame_sequence"] == 30
+    assert led_calls == ["active", "done"]
+
+
+def test_enrollment_maps_invalid_frames_and_reactivates_collection_feedback(
+    monkeypatch,
+):
+    websocket = FakeWebSocket()
+    image = np.zeros((120, 160, 3), dtype=np.uint8)
+    face = SimpleNamespace(bbox=np.array([10, 10, 110, 110], dtype=np.float32))
+    frames = 0
+
+    async def next_frame(websocket, camera, last_sequence):
+        nonlocal frames
+        frames += 1
+        if frames > 4:
+            raise backend_main.WebSocketDisconnect()
+        return backend_main.CameraFrame(frames, 0.0, image, 0.0)
+
+    results = iter(
+        [
+            (None, face, "spoof"),
+            (None, face, "bad_face"),
+            (None, None, "no_face"),
+            (np.array([1.0, 0.0]), face, "real"),
+        ]
+    )
+    monkeypatch.setattr(backend_main, "next_input_frame", next_frame)
+    monkeypatch.setattr(
+        backend_main,
+        "extract_embedding_from_frame",
+        lambda *args: next(results),
+    )
+    led_calls = []
+    monkeypatch.setattr(
+        backend_main.leds, "access_denied", lambda: led_calls.append("red")
+    )
+    monkeypatch.setattr(
+        backend_main.leds, "bad_frame", lambda: led_calls.append("yellow")
+    )
+    monkeypatch.setattr(
+        backend_main.leds,
+        "registration_active",
+        lambda: led_calls.append("active"),
+    )
+    monkeypatch.setattr(backend_main.leds, "all_off", lambda: led_calls.append("off"))
+
+    asyncio.run(backend_main.websocket_enroll(websocket))
+
+    assert [response["status"] for response in websocket.sent] == [
+        "SPOOF DETECTED",
+        "Look straight",
+        "No face detected",
+        "Collecting: 1/30",
+    ]
+    assert led_calls == ["red", "yellow", "off", "active", "off"]
+
+
+def test_concurrent_recognition_and_enrollment_are_not_allowed(monkeypatch):
+    recognition_socket = FakeWebSocket()
+    enrollment_socket = FakeWebSocket()
+    recognition_started = asyncio.Event()
+    release_recognition = asyncio.Event()
+
+    async def blocked_frame(websocket, camera, last_sequence):
+        recognition_started.set()
+        await release_recognition.wait()
+        raise backend_main.WebSocketDisconnect()
+
+    monkeypatch.setattr(backend_main, "next_input_frame", blocked_frame)
+    monkeypatch.setattr(backend_main, "OPERATION_HANDOFF_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(backend_main.leds, "all_off", lambda: None)
+
+    async def scenario():
+        recognition = asyncio.create_task(
+            backend_main.websocket_recognize(recognition_socket)
+        )
+        await recognition_started.wait()
+        await backend_main.websocket_enroll(enrollment_socket)
+        release_recognition.set()
+        await recognition
+
+    asyncio.run(scenario())
+
+    assert enrollment_socket.sent[0]["error_code"] == "operation_busy"
+    assert enrollment_socket.closed_codes == [1013]
+    assert backend_main.operation_lock.locked() is False

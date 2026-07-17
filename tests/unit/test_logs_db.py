@@ -4,6 +4,8 @@ import sys
 import types
 from datetime import datetime
 
+import pytest
+
 
 class FakeCursor:
     def __init__(self, rows=(), row=None, error=None):
@@ -85,7 +87,8 @@ def test_init_db_rolls_back_database_error(monkeypatch):
     connection = FakeConnection(FakeCursor(error=RuntimeError("database unavailable")))
     use_connection(monkeypatch, logs_db, connection)
 
-    logs_db.init_db()
+    with pytest.raises(RuntimeError, match="Unable to initialize access-log schema"):
+        logs_db.init_db()
 
     assert connection.commits == 0
     assert connection.rollbacks == 1
