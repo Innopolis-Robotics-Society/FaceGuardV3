@@ -211,4 +211,5 @@ This is a manual hardware check, not QRT-006 evidence. Full QR-006 verification 
 - [Definition of Done](docs/definition-of-done.md)
 - [Customer handover](docs/customer-handover.md)
 - [Contributing](CONTRIBUTING.md)
+- [Agent Guidance](AGENTS.md)
 - [Hosted documentation](https://innopolis-robotics-society.github.io/FaceGuardV3/)

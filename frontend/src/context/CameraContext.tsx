@@ -103,6 +103,7 @@ export function CameraProvider({ children, source = configuredCameraSource }: Ca
   const reconnectTimeoutRef = useRef<number | null>(null);
   const captureTimeoutRef = useRef<number | null>(null);
   const activeModeRef = useRef<'recognize' | 'enroll' | null>(null);
+  const wasRecognizingBeforeEnrollRef = useRef<boolean>(false);
 
   const activeMode = isEnrolling ? 'enroll' : isRecognizing ? 'recognize' : null;
   const cameraActive = activeMode !== null;
@@ -163,6 +164,7 @@ export function CameraProvider({ children, source = configuredCameraSource }: Ca
   }, []);
 
   const startEnroll = useCallback(() => {
+    wasRecognizingBeforeEnrollRef.current = activeModeRef.current === 'recognize';
     closeSocket();
     setIsRecognizing(false);
     setRecognitionData(defaultRecognitionData);
@@ -174,7 +176,11 @@ export function CameraProvider({ children, source = configuredCameraSource }: Ca
   const stopEnroll = useCallback(() => {
     setIsEnrolling(false);
     setRemoteFrame(null);
-  }, []);
+    if (wasRecognizingBeforeEnrollRef.current) {
+      wasRecognizingBeforeEnrollRef.current = false;
+      startRecognition();
+    }
+  }, [startRecognition]);
 
   // Acquire the laptop camera lazily and only in browser mode. The disposed
   // guard also stops a stream that resolves after React StrictMode cleanup.
