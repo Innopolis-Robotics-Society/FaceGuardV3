@@ -1,20 +1,14 @@
-opencv-python
-insightface
-onnxruntime
-numpy
-pytest
-pytest-cov
-bandit
-flake8
-black
-python-dotenv
-fastapi
-uvicorn
-psycopg2-binary
-pandas
-pydantic
-websockets
-python-multipart
-bcrypt
-PyJWT
-slowapi
+# Keep development and CI on the same pinned runtime dependency set.
+-r ../requirements.txt
+
+# A plain development/CI install follows InsightFace's upstream metadata and
+# may also install opencv-python. The deployment image installs this same wheel
+# with --no-deps so that its pinned headless OpenCV remains the only cv2 build.
+insightface==1.0.1
+
+pytest==8.3.4
+pytest-cov==6.0.0
+bandit==1.8.0
+flake8==7.1.1
+black==24.10.0
+httpx==0.28.1

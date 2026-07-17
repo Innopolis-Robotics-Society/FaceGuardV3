@@ -1,44 +1,28 @@
-# FaceGuardV3
-Face recognition access control system for the university laboratory.
+# FaceGuardV3 documentation
 
-## Setup Instructions - Docker
+FaceGuardV3 is a local React + FastAPI + PostgreSQL face-recognition access indicator with liveness detection, dual browser/Raspberry-Pi camera modes, and optional GPIO LEDs. It has no physical door actuator.
 
-**1. Clone the repository**
-```bash
-git clone git@github.com:Innopolis-Robotics-Society/FaceGuardV3.git
-cd FaceGuardV3
-```
-If the above does not work, use HTTPS instead:
-```bash
-git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
-cd FaceGuardV3
-```
+## Start here
 
-**2. Create your secrets file**
+- [Repository setup, Raspberry Pi deployment, tests, and troubleshooting](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md)
+- [Customer handover](customer-handover.md)
+- [Architecture](architecture/README.md)
+- [Testing and QA](testing.md)
+- [Quality requirements](quality-requirements.md) and [QRT status](quality-requirement-tests.md)
+- [Definition of Done](definition-of-done.md)
+- [Contributing](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/CONTRIBUTING.md)
+
+## Minimal browser-camera deployment
+
 ```bash
 cp backend/.env.example backend/.env
-```
-Open `backend/.env` and fill in your credentials:
-- `ADMIN_LOGIN` — your admin username
-- `ADMIN_PASSWORD_HASH` — your admin password hash (generate this by running `python backend/scripts/generate_hash.py`)
-*(The local PostgreSQL connection details are pre-filled correctly for the Docker setup)*
-
-> [!WARNING]
-> Never commit your `backend/.env` file to version control. It is already included in `.gitignore`.
-
-**3. Make sure Docker is running**
-
-**Linux:**
-```bash
-sudo systemctl start docker
+python3 backend/scripts/generate_hash.py
+openssl rand -hex 32
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml up --build -d
 ```
 
-**4. Build and run with Docker**
-```bash
-docker compose -f docker/docker-compose.yml build
-docker compose -f docker/docker-compose.yml up
-```
+Fill the generated bcrypt hash and JWT secret in `backend/.env` first. Open `http://localhost:3000`; backend health is `http://localhost:8000/health`. Raspberry Pi backend-camera/GPIO deployment requires both Compose files and explicit device/chip configuration as documented in the root README.
 
-**5. Access the application**
-Open your browser at `http://localhost:3000` for the Web UI.
-*(The backend API and WebSockets are automatically served at `http://localhost:8000`)*
+!!! warning
+    Never commit `backend/.env`. Normal CI does not prove physical camera behavior, real photo-attack rejection, or LED latency; consult the QRT page before interpreting test evidence.

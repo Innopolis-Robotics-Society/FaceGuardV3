@@ -1,18 +1,26 @@
-import { useEffect, useRef } from 'react';
-import { useCamera } from '../context/CameraContext';
 import { Play, Square } from 'lucide-react';
+import CameraPreview from '../components/CameraPreview';
+import { useCamera } from '../context/CameraContext';
 
 export default function Recognition() {
-  const { stream, isRecognizing, startRecognition, stopRecognition, recognitionData } = useCamera();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream]);
+  const {
+    cameraSource,
+    stream,
+    remoteFrame,
+    isRecognizing,
+    startRecognition,
+    stopRecognition,
+    recognitionData,
+  } = useCamera();
+  const { status, color, name, similarity, box, frameWidth, frameHeight } = recognitionData;
 
-  const { status, color, name, similarity } = recognitionData;
+  const placeholder = cameraSource === 'backend'
+    ? isRecognizing
+      ? 'Connecting to Raspberry Pi camera...'
+      : status === 'Idle' ? 'Start recognition to view the camera' : status
+    : isRecognizing
+      ? 'Connecting to browser camera...'
+      : status === 'Idle' ? 'Start recognition to view the camera' : status;
 
   return (
     <div className="page-container" style={{ textAlign: 'center' }}>
@@ -30,29 +38,30 @@ export default function Recognition() {
           )}
         </div>
       </div>
-      
-      <div className="camera-container">
-        {stream ? (
-          <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
-        ) : (
-          <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222', borderRadius: '12px' }}>
-            <p>Camera not connected</p>
-          </div>
-        )}
-        
+
+      <CameraPreview
+        cameraSource={cameraSource}
+        stream={stream}
+        remoteFrame={remoteFrame}
+        box={isRecognizing ? box : undefined}
+        frameWidth={frameWidth}
+        frameHeight={frameHeight}
+        boxColor={color}
+        placeholder={placeholder}
+      >
         {isRecognizing && (
           <div className="camera-overlay" style={{ borderColor: color }}>
             <div className="status-indicator" style={{ color }}>{status}</div>
             {name && (
               <div className="status-details">
-                <strong>Name:</strong> {name} <br/>
+                <strong>Name:</strong> {name} <br />
                 <strong>Similarity:</strong> {similarity}
               </div>
             )}
           </div>
         )}
-      </div>
-      
+      </CameraPreview>
+
       {isRecognizing && (
         <p style={{ marginTop: '1rem', color: '#888' }}>
           Background recognition is active. You can navigate to other pages and the camera will keep working.

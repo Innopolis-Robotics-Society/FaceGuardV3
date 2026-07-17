@@ -1,74 +1,30 @@
-# ADR-003: Keep the Recognition Pipeline Synchronous and In-Process for Sub-3-Second Response
+# ADR-003: Keep Recognition In-Process and Direct
 
 **ID:** ADR-003
-
 **Status:** Accepted
 
-**Context:**
+## Context
 
-MVP v1 required manual triggering of recognition and could freeze because
-heavy model loading blocked the rest of the application. The customer
-explicitly reported this as a usability problem ("Site freezes; make
-recognition faster"). For the deployment scenario the product targets — a
-single local access point with a small database of up to ~20 registered users
-— the team needed to guarantee that a full access attempt (capture,
-preprocess, extract embedding, compare against the database, and display a
-decision) completes within a bounded, predictable time.
+FaceGuard targets one local entry point and a small employee database. Moving each frame through an external job queue or cloud inference service would add latency, an online dependency, and result-correlation complexity. Earlier UI-driven model loading also caused freezes. QR-001 requires a decision visible within 3 seconds under its stated hardware conditions.
 
-**Decision:**
+## Decision
 
-Keep the recognition pipeline synchronous and in-process (no background job
-queue, no async worker, no external inference service) for this scale of
-deployment, but require that:
+Keep model inference, liveness, similarity comparison, and access decision in the FastAPI backend process. A frame is handled as one direct, ordered operation; CPU/blocking functions run through FastAPI's worker-thread boundary so they do not block the event loop. Models are initialized once at application startup, and recognition/enrollment are serialized by one operation lock. No external queue or inference service is introduced for the current single-entry deployment.
 
-- The face-recognition provider used in production is lightweight enough
-  (e.g. ONNX-based) to keep per-frame inference fast, decoupled from
-  business logic via the `FaceProviderInterface` (ADR-001).
-- The database comparison step remains a simple, low-overhead operation
-  appropriate for a database of this size (tens of users), avoiding
-  unnecessary work in the critical path between frame capture and decision.
+## Considered alternatives
 
-This decision is verified by QRT-001, which times both the embedding
-extraction step and the full `process_access_attempt` path against the
-3.0-second budget defined in QR-001 using deterministic test providers.
+- An external/cloud inference service: rejected because offline operation and predictable local latency are required.
+- A persistent background job queue: rejected because only one current decision is useful and queued stale frames conflict with the latest-frame policy.
+- Running ML directly on the event loop: rejected because it would block WebSocket handling despite inference remaining in-process.
 
-**Alternatives considered:**
+## Consequences
 
-- Move recognition to a background job queue. This was rejected for the
-  current access-control flow because the user needs an immediate allow/deny
-  decision at the entry point.
-- Use an external inference service. This was rejected for the current
-  local deployment model because it would add network latency and another
-  runtime dependency to a small, single-entry-point installation.
-- Introduce asynchronous orchestration in the UI/backend path. This was
-  rejected because the current repository uses a simple Streamlit-based
-  monolithic flow, and the measured quality requirement can be exercised
-  without adding async infrastructure.
+- The pipeline is simple and offline, and response correlation is explicit.
+- A slow consumer skips old camera frames rather than building a backlog.
+- The design intentionally does not support simultaneous recognition/enrollment or multiple backend cameras.
+- Horizontal/multi-camera scaling would require revisiting process ownership, model concurrency, and similarity indexing.
+- `tests/quality/test_recognition_performance.py` is only a deterministic software-overhead check because its fake detector returns immediately. It does not prove QR-001's camera + real model + Raspberry Pi + UI latency; QRT-001 remains only partially automated until that environment is measured.
 
-**Consequences and tradeoffs:**
+## Quality requirements addressed
 
-- Positive: A synchronous pipeline is simple to reason about, simple to
-  test deterministically (see `tests/quality/test_recognition_performance.py`),
-  and avoids the added complexity of async orchestration for a
-  small-scale local deployment.
-- Positive: Directly addresses the customer-reported freezing/performance
-  problem by making response time an explicit, tested, measurable
-  requirement instead of an incidental property of whichever model happens
-  to be loaded.
-- Negative: A synchronous, in-process design does not scale to a much
-  larger user database or to concurrent multi-camera access points without
-  revisiting this decision (e.g. introducing indexed similarity search or
-  async processing). This is a known scaling risk that should be
-  reconsidered if the product's target deployment scale grows materially.
-- Negative: The 3.0-second budget in QR-001 and this ADR assumes a single
-  local webcam and CPU-bound inference; it does not account for GPU
-  acceleration or multi-tenant load, which would require a different
-  architectural approach.
-
-**Quality requirements addressed:**
-
-- QR-001 (Recognition Response Time) — directly addressed. This ADR is the
-  architectural rationale for why a synchronous, lightweight-provider
-  pipeline is expected to meet the ≤3.0-second response-time scenario that
-  QR-001 defines and QRT-001 verifies. See
-  [QR-001](../../quality-requirements.md#qr-001-recognition-response-time).
+- [QR-001](../../quality-requirements.md#qr-001-recognition-response-time), together with ADR-005 and ADR-009.

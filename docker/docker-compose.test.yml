@@ -1,0 +1,17 @@
+services:
+  db-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: faceguard_test
+      POSTGRES_PASSWORD: faceguard_test
+      POSTGRES_DB: faceguard_test
+      TZ: Europe/Moscow
+    ports:
+      - "55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U faceguard_test -d faceguard_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 15

@@ -1,193 +1,563 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactNode } from 'react';
+import { getValidAuthToken, invalidateAuth } from '../auth/token';
+import { parseBBox } from '../camera/projectBBox';
+import type { BBox } from '../camera/projectBBox';
+import { websocketAuthProtocols, websocketUrl } from '../lib/urls';
 
-type RecognitionData = { status: string; color: string; name?: string; similarity?: string };
-type EnrollData = { status: string; color: string; progress: number; embedding?: number[]; box?: number[] };
+export type CameraSource = 'browser' | 'backend';
+
+interface FrameData {
+  box?: BBox;
+  frameWidth?: number;
+  frameHeight?: number;
+}
+
+export interface RecognitionData extends FrameData {
+  status: string;
+  color: string;
+  name?: string;
+  similarity?: string;
+}
+
+export interface EnrollData extends FrameData {
+  status: string;
+  color: string;
+  progress: number;
+  embedding?: number[];
+}
 
 interface CameraContextType {
+  cameraSource: CameraSource;
   stream: MediaStream | null;
-  
+  remoteFrame: string | null;
   isRecognizing: boolean;
   startRecognition: () => void;
   stopRecognition: () => void;
   recognitionData: RecognitionData;
-  
   isEnrolling: boolean;
   startEnroll: () => void;
   stopEnroll: () => void;
   enrollData: EnrollData;
+  resetCamera: () => void;
 }
 
-const defaultRecData = { status: 'Idle', color: '#888' };
-const defaultEnrollData = { status: 'Idle', color: '#888', progress: 0 };
+interface CameraProviderProps {
+  children: ReactNode;
+  source?: CameraSource;
+}
+
+const defaultRecognitionData: RecognitionData = { status: 'Idle', color: '#888' };
+const defaultEnrollData: EnrollData = { status: 'Idle', color: '#888', progress: 0 };
+const MAX_RECONNECT_ATTEMPTS = 4;
+const AUTH_CLOSE_CODES = new Set([1008, 4401, 4403]);
+const FATAL_CLOSE_CODES = new Set([1002, 1003, 1007, 1011]);
 
 const CameraContext = createContext<CameraContextType | null>(null);
 
-export function CameraProvider({ children }: { children: ReactNode }) {
+function parseCameraSource(value: string | undefined): CameraSource {
+  return value?.trim().toLowerCase() === 'backend' ? 'backend' : 'browser';
+}
+
+const configuredCameraSource = parseCameraSource(import.meta.env.VITE_CAMERA_SOURCE);
+
+function positiveNumber(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+    ? value
+    : undefined;
+}
+
+function stringValue(value: unknown, fallback: string) {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function stopStream(stream: MediaStream | null) {
+  stream?.getTracks().forEach(track => track.stop());
+}
+
+function messageFromError(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export function CameraProvider({ children, source = configuredCameraSource }: CameraProviderProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [remoteFrame, setRemoteFrame] = useState<string | null>(null);
   const [isRecognizing, setIsRecognizing] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
-  
-  const [recognitionData, setRecognitionData] = useState<RecognitionData>(defaultRecData);
+  const [recognitionData, setRecognitionData] =
+    useState<RecognitionData>(defaultRecognitionData);
   const [enrollData, setEnrollData] = useState<EnrollData>(defaultEnrollData);
-  
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const intervalRef = useRef<number | null>(null);
 
-  // Initialize camera and hidden elements
-  useEffect(() => {
-    videoRef.current = document.createElement('video');
-    videoRef.current.autoplay = true;
-    videoRef.current.playsInline = true;
-    videoRef.current.muted = true;
-    
-    canvasRef.current = document.createElement('canvas');
-    
-    navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false })
-      .then(s => {
-        setStream(s);
-        if (videoRef.current) {
-          videoRef.current.srcObject = s;
-        }
-      })
-      .catch(err => {
-        setRecognitionData({ status: 'Error accessing camera: ' + err.message, color: '#f00' });
-        console.error("Camera access error:", err);
-      });
-      
-    return () => {
-      if (wsRef.current) wsRef.current.close();
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (videoRef.current && videoRef.current.srcObject) {
-        const s = videoRef.current.srcObject as MediaStream;
-        s.getTracks().forEach(t => t.stop());
-      }
-    };
+  const hiddenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const activeStreamRef = useRef<MediaStream | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const captureTimeoutRef = useRef<number | null>(null);
+  const activeModeRef = useRef<'recognize' | 'enroll' | null>(null);
+  const wasRecognizingBeforeEnrollRef = useRef<boolean>(false);
+
+  const activeMode = isEnrolling ? 'enroll' : isRecognizing ? 'recognize' : null;
+  const cameraActive = activeMode !== null;
+  activeModeRef.current = activeMode;
+
+  const clearSocketTimers = useCallback(() => {
+    if (reconnectTimeoutRef.current !== null) {
+      window.clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    if (captureTimeoutRef.current !== null) {
+      window.clearTimeout(captureTimeoutRef.current);
+      captureTimeoutRef.current = null;
+    }
   }, []);
 
-  // Connection and capturing logic
-  useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  const closeSocket = useCallback(() => {
+    clearSocketTimers();
+    const socket = wsRef.current;
+    wsRef.current = null;
+    if (socket && socket.readyState < WebSocket.CLOSING) {
+      socket.onclose = null;
+      socket.close(1000, 'Client stopped');
     }
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
+  }, [clearSocketTimers]);
 
-    if (!stream) return;
-    if (!isRecognizing && !isEnrolling) {
-      setRecognitionData(defaultRecData);
-      setEnrollData(defaultEnrollData);
+  const stopBrowserCamera = useCallback(() => {
+    const activeStream = activeStreamRef.current;
+    activeStreamRef.current = null;
+    stopStream(activeStream);
+    if (hiddenVideoRef.current) hiddenVideoRef.current.srcObject = null;
+    setStream(null);
+  }, []);
+
+  const resetCamera = useCallback(() => {
+    closeSocket();
+    stopBrowserCamera();
+    setIsRecognizing(false);
+    setIsEnrolling(false);
+    setRemoteFrame(null);
+    setRecognitionData(defaultRecognitionData);
+    setEnrollData(defaultEnrollData);
+  }, [closeSocket, stopBrowserCamera]);
+
+  const startRecognition = useCallback(() => {
+    closeSocket();
+    setIsEnrolling(false);
+    setEnrollData(defaultEnrollData);
+    setRecognitionData({ status: 'Starting camera...', color: '#888' });
+    setRemoteFrame(null);
+    setIsRecognizing(true);
+  }, [closeSocket]);
+
+  const stopRecognition = useCallback(() => {
+    setIsRecognizing(false);
+    setRemoteFrame(null);
+    setRecognitionData(defaultRecognitionData);
+  }, []);
+
+  const startEnroll = useCallback(() => {
+    wasRecognizingBeforeEnrollRef.current = activeModeRef.current === 'recognize';
+    closeSocket();
+    setIsRecognizing(false);
+    setRecognitionData(defaultRecognitionData);
+    setEnrollData({ status: 'Starting camera...', color: '#888', progress: 0 });
+    setRemoteFrame(null);
+    setIsEnrolling(true);
+  }, [closeSocket]);
+
+  const stopEnroll = useCallback(() => {
+    setIsEnrolling(false);
+    setRemoteFrame(null);
+    if (wasRecognizingBeforeEnrollRef.current) {
+      wasRecognizingBeforeEnrollRef.current = false;
+      startRecognition();
+    }
+  }, [startRecognition]);
+
+  // Acquire the laptop camera lazily and only in browser mode. The disposed
+  // guard also stops a stream that resolves after React StrictMode cleanup.
+  useEffect(() => {
+    if (source !== 'browser' || !cameraActive) {
+      stopBrowserCamera();
+      hiddenVideoRef.current = null;
+      canvasRef.current = null;
       return;
     }
 
-    const isEnrollMode = isEnrolling; // enrollment takes precedence
-    const token = localStorage.getItem('auth_token') || '';
-    const endpoint = isEnrollMode ? `ws://localhost:8000/ws/enroll?token=${token}` : `ws://localhost:8000/ws/recognize?token=${token}`;
-    const intervalTime = isEnrollMode ? 300 : 200;
+    let disposed = false;
+    let acquiredStream: MediaStream | null = null;
+    const hiddenVideo = document.createElement('video');
+    hiddenVideo.autoplay = true;
+    hiddenVideo.playsInline = true;
+    hiddenVideo.muted = true;
+    hiddenVideoRef.current = hiddenVideo;
+    canvasRef.current = document.createElement('canvas');
 
+    const mediaDevices = navigator.mediaDevices;
+    if (!mediaDevices?.getUserMedia) {
+      const status = 'Camera API is unavailable. Use HTTPS or backend camera mode.';
+      if (activeModeRef.current === 'enroll') {
+        setEnrollData(previous => ({ ...previous, status, color: '#f00' }));
+      } else {
+        setRecognitionData({ status, color: '#f00' });
+      }
+      return () => {
+        disposed = true;
+      };
+    }
+
+    mediaDevices
+      .getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      })
+      .then(cameraStream => {
+        if (disposed) {
+          stopStream(cameraStream);
+          return;
+        }
+        acquiredStream = cameraStream;
+        activeStreamRef.current = cameraStream;
+        hiddenVideo.srcObject = cameraStream;
+        setStream(cameraStream);
+        hiddenVideo.play().catch(error => {
+          console.debug('Hidden camera preview did not autoplay:', error);
+        });
+      })
+      .catch(error => {
+        if (disposed) return;
+        const status = `Error accessing camera: ${messageFromError(error)}`;
+        if (activeModeRef.current === 'enroll') {
+          setEnrollData(previous => ({ ...previous, status, color: '#f00' }));
+        } else {
+          setRecognitionData({ status, color: '#f00' });
+        }
+      });
+
+    return () => {
+      disposed = true;
+      if (activeStreamRef.current === acquiredStream) {
+        stopStream(acquiredStream);
+        activeStreamRef.current = null;
+      }
+      hiddenVideo.srcObject = null;
+      if (hiddenVideoRef.current === hiddenVideo) hiddenVideoRef.current = null;
+      canvasRef.current = null;
+    };
+  }, [cameraActive, source, stopBrowserCamera]);
+
+  useEffect(() => {
+    closeSocket();
+    if (activeMode === null) return;
+    if (source === 'browser' && !stream) return;
+
+    const token = getValidAuthToken();
+    if (!token) {
+      const status = 'Authentication expired. Please sign in again.';
+      if (activeMode === 'enroll') {
+        setEnrollData(previous => ({ ...previous, status, color: '#f00' }));
+      } else {
+        setRecognitionData({ status, color: '#f00' });
+      }
+      if (activeMode === 'enroll') setIsEnrolling(false);
+      else setIsRecognizing(false);
+      invalidateAuth();
+      return;
+    }
+
+    const isEnrollMode = activeMode === 'enroll';
+    const endpoint = websocketUrl(isEnrollMode ? '/ws/enroll' : '/ws/recognize');
+    const authProtocols = websocketAuthProtocols(token);
+    const minimumFrameInterval = isEnrollMode ? 200 : 100;
+    let disposed = false;
+    let finished = false;
+    let fatalResponse = false;
+    let activeSocket: WebSocket | null = null;
+    let reconnectAttempts = 0;
+    let awaitingResponse = false;
+    let pendingBrowserFrame: string | null = null;
+
+    setRemoteFrame(null);
     if (isEnrollMode) {
-      setEnrollData({ status: 'Initializing camera...', color: '#888', progress: 0 });
+      setEnrollData(previous => ({
+        ...previous,
+        status: 'Connecting...',
+        color: '#888',
+        box: undefined,
+      }));
     } else {
       setRecognitionData({ status: 'Connecting...', color: '#888' });
     }
 
-    let activeWs: WebSocket | null = null;
-    let isFinished = false;
+    const clearCaptureTimeout = () => {
+      if (captureTimeoutRef.current !== null) {
+        window.clearTimeout(captureTimeoutRef.current);
+        captureTimeoutRef.current = null;
+      }
+    };
 
-    const connectWs = () => {
-      if (isFinished) return;
-      
-      activeWs = new WebSocket(endpoint);
-      wsRef.current = activeWs;
-
-      activeWs.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (isEnrollMode) {
-          if (data.status === 'Finished') {
-            isFinished = true;
-            setEnrollData(prev => ({ 
-              ...prev, 
-              status: 'Face data collected! Please fill the form.', 
-              color: '#00FF00', 
-              embedding: data.embedding, 
-              box: undefined 
-            }));
-            activeWs?.close();
-            activeWs = null;
-          } else {
-            setEnrollData({ status: data.status, color: data.color, progress: data.progress || 0, box: data.box || undefined });
-          }
-        } else {
-          setRecognitionData({ status: data.status, color: data.color, name: data.name, similarity: data.similarity });
+    const scheduleBrowserFrame = (socket: WebSocket, delay: number) => {
+      if (source !== 'browser' || disposed || finished) return;
+      clearCaptureTimeout();
+      captureTimeoutRef.current = window.setTimeout(() => {
+        captureTimeoutRef.current = null;
+        if (
+          disposed ||
+          finished ||
+          activeSocket !== socket ||
+          socket.readyState !== WebSocket.OPEN
+        ) {
+          return;
         }
+        if (awaitingResponse || socket.bufferedAmount > 0) {
+          scheduleBrowserFrame(socket, 25);
+          return;
+        }
+
+        const video = hiddenVideoRef.current;
+        const canvas = canvasRef.current;
+        if (!video || !canvas || video.videoWidth <= 0 || video.videoHeight <= 0) {
+          scheduleBrowserFrame(socket, 50);
+          return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          scheduleBrowserFrame(socket, 100);
+          return;
+        }
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        pendingBrowserFrame = canvas.toDataURL('image/jpeg', 0.5);
+        awaitingResponse = true;
+        socket.send(pendingBrowserFrame);
+      }, delay);
+    };
+
+    const updateRemoteFrame = (value: unknown) => {
+      if (source === 'backend' && typeof value === 'string' && value.startsWith('data:image/jpeg;base64,')) {
+        setRemoteFrame(value);
+      } else if (source === 'browser' && pendingBrowserFrame) {
+        // The bbox describes the submitted canvas snapshot, not the newer
+        // live video frame. Display that exact snapshot to keep them atomic.
+        setRemoteFrame(pendingBrowserFrame);
+        pendingBrowserFrame = null;
+      }
+    };
+
+    const setConnectionFailure = (status: string) => {
+      if (isEnrollMode) {
+        setEnrollData(previous => ({ ...previous, status, color: '#f00', box: undefined }));
+      } else {
+        setRecognitionData({ status, color: '#f00' });
+      }
+    };
+
+    const stopCurrentOperation = () => {
+      clearCaptureTimeout();
+      setRemoteFrame(null);
+      if (isEnrollMode) setIsEnrolling(false);
+      else setIsRecognizing(false);
+    };
+
+    const connect = () => {
+      if (disposed || finished) return;
+      const socket = new WebSocket(endpoint, authProtocols);
+      activeSocket = socket;
+      wsRef.current = socket;
+      awaitingResponse = false;
+      pendingBrowserFrame = null;
+
+      socket.onopen = () => {
+        if (source === 'browser') scheduleBrowserFrame(socket, 0);
       };
-      
-      activeWs.onclose = () => {
-        if (!isFinished && activeWs !== null) {
-          setTimeout(connectWs, 2000);
+
+      socket.onmessage = event => {
+        if (disposed || finished || activeSocket !== socket) return;
+        awaitingResponse = false;
+
+        let data: Record<string, unknown>;
+        try {
+          data = JSON.parse(String(event.data)) as Record<string, unknown>;
+        } catch {
+          setConnectionFailure('Invalid response from camera service');
+          scheduleBrowserFrame(socket, minimumFrameInterval);
+          return;
         }
+
+        reconnectAttempts = 0;
+        fatalResponse = data.fatal === true;
+        updateRemoteFrame(data.frame);
+        const box = parseBBox(data.box);
+        const frameWidth = positiveNumber(data.frame_width);
+        const frameHeight = positiveNumber(data.frame_height);
+        const status = stringValue(data.status, 'Processing...');
+        const color = stringValue(data.color, '#888');
+
+        if (isEnrollMode) {
+          if (status === 'Finished') {
+            finished = true;
+            clearCaptureTimeout();
+            const embedding = Array.isArray(data.embedding) &&
+              data.embedding.every(value => typeof value === 'number' && Number.isFinite(value))
+              ? data.embedding as number[]
+              : undefined;
+            setEnrollData(previous => ({
+              ...previous,
+              status: embedding
+                ? 'Face data collected! Please fill the form.'
+                : 'Invalid enrollment result',
+              color: embedding ? '#00FF00' : '#f00',
+              progress: embedding ? 1 : previous.progress,
+              embedding,
+              box: undefined,
+              frameWidth,
+              frameHeight,
+            }));
+            if (wsRef.current === socket) wsRef.current = null;
+            socket.close(1000, 'Enrollment finished');
+            setIsEnrolling(false);
+            return;
+          }
+
+          const rawProgress = typeof data.progress === 'number' && Number.isFinite(data.progress)
+            ? data.progress
+            : 0;
+          setEnrollData(previous => ({
+            status,
+            color,
+            progress: Math.max(0, Math.min(1, rawProgress)),
+            embedding: previous.embedding,
+            box,
+            frameWidth,
+            frameHeight,
+          }));
+        } else {
+          setRecognitionData({
+            status,
+            color,
+            name: typeof data.name === 'string' ? data.name : undefined,
+            similarity: typeof data.similarity === 'string' ? data.similarity : undefined,
+            box,
+            frameWidth,
+            frameHeight,
+          });
+        }
+
+        if (fatalResponse) {
+          if (wsRef.current === socket) wsRef.current = null;
+          stopCurrentOperation();
+          socket.close(1000, 'Fatal camera error');
+          return;
+        }
+        scheduleBrowserFrame(socket, minimumFrameInterval);
+      };
+
+      socket.onclose = event => {
+        clearCaptureTimeout();
+        if (wsRef.current === socket) wsRef.current = null;
+        if (activeSocket === socket) activeSocket = null;
+        if (disposed || finished || fatalResponse) return;
+
+        if (AUTH_CLOSE_CODES.has(event.code)) {
+          setConnectionFailure('Authentication rejected. Please sign in again.');
+          stopCurrentOperation();
+          invalidateAuth();
+          return;
+        }
+        if (FATAL_CLOSE_CODES.has(event.code)) {
+          setConnectionFailure('Camera service closed with a fatal error.');
+          stopCurrentOperation();
+          return;
+        }
+        if (event.code === 1000) {
+          setConnectionFailure('Camera connection closed. Retry the operation.');
+          stopCurrentOperation();
+          return;
+        }
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+          setConnectionFailure('Camera connection failed. Retry the operation.');
+          stopCurrentOperation();
+          return;
+        }
+
+        const delay = Math.min(500 * 2 ** reconnectAttempts, 4000);
+        reconnectAttempts += 1;
+        reconnectTimeoutRef.current = window.setTimeout(() => {
+          reconnectTimeoutRef.current = null;
+          connect();
+        }, delay);
       };
     };
-    
-    connectWs();
 
-    // Frame capture loop
-    intervalRef.current = window.setInterval(() => {
-      if (isFinished) return;
-      if (activeWs?.readyState !== WebSocket.OPEN) return;
-      
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        if (video.videoWidth > 0) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const base64 = canvas.toDataURL('image/jpeg', 0.5);
-            activeWs.send(base64);
-          }
-        }
-      }
-    }, intervalTime);
+    connect();
 
     return () => {
-      isFinished = true;
-      if (activeWs) {
-        activeWs.close();
-        activeWs = null;
-      }
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      disposed = true;
+      clearSocketTimers();
+      const socket = activeSocket;
+      activeSocket = null;
+      pendingBrowserFrame = null;
+      if (wsRef.current === socket) wsRef.current = null;
+      if (socket && socket.readyState < WebSocket.CLOSING) {
+        socket.close(1000, 'Operation changed');
       }
     };
-  }, [isRecognizing, isEnrolling, stream]);
+  }, [activeMode, clearSocketTimers, closeSocket, source, stream]);
 
-  const value = {
+  useEffect(() => () => {
+    clearSocketTimers();
+    const socket = wsRef.current;
+    wsRef.current = null;
+    if (socket && socket.readyState < WebSocket.CLOSING) socket.close(1000, 'Provider unmounted');
+    stopStream(activeStreamRef.current);
+    activeStreamRef.current = null;
+    if (hiddenVideoRef.current) hiddenVideoRef.current.srcObject = null;
+  }, [clearSocketTimers]);
+
+  const value = useMemo<CameraContextType>(() => ({
+    cameraSource: source,
     stream,
+    remoteFrame,
     isRecognizing,
-    startRecognition: () => setIsRecognizing(true),
-    stopRecognition: () => setIsRecognizing(false),
+    startRecognition,
+    stopRecognition,
     recognitionData,
     isEnrolling,
-    startEnroll: () => setIsEnrolling(true),
-    stopEnroll: () => setIsEnrolling(false),
-    enrollData
-  };
+    startEnroll,
+    stopEnroll,
+    enrollData,
+    resetCamera,
+  }), [
+    enrollData,
+    isEnrolling,
+    isRecognizing,
+    recognitionData,
+    remoteFrame,
+    resetCamera,
+    source,
+    startEnroll,
+    startRecognition,
+    stopEnroll,
+    stopRecognition,
+    stream,
+  ]);
 
   return <CameraContext.Provider value={value}>{children}</CameraContext.Provider>;
 }
 
+// oxlint-disable-next-line react/only-export-components -- Context providers and their hook are one API.
 export function useCamera() {
   const context = useContext(CameraContext);
-  if (!context) {
-    throw new Error("useCamera must be used within CameraProvider");
-  }
+  if (!context) throw new Error('useCamera must be used within CameraProvider');
   return context;
 }

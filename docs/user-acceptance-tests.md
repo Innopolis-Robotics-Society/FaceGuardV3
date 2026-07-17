@@ -3,22 +3,22 @@
 ## UAT-001: Register a new employee with permanent access
 
 **Status:** Active  
-**User goal:** Grant permanent access to a new employee so the system recognizes them any time they approach the camera.
+**User goal:** Grant permanent access to a new employee so the system recognizes them any time they approach the camera.  
 
 **Preconditions:**
-- The system is active, powered on
-- The admin is on the page 'Add a new employee'
+- The system is active, powered on  
+- The admin is on the page 'Add a new employee'  
 
 **Steps:**
-1. Place employee with clearly visible face in front of the camera in its view
-2. Capture employee's face
-3. Enter the name of the employee
-4. Choose access type 'Permanent'
-5. Press the button 'Save'
+1. Place employee with clearly visible face in front of the camera in its view  
+2. Capture employee's face  
+3. Enter the name of the employee  
+4. Choose access type 'Permanent'  
+5. Press the button 'Save'  
 
 **Expected outcome:**
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
-- The LEDs lit up yellow, red, and blue (all LEDs) during the registration and 3 seconds after it 
+- The LEDs lit up yellow, red, and blue (all LEDs) during the registration and 3 seconds after it
 - The employee was registered
 - The system recognizes them
 - The name, registration date, the type of the access (status) are displayed in the list of all registered employees on the 'Employees' page; the fields start date and time and expiration date and time are filled with 'None'
@@ -30,26 +30,33 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add a check if the employee was already registered. Try to define the upper bound on FPS number to fit in 3-5 seconds for backend response.  
-**Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)
+**Resulting PBIs:** [#115](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/115)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)  
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:**  The system shall be faster.  
+**Comments:** The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Registration demonstrated live. Slower on Raspberry Pi than on a laptop, otherwise works as expected. Camera resolution fixed at 640x480 to preserve recognition accuracy.  
+**Resulting PBIs:** -  
 
 ---
 
-## UAT-002: Add a new employee with temporary access
+## UAT-002: Add a new employee with temporary access  
 
 **Status:** Active  
-**User goal:**  Grant temporary access to a new employee so the system recognizes them if they approach the camera during the allowed period.
+**User goal:**  Grant temporary access to a new employee so the system recognizes them if they approach the camera during the allowed period.  
 
 **Preconditions:**
-- The system is active, powered on
+- The system is active, powered on  
 - The admin is on the page 'Add a new employee'
 
 **Steps:**
@@ -66,21 +73,23 @@
 - The employee was registered
 - The system recognizes them during the allowed period
 - The name, registration date, the type of the access (status), start date and time, and expiration date and time are displayed in the list of all registered employees on the page 'Employees'
+- Input time is validated; past dates are rejected
 - After the expiration date and time, the access for that employee is automatically removed, and the system rejects the attempt
+
 ---
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.   
+**Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Change the way of specifying the temporary access duration from selecting dates to selecting dates with exact time.  
 **Resulting PBIs:** [#117](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/117)  
 
 ---
-### Execution: Sprint Review & UAT Session (2026-07-04)
+### Execution: Sprint Review & UAT Session (2026-07-04)  
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)   
+**Executed by:** Customer (role: admin)  
 **Comments:** The system shall be faster.  
 **Resulting PBIs:** [#171](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/171)  
 
@@ -92,16 +101,22 @@
 **Comments:** Add a field with automatic validation so the admin is able to input only the valid date.  
 **Resulting PBIs:** [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)  
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Date validation now confirmed working.  
+**Resulting PBIs:** -   
 
 ---
-
 
 ## UAT-003: Remove a registered employee
 
 **Status:** Active  
-**User goal:** Remove the registered employee so they do not have the access to enter the laboratory
+**User goal:** Remove the registered employee so they do not have the access to enter the laboratory  
 
-**Preconditions:**
+**Preconditions:**  
 - The admin is on the 'Employees' page
 
 **Steps:**
@@ -123,11 +138,19 @@
 **Resulting PBIs:** -  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -  
+**Resulting PBIs:** -  
+
+---
 
 ## UAT-004: View the list of all registered employees
 
 **Status:** Active  
-**User goal:** View the list with information of all registered employees so the admin can monitor registered employees
+**User goal:** View the list with information of all registered employees so the admin can monitor registered employees  
 
 **Preconditions:**
 - The admin is on the 'Employees' page
@@ -137,9 +160,11 @@
 
 **Expected outcome:**
 - All registered employees are displayed on the list
-- Each row with employee has the following filled fields: employee's name, registration date and time, the type of the access (status), start date and time, expiration date and time, and time of the last access (or with empty, None, or Never if the employee had not made any attempts to enter the laboratory) 
+- Each row with employee has the following filled fields: employee's name, registration date and time, the type of the access (status), start date and time, expiration date and time, and time of the last access (or with empty, None, or Never if the employee had not made any attempts to enter the laboratory)
 - Each row with employee has a tick box in the left side so it can be selected
 - The admin is able to sort, search, filter the items
+
+**Current implementation note (2026-07-17 audit):** PostgreSQL stores `registration_date` as `DATE` and the UI displays only that date. The date-and-time wording above remains an unresolved acceptance discrepancy; the historical execution records below have not been rewritten.
 
 ---
 
@@ -148,16 +173,23 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add the ability to change employee's name and status after registration, add the time of the employee's last entry  
-**Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)
+**Resulting PBIs:** [#113](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/113), [#114](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/114)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)   
+**Executed by:** Customer (role: admin)  
 **Comments:** All good.  
 **Resulting PBIs:** -  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** All demonstrated and confirmed working.  
+**Resulting PBIs:** -  
 
 ---
 
@@ -179,6 +211,8 @@
 - Each recognition session adds only one log at a time (with one-minute-period)
 - The admin can select the date range to filter the logs (within the period of 3 days because it is the maximum period the system keeps)
 
+**Current implementation note (2026-07-17 audit):** The backend accepts `start_date`/`end_date`, but the current Logs page exposes name search and sorting only; it has no date-range controls. This remains an unresolved acceptance discrepancy, and the historical execution records below are retained as recorded.
+
 ---
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
@@ -186,7 +220,7 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Add filtering by date range  
-**Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)
+**Resulting PBIs:** [#116](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/116)  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
@@ -196,6 +230,13 @@
 **Comments:** Works well.  
 **Resulting PBIs:** -  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -  
+**Resulting PBIs:** -  
 
 ---
 
@@ -203,7 +244,7 @@
 ## UAT-006: Automatic recognition of a registered employee
 
 **Status:** Active  
-**User goal:** The system shall grant the access to a registered employee so they can enter the laboratory
+**User goal:** The system shall grant the access to a registered employee so they can enter the laboratory  
 
 **Preconditions:**
 - The employee was registered
@@ -228,16 +269,23 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:** Very good!  
-**Resulting PBIs:** -
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
 
 **Result:** Passed  
-**Executed by:** Customer (role: admin)    
+**Executed by:** Customer (role: admin)  
 **Comments:** The recognition shall run in the background.  
 **Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -    
+**Resulting PBIs:** -  
 
 ---
 
@@ -245,7 +293,7 @@
 ## UAT-007: Rejection of an unregistered person
 
 **Status:** Active  
-**User goal:** The system shall deny the access to an unregistered person so they cannot enter the laboratory
+**User goal:** The system shall deny the access to an unregistered person so they cannot enter the laboratory  
 
 **Preconditions:**
 - The person is not registered
@@ -257,7 +305,7 @@
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
 - During recognition, the LEDs glow yellow; after failed recognition, the LEDs stop blinking yellow and turn solid red for 5 seconds
 - There is no test section on the recognition page
-- If there's no one in front of the camera, nothing lights up 
+- If there's no one in front of the camera, nothing lights up
 - The system identifies the presence of a face
 - The system denies the access
 - The system logs the attempt
@@ -269,7 +317,7 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin). Tests were demonstrated by the team during an online session; the customer observed, asked questions, and confirmed acceptance.  
 **Comments:**  Very good!  
-**Resulting PBIs:** -
+**Resulting PBIs:** -  
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
@@ -279,6 +327,13 @@
 **Comments:** The recognition shall run in the background.  
 **Resulting PBIs:** [#172](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/172)  
 
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Anti-spoofing tested specifically: a photograph presented to the camera instead of a real face was correctly rejected. A live unregistered person was not separately tested this session; the underlying rejection path is the same as verified in earlier sessions.  
+**Resulting PBIs:** -  
 
 ---
 
@@ -286,7 +341,7 @@
 ## UAT-008: Edit the name or status of an employee
 
 **Status:** Active  
-**User goal:** Change the name or status of an already registered employee in the employees' table
+**User goal:** Change the name or status of an already registered employee in the employees' table  
 
 **Preconditions:**
 - The admin is on the 'Employees' page
@@ -306,16 +361,24 @@
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
+ 
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Great job!  
+**Resulting PBIs:** -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
-**Comments:** Great job!   
+**Comments:** -    
 **Resulting PBIs:** -  
 
 ---
 ## UAT-009: Register an already registered employee
 
-**Status:** Active
+**Status:** Active  
 **User goal:** Prevent duplication of registered employees
 
 **Preconditions:**
@@ -325,12 +388,14 @@
 **Steps:**
 1. Place employee with clearly visible face in front of the camera in its view
 2. Capture employee's face
+3. Enter a name and access type
+4. Press the button 'Save'
 
 **Expected outcome:**
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
 - The LEDs lit up yellow, red, and blue (all LEDs) during the registration
-- The system shows a message about duplicate and does not register the employee again
-- The user can change the name and try saving again without recapturing the face
+- The save request returns a duplicate message identifying the existing employee and does not register a second employee
+- The existing employee data remains unchanged; changing only the proposed name does not bypass biometric duplicate detection
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)
@@ -338,35 +403,45 @@
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
 **Comments:**  Works correctly.  
-**Resulting PBIs:**  -  
+**Resulting PBIs:**  -   
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** -   
+**Resulting PBIs:** -  
 
 ---
 
-## UAT-010: Face recognition with accessories  
+## UAT-010: Face recognition with accessories
 
 **Status:** Active  
-**User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats, medical masks)  
+**User goal:** Ensure system reliably recognizes registered employees wearing common accessories (glasses, hats)
 
-**Preconditions:**  
-- The system is active, powered on  
-- A registered employee approaches the camera  
+**Preconditions:**
+- The system is active, powered on
+- A registered employee approaches the camera
 
-**Steps:**  
-1. Place employee with accessories with clearly visible face in front of the camera in its view  
-2. Capture employee's face  
+**Steps:**
+1. Place employee with accessories with clearly visible face in front of the camera in its view
+2. Capture employee's face
 
-**Expected outcome:**  
-- If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds  
-- During recognition, the LEDs glow yellow; after successful recognition, the LEDs stop blinking yellow and turn solid blue for 5 seconds    
-- If there's no one in front of the camera, nothing lights up  
-- There is no test section on the recognition page  
-- The system recognized the employee within 3 seconds automatically    
-- The system grants the access  
-- The system logs the attempt  
-- Recognition success rate ≥95% with common accessories  
+**Expected outcome:**
+- If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
+- During recognition, the LEDs glow yellow; after successful recognition, the LEDs stop blinking yellow and turn solid blue for 5 seconds
+- If there's no one in front of the camera, nothing lights up
+- There is no test section on the recognition page
+- The system recognized the employee within 3 seconds automatically
+- The system grants the access
+- The system logs the attempt
+- Recognition success rate ≥95% with common accessories (glasses, hats)
+
+**Intentional exclusion:** medical masks are not a supported accessory. The system deliberately rejects recognition attempts made while wearing a mask, because a mask significantly distorts the facial embedding and reduces the reliability of the identity match. This is a security-motivated design decision, not a defect.
 
 ---
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
@@ -374,26 +449,35 @@
 **Resulting PBIs:**  -  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-## UAT-011: Admin authentication  
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Glasses recognized correctly, confirmed twice during the session. Masks intentionally rejected for security reasons, this is now documented as expected behavior rather than a gap. Scenario and expected outcome updated to remove masks from the supported accessory list.  
+**Resulting PBIs:** -  
+
+---
+
+## UAT-011: Admin authentication
 
 **Status:** Active  
-**User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.  
+**User goal:** Secure the system so only the admin is able to view logs, register an employee, view registered employees, and manipulate with the databases.
 
-**Preconditions:**  
-- The system is active, powered on  
-- The admin is on the authentication page  
+**Preconditions:**
+- The system is active, powered on
+- The admin is on the authentication page
 
-**Steps:**  
-1. Fill in the login field with the correct login  
-2. Fill in the password field with the correct password  
+**Steps:**
+1. Fill in the login field with the correct login
+2. Fill in the password field with the correct password
 
-**Expected outcome:**  
-- If the login and password are correct, the system successfully logs in and the admin is switched to the employees page    
-- If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page  
-- If the admin attempts to log in with an incorrect password 5 times consecutively within a minute, the system denies access with a "Too many attempts. Please try again later." message and temporarily blocks further attempts
+**Expected outcome:**
+- If the login and password are correct, the system successfully logs in and the admin is switched to the employees page
+- If the login or password is incorrect, the system denies access, shows a clear error message, and the admin stays on the authentication page
+- If the admin attempts to log in with an incorrect password 5 times consecutively within a minute, the system denies access with a "Too many attempts. Please try again later." message and temporarily blocks further attempts for one minute
+
 ---
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
@@ -401,30 +485,46 @@
 **Resulting PBIs:**  -  
 
 ---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
 
-## UAT-012: Background recognition  
+**Result:** Passed  
+**Executed by:** Customer (role: admin)  
+**Comments:** Works.  
+**Resulting PBIs:** -  
+
+---
+
+## UAT-012: Background recognition
 
 **Status:** Active  
 **User goal:** Recognize a person in a background mode so the admin is able to change the pages and do other things while the recognition is running.  
 
-**Preconditions:**  
-- The system is active, powered on    
-- The admin is on the page with recognition  
-- An employee approaches the camera   
+**Preconditions:**
+- The system is active, powered on
+- The admin is on the page with recognition
+- An employee approaches the camera
 
-**Steps:**  
-1. While the admin is on another page, such as 'Employees' or 'Access Logs History', have an employee stand in front of the camera in its view with clearly visible face  
+**Steps:**
+1. While the admin is on another page, such as 'Employees' or 'Access Logs History', have an employee stand in front of the camera in its view with clearly visible face
 
-**Expected outcome:**  
-- The recognition runs without the admin needing to open or stay on the recognition page  
-- The admin can navigate between pages and perform other actions while recognition is in progress   
-- The recognition attempt is logged and the result is visible on the 'Access Logs History' page after it completes  
-- The system handles this recognition attempt together with any other admin action without errors or delay to either task  
+**Expected outcome:**
+- The recognition runs without the admin needing to open or stay on the recognition page
+- The admin can navigate between pages and perform other actions while recognition is in progress
+- The recognition attempt is logged and the result is visible on the 'Access Logs History' page after it completes
+- The system handles this recognition attempt together with any other admin action without errors or delay to either task
 
 ---
-### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)  
+### Execution: Sprint Review, UAT Execution, Customer Trial & Transition Readiness Session (2026-07-10)
 
 **Result:** Passed  
 **Executed by:** Customer (role: admin)  
 **Comments:**  All good!  
 **Resulting PBIs:**  -  
+
+---
+### Execution: Sprint Review & Final Transition Confirmation (2026-07-16)
+
+**Result:** Passed  
+**Executed by:** Customer (role: admin)    
+**Comments:** -  
+**Resulting PBIs:** -  
