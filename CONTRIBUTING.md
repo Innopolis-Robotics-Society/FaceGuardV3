@@ -1,51 +1,67 @@
 # Contributing to FaceGuardV3
 
-Welcome, and thank you for your interest in contributing to FaceGuardV3! 
-FaceGuardV3 is a secure, decoupled face recognition access control system deployed on edge hardware. We strictly adhere to a disciplined, issue-driven workflow to maintain the quality and reliability of the access control system.
+FaceGuardV3 uses issue-linked pull requests and mandatory behavior, quality, security, deployment, and documentation gates. Read the [architecture](docs/architecture/README.md), [Definition of Done](docs/definition-of-done.md), and affected QR/QRT before changing a critical path.
 
-## 1. Issue-Linked Workflow
+## Workflow
 
-**No product work is started without an issue.** 
-All changes must trace back to a specific GitHub Issue.
+1. Start from a refined, assigned issue with acceptance criteria and create `<issue-number>-<short-description>` from current `main`.
+2. Keep changes scoped. Do not commit `.env`, credentials, real employee data, biometric samples, generated model data, or coverage output.
+3. Add tests for the behavior/risk being changed. Do not add mock-call-only tests, trivial construction tests, sleeps for timing assertions, or tests that merely inflate coverage.
+4. Update code, architecture views/ADR where applicable, `.env.example`, operational docs, QRT status/evidence, and `CHANGELOG.md` as required by the DoD.
+5. Open an issue-linked PR (`Closes #...`), record exact commands/results and hardware limitations, obtain another participant's approval, and merge only after required CI checks pass.
 
-1. **Find or Create an Issue:** Check the [Issues](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues) tab. If you find a bug or want to propose a feature, create an issue using one of the provided templates (`User Story`, `Bug Report`, or `Other PBI`).
-2. **Assignment and Estimation:** Wait for the issue to be prioritized in the Sprint Backlog. An issue must be moved to the **Ready** column with an assigned owner and Story Points before work begins.
-3. **Branching:** Create a branch for your issue. Use the naming convention: `<issue-number>-<short-description>` (e.g., `42-add-login-form`).
+## Configuration and local stack
 
-## 2. Pull Request (PR) Process
+```bash
+cp backend/.env.example backend/.env
+python3 backend/scripts/generate_hash.py
+openssl rand -hex 32
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml up --build -d
+```
 
-We use a trunk-based workflow adapted for GitHub Pull Requests. Direct pushes to `main` are disabled.
+Use the base file plus `docker/docker-compose.pi.yml` only for Raspberry Pi backend-camera/GPIO deployment. See the root [README](README.md) before mapping `/dev/videoN` or `/dev/gpiochipN`. Frontend `VITE_*` settings are compiled at build time.
 
-1. **Commit Often:** Make small, logical commits. Use meaningful commit messages.
-2. **Open a Pull Request:** Once your work is ready, open a PR against the `main` branch. 
-3. **Link the Issue:** Ensure your PR description links to the original issue (e.g., `Closes #42`). Use the provided PR template to document your changes and testing steps.
-4. **Pass CI Quality Gates:** All PRs must pass the automated CI pipeline. This includes:
-   - Formatting (`black`) and Linting (`flake8`)
-   - Unit and Integration tests (`pytest`)
-   - Quality Requirement Tests (QRT)
-   - Minimum test coverage thresholds
-   - Security vulnerability scans (`bandit`)
-5. **Code Review:** Your PR requires at least **one approval** from a different team member.
-6. **Merge:** Once approved and passing CI, the PR will be merged using a **Merge Commit** (Squash and Rebase are disabled to preserve exact commit history).
+## Backend verification
 
-## 3. Configuration and Secrets
+Use Python 3.10/3.11:
 
-- **Never commit secrets:** Passwords, API keys, and environment-specific configs must never be committed.
-- **Environment Variables:** Use `backend/.env`. A sanitized example is provided at `backend/.env.example`.
-- If you add a new environment variable, make sure to add a placeholder for it in `backend/.env.example`.
+```bash
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt -r backend/requirements.txt
+PYTHONPATH=backend:. .venv/bin/pytest tests/unit -q
+PYTHONPATH=backend:. .venv/bin/pytest tests/integration -q
+PYTHONPATH=backend:. .venv/bin/pytest tests/quality -q
+.venv/bin/black --check backend tests scripts/check_critical_coverage.py
+.venv/bin/flake8 backend tests scripts/check_critical_coverage.py \
+  --max-line-length=120
+.venv/bin/bandit -q -r backend
+```
 
-## 4. Setting Up Your Development Environment
+QRT-005 and complete coverage require the isolated `faceguard_test` PostgreSQL service. Use the exact commands in [Testing and QA](docs/testing.md); never point QRT-005 at a development or customer database. CI uploads JSON/XML coverage and enforces at least 30% for every documented critical module.
 
-FaceGuardV3 relies on Docker to ensure a reproducible environment across all machines.
+## Frontend verification
 
-1. Copy the example environment variables:
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
-2. Build and run the containers:
-   ```bash
-   docker compose -f docker/docker-compose.yml up --build
-   ```
-3. The frontend is available at `http://localhost:3000` and the backend API docs at `http://localhost:8000/docs`.
+```bash
+cd frontend
+npm ci
+npm test
+npm run lint
+npm run build
+npm audit --audit-level=high
+```
 
-For detailed architecture and internal logic explanations, please refer to the [Architecture Documentation](docs/architecture/README.md) and [Development Process](docs/development-process.md).
+Frontend tests should cover observable UI/network/camera behavior. Browser/backend camera mode and bbox/frame correlation are security/latency-sensitive boundaries, not implementation details to bypass.
+
+## Configuration and documentation verification
+
+```bash
+BACKEND_ENV_FILE=../backend/.env.example docker compose \
+  --env-file backend/.env.example -f docker/docker-compose.yml config --quiet
+BACKEND_ENV_FILE=../backend/.env.example docker compose \
+  --env-file backend/.env.example -f docker/docker-compose.yml \
+  -f docker/docker-compose.pi.yml config --quiet
+mkdocs build --strict --site-dir /tmp/faceguardv3-site
+```
+
+Lychee runs separately on every PR. Do not mark a physical-camera, liveness-attack, or LED-latency requirement Implemented based on fakes; preserve the limitation and plan/attach hardware evidence.
