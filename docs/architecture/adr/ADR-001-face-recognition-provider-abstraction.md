@@ -43,8 +43,8 @@ recognizer, and test doubles such as `MockFaceRecognizer` and
 **Consequences and tradeoffs:**
 
 - Positive: The recognition provider can be replaced (e.g. heavy model to
-  ONNX-based model) without modifying business logic, API routes, or UI
-  templates, reducing regression risk.
+  ONNX-based model) without modifying business logic or API route contracts,
+  reducing regression risk.
 - Positive: Business logic can be unit- and quality-tested with fast,
   deterministic fake/mock providers instead of requiring real models or
   camera hardware in CI (see `tests/quality/test_inference_provider_contract.py`,
@@ -60,6 +60,6 @@ recognizer, and test doubles such as `MockFaceRecognizer` and
 
 - QR-003 (Recognition Model Modularity) — directly addressed. The interface
   is the mechanism that allows swapping recognition providers while keeping
-  backend entry points, UI templates, and business-logic test assertions
+  backend entry points and business-logic test assertions
   unchanged, which is the scenario QR-003 measures and QRT-003 verifies.
   See [QR-003](../../quality-requirements.md#qr-003-recognition-model-modularity).

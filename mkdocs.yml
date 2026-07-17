@@ -39,7 +39,13 @@ nav:
       - ADRs:
           - ADR-001 Face Recognition Provider Abstraction: architecture/adr/ADR-001-face-recognition-provider-abstraction.md
           - ADR-002 Reject on Status Code Before Embedding Match: architecture/adr/ADR-002-reject-on-status-code-before-embedding-match.md
-          - ADR-003 Synchronous Recognition Pipeline for Response Time: architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md
+          - ADR-003 In-Process Recognition Pipeline: architecture/adr/ADR-003-synchronous-recognition-pipeline-for-response-time.md
+          - ADR-004 Temporary Access Windows: architecture/adr/ADR-004-temporary-access-window-enforcement.md
+          - ADR-005 React and FastAPI Separation: architecture/adr/ADR-005-decouple-frontend-backend-for-websocket-streaming.md
+          - ADR-006 Local PostgreSQL: architecture/adr/ADR-006-local-database-for-offline-reliability.md
+          - ADR-007 GPIO LED Feedback: architecture/adr/ADR-007-gpio-hardware-integration.md
+          - ADR-008 Atomic Duplicate Prevention: architecture/adr/ADR-008-atomic-duplicate-registration-prevention.md
+          - ADR-009 Dual Camera Latest-Frame Pipeline: architecture/adr/ADR-009-dual-camera-latest-frame-pipeline.md
   - Development Process: development-process.md
   - Contributing: contributing.md
   - Agent Guidance: agents.md
@@ -49,11 +55,14 @@ nav:
       - User Acceptance Tests: user-acceptance-tests.md
   - Testing: testing.md
   - Definition of Done: definition-of-done.md
+  - Customer Handover: customer-handover.md
   - Roadmap: roadmap.md
   - Changelog: changelog.md
 
 plugins:
   - search
+
+markdown_extensions:
   - pymdownx.tabbed
   - pymdownx.tasklist
   - admonition

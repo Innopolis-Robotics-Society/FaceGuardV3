@@ -1,6 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { Camera, Users, UserPlus, Clock, LogOut } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  AUTH_INVALIDATED_EVENT,
+  getValidAuthToken,
+  invalidateAuth,
+  storeAuthToken,
+} from './auth/token';
 import { useCamera } from './context/CameraContext';
 import Recognition from './pages/Recognition';
 import Registration from './pages/Registration';
@@ -10,14 +16,23 @@ import Auth from './pages/Auth';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!localStorage.getItem('auth_token');
+    return getValidAuthToken() !== null;
   });
   
-  const { isRecognizing } = useCamera();
+  const { isRecognizing, resetCamera } = useCamera();
+
+  useEffect(() => {
+    const handleInvalidatedAuth = () => {
+      resetCamera();
+      setIsAuthenticated(false);
+    };
+    window.addEventListener(AUTH_INVALIDATED_EVENT, handleInvalidatedAuth);
+    return () => window.removeEventListener(AUTH_INVALIDATED_EVENT, handleInvalidatedAuth);
+  }, [resetCamera]);
 
   if (!isAuthenticated) {
     return <Auth onLogin={(token) => {
-      localStorage.setItem('auth_token', token);
+      storeAuthToken(token);
       setIsAuthenticated(true);
     }} />;
   }
@@ -56,7 +71,8 @@ function App() {
           </nav>
           
           <button className="nav-link" style={{ marginTop: 'auto', background: 'transparent', border: 'none', color: 'var(--text-color)', cursor: 'pointer', textAlign: 'left' }} onClick={() => {
-            localStorage.removeItem('auth_token');
+            resetCamera();
+            invalidateAuth();
             setIsAuthenticated(false);
           }}>
             <LogOut size={20} />

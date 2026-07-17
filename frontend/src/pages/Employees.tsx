@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Edit2, Search, ArrowUp, ArrowDown, AlertCircle } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 interface Employee {
   id: number;
@@ -14,13 +15,13 @@ interface Employee {
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [search, setSearch] = useState('');
   const [sortCol, setSortCol] = useState<keyof Employee>('id');
   const [sortDesc, setSortDesc] = useState(false);
 
   const [editingEmp, setEditingEmp] = useState<Employee | null>(null);
-  
+
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
@@ -36,9 +37,7 @@ export default function Employees() {
   const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth()+1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
 
   const fetchEmployees = () => {
-    fetch('http://localhost:8000/api/employees', {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch('/api/employees')
       .then(res => res.json())
       .then(data => {
         setEmployees(data);
@@ -52,10 +51,7 @@ export default function Employees() {
 
   const handleDelete = (id: number) => {
     if (!confirm('Are you sure you want to delete this employee?')) return;
-    fetch(`http://localhost:8000/api/employees/${id}`, { 
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch(`/api/employees/${id}`, { method: 'DELETE' })
       .then(() => {
         setSelectedIds(prev => {
           const newSet = new Set(prev);
@@ -71,12 +67,9 @@ export default function Employees() {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} employees?`)) return;
 
     for (const id of Array.from(selectedIds)) {
-      await fetch(`http://localhost:8000/api/employees/${id}`, { 
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-      });
+      await apiFetch(`/api/employees/${id}`, { method: 'DELETE' });
     }
-    
+
     setSelectedIds(new Set());
     fetchEmployees();
   };
@@ -101,7 +94,7 @@ export default function Employees() {
     setEditingEmp(emp);
     setEditName(emp.name);
     setEditStatus(emp.status);
-    
+
     // For editing, we should allow the previous dates to be shown,
     // but the validation should still enforce end > start and start >= now (if changed)
     // Helper to format Date to local YYYY-MM-DDThh:mm string
@@ -117,7 +110,7 @@ export default function Employees() {
   const saveEdit = () => {
     if (!editingEmp) return;
     setEditError('');
-    
+
     if (!editName) {
       setEditError('Please enter a name.');
       return;
@@ -130,16 +123,16 @@ export default function Employees() {
         setEditError('Please enter both start and expiration dates.');
         return;
       }
-      
+
       const startDt = new Date(editStart);
       const endDt = new Date(editEnd);
       const now = new Date();
       now.setSeconds(0, 0);
-      
+
       // Strict validation
       // If user edits the date to something past, reject. (unless they didn't change it, but simplest is to enforce it always)
       if (startDt < now) {
-        // Only error if the start time is strictly earlier than now 
+        // Only error if the start time is strictly earlier than now
         // AND the user actually modified the start time (or it's a new temporary record).
         // Let's enforce that any temporary access saved from now on must be valid in the future.
         setEditError('Start time cannot be in the past.');
@@ -149,18 +142,17 @@ export default function Employees() {
         setEditError('Expiration time must be at least 1 minute after start time.');
         return;
       }
-      
+
       const getLocalISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00.000`;
-      
+
       finalStart = getLocalISO(startDt);
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://localhost:8000/api/employees/${editingEmp.id}`, {
+    apiFetch(`/api/employees/${editingEmp.id}`, {
       method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      headers: {
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name: editName,
@@ -212,17 +204,17 @@ export default function Employees() {
           )}
           <div style={{ position: 'relative', width: 300 }}>
             <Search size={18} style={{ position: 'absolute', left: 10, top: 10, color: '#888' }} />
-            <input 
-              className="form-control" 
-              style={{ paddingLeft: 35 }} 
-              placeholder="Search by name..." 
-              value={search} 
-              onChange={e => setSearch(e.target.value)} 
+            <input
+              className="form-control"
+              style={{ paddingLeft: 35 }}
+              placeholder="Search by name..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
             />
           </div>
         </div>
       </div>
-      
+
       <div className="glass-panel">
         <div className="table-container">
           {loading ? (
@@ -232,8 +224,8 @@ export default function Employees() {
               <thead>
                 <tr>
                   <th style={{ width: 40 }}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={sorted.length > 0 && selectedIds.size === sorted.length}
                       onChange={toggleSelectAll}
                     />
@@ -259,8 +251,8 @@ export default function Employees() {
                 {sorted.map((emp) => (
                   <tr key={emp.id} style={{ background: selectedIds.has(emp.id) ? 'rgba(59, 130, 246, 0.1)' : '' }}>
                     <td>
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selectedIds.has(emp.id)}
                         onChange={() => toggleSelect(emp.id)}
                       />
@@ -327,23 +319,23 @@ export default function Employees() {
               <>
                 <div className="form-group">
                   <label>Start Date & Time</label>
-                  <input 
-                    type="datetime-local" 
-                    className="form-control" 
+                  <input
+                    type="datetime-local"
+                    className="form-control"
                     min={minDateTimeStr}
-                    value={editStart} 
-                    onChange={e => setEditStart(e.target.value)} 
+                    value={editStart}
+                    onChange={e => setEditStart(e.target.value)}
                     onKeyDown={e => e.preventDefault()}
                   />
                 </div>
                 <div className="form-group">
                   <label>Expiration Date & Time</label>
-                  <input 
-                    type="datetime-local" 
-                    className="form-control" 
+                  <input
+                    type="datetime-local"
+                    className="form-control"
                     min={editStart || minDateTimeStr}
-                    value={editEnd} 
-                    onChange={e => setEditEnd(e.target.value)} 
+                    value={editEnd}
+                    onChange={e => setEditEnd(e.target.value)}
                     onKeyDown={e => e.preventDefault()}
                   />
                 </div>

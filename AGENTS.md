@@ -1,35 +1,34 @@
 # AI Agent Guidance
 
-This document outlines the rules and context for AI coding assistants and agents operating within the FaceGuardV3 repository.
+## Current system
 
-## System Context
-- **Product:** FaceGuardV3 is a decoupled face recognition access control system designed to run on a Raspberry Pi 5 at the edge.
-- **Architecture:** 
-  - **Frontend:** React SPA (runs in `docker-frontend`)
-  - **Backend:** FastAPI with WebSockets for real-time video streaming (runs in `docker-backend`)
-  - **Database:** PostgreSQL (runs in `docker-db-1`)
-  - **Hardware:** Integrates with Raspberry Pi GPIO (LEDs/Motor) via asynchronous tasks.
+- React/Vite SPA in `frontend/`; FastAPI REST/WebSockets in `backend/main.py`; local PostgreSQL; optional Raspberry Pi GPIO LEDs.
+- The deployed FastAPI camera source is `browser` (one JPEG in flight) or `backend` (`LatestFrameCamera`: one V4L2 capture loop, one replace-only latest slot). The maintenance CLI modules under `backend/faceguard/` still open OpenCV directly and must not run beside the service against the same device.
+- Recognition/enrollment share an operation lock. Responses correlate exact JPEG/bbox/dimensions/sequence.
+- JWT is mandatory. REST uses Bearer auth; WebSockets use `faceguard.jwt` and `bearer.<JWT>` subprotocols, never a query token.
+- Duplicate check and insert are one PostgreSQL transaction under an advisory lock (ADR-008). GPIO workers are generation-safe and cleaned up (ADR-007).
+- There is no Streamlit runtime, motor, door controller, native libcamera adapter, or physical-hardware CI runner.
 
-## Rules for Agents
+## Rules
 
-1. **Secrets Management:** 
-   - Never commit sensitive information (passwords, tokens, database credentials).
-   - Use `backend/.env.example` as a reference for environment variables. Do not modify `.gitignore` to track `.env` files.
+1. Never read into output, change, or commit real `.env`, credentials, biometric data, or customer employee records. Use only sanitized examples/test databases.
+2. Read the relevant view and ADR before structural changes. Preserve the provider boundary, latest-frame/no-backlog semantics, operation lock, transactional duplicate boundary, and cleanup lifecycle unless an explicit superseding ADR is justified.
+3. Do not block the FastAPI event loop with inference, database, GPIO duration waits, or camera reads. Immediate adapter commands may be synchronous; blocking work uses the worker boundary.
+4. Do not add unrelated refactors or tests created only for quantity/coverage. Tests must assert a behavior or risk and fail for a real regression.
+5. Never describe fake GPIO as physical latency, fake face status as 9/10 photo-attack accuracy, or instant fake inference as Raspberry Pi response-time evidence.
+6. Keep base and Pi Compose roles distinct. Pi mode uses both Compose files and maps the configured `/dev/videoN` and `/dev/gpiochipN` only into the backend.
 
-2. **Architectural Constraints:**
-   - Refer to `docs/architecture/README.md` and `docs/architecture/adr/` before making structural changes. 
-   - The frontend and backend must remain strictly decoupled.
-   - Hardware GPIO operations must be asynchronous to prevent blocking the FastAPI event loop (ADR-007).
+## Required checks
 
-3. **Development Workflow:**
-   - Always run the test suite (`pytest tests/`) after modifying backend logic.
-   - Run formatting (`black`) and linting (`flake8`) before finalizing your changes.
-   - Do not bypass the `FaceRecognitionProvider` abstraction when modifying recognition logic (ADR-001).
+```bash
+PYTHONPATH=backend:. .venv/bin/pytest tests/unit -q
+PYTHONPATH=backend:. .venv/bin/pytest tests/integration -q
+PYTHONPATH=backend:. .venv/bin/pytest tests/quality -q
+.venv/bin/black --check backend tests scripts/check_critical_coverage.py
+.venv/bin/flake8 backend tests scripts/check_critical_coverage.py --max-line-length=120
+.venv/bin/bandit -q -r backend
+```
 
-4. **Quality Gates:**
-   - Verify that your changes do not violate existing Quality Requirements (`docs/quality-requirements.md`).
-   - If adding a new substantial feature, ensure corresponding tests are written or updated in `tests/quality/` or `tests/unit/`.
+For QRT-005/full coverage, use only `docker/docker-compose.test.yml` and `POSTGRES_DB=faceguard_test` as documented in `docs/testing.md`. Run frontend `npm ci`, `npm test`, `npm run lint`, `npm run build`, and `npm audit --audit-level=high` after frontend changes. Validate base and combined Pi Compose and run `mkdocs build --strict --site-dir /tmp/faceguardv3-site` after configuration/documentation changes.
 
-5. **Tool Usage:**
-   - Use standard Docker commands (`docker compose up --build`) to verify the environment.
-   - Do not make changes to `.streamlit/` files, as the project has migrated away from Streamlit.
+Report commands and limitations honestly; do not commit or push unless explicitly requested.

@@ -164,6 +164,8 @@
 - Each row with employee has a tick box in the left side so it can be selected
 - The admin is able to sort, search, filter the items
 
+**Current implementation note (2026-07-17 audit):** PostgreSQL stores `registration_date` as `DATE` and the UI displays only that date. The date-and-time wording above remains an unresolved acceptance discrepancy; the historical execution records below have not been rewritten.
+
 ---
 
 ### Execution: Sprint Review & UAT Session (2026-06-27)
@@ -208,6 +210,8 @@
 - The ID of a log, name of the employee or 'UNKNOWN', attempt time, and status are correctly displayed
 - Each recognition session adds only one log at a time (with one-minute-period)
 - The admin can select the date range to filter the logs (within the period of 3 days because it is the maximum period the system keeps)
+
+**Current implementation note (2026-07-17 audit):** The backend accepts `start_date`/`end_date`, but the current Logs page exposes name search and sorting only; it has no date-range controls. This remains an unresolved acceptance discrepancy, and the historical execution records below are retained as recorded.
 
 ---
 
@@ -384,12 +388,14 @@
 **Steps:**
 1. Place employee with clearly visible face in front of the camera in its view
 2. Capture employee's face
+3. Enter a name and access type
+4. Press the button 'Save'
 
 **Expected outcome:**
 - If the lighting is poor or the frame is blurry, the system asks you to look straight ahead and the LEDs light up yellow for 5 seconds
 - The LEDs lit up yellow, red, and blue (all LEDs) during the registration
-- The system shows a message about duplicate and does not register the employee again
-- The user can change the name and try saving again without recapturing the face
+- The save request returns a duplicate message identifying the existing employee and does not register a second employee
+- The existing employee data remains unchanged; changing only the proposed name does not bypass biometric duplicate detection
 
 ---
 ### Execution: Sprint Review & UAT Session (2026-07-04)

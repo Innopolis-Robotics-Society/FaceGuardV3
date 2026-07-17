@@ -21,7 +21,7 @@ def load_employees_db(monkeypatch):
     psycopg2_extras = types.ModuleType("psycopg2.extras")
     psycopg2.extras = psycopg2_extras
     psycopg2.pool = types.ModuleType("psycopg2.pool")
-    psycopg2.pool.SimpleConnectionPool = lambda minconn, maxconn, **kwargs: FakePool()
+    psycopg2.pool.ThreadedConnectionPool = lambda minconn, maxconn, **kwargs: FakePool()
     streamlit = types.SimpleNamespace(secrets={}, error=lambda message: None)
     pandas = types.SimpleNamespace(notna=lambda value: value is not None)
     tomli = types.ModuleType("tomli")
@@ -103,6 +103,20 @@ def test_temporary_access_accepts_datetime_window(monkeypatch):
         datetime(2026, 7, 4, 9, 0),
         datetime(2026, 7, 4, 18, 0),
         now=datetime(2026, 7, 4, 12, 0),
+    )
+
+
+@pytest.mark.parametrize(
+    "now",
+    [datetime(2026, 7, 4, 9, 0), datetime(2026, 7, 4, 18, 0)],
+)
+def test_temporary_access_includes_exact_window_boundaries(monkeypatch, now):
+    employees_db = load_employees_db(monkeypatch)
+
+    assert employees_db._temporary_access_is_active(
+        datetime(2026, 7, 4, 9, 0),
+        datetime(2026, 7, 4, 18, 0),
+        now=now,
     )
 
 
@@ -229,9 +243,7 @@ def test_get_all_embeddings_excludes_expired_and_not_yet_started(monkeypatch):
     assert len(result) == 2
 
 
-def test_add_employees_returns_false_and_skips_insert_on_duplicate(monkeypatch):
-    """Regression test for bug 2 (add_employees silently succeeded in the
-    UI even on a duplicate name because it returned nothing)."""
+def test_add_employees_rolls_back_and_skips_insert_on_duplicate_name(monkeypatch):
     employees_db = load_employees_db(monkeypatch)
 
     connection = FakeConnection(fetchone_result=(1,))  # existing employee found
@@ -244,11 +256,13 @@ def test_add_employees_returns_false_and_skips_insert_on_duplicate(monkeypatch):
 
     with pytest.raises(ValueError, match="Employee with this name already exists"):
         employees_db.add_employees("Alice", "Permanent")
-    # Only the duplicate-check SELECT should have run, never an INSERT
     executed_queries = [q for q, _ in connection.cursor_instance.executed]
-    assert len(executed_queries) == 1
-    assert "SELECT" in executed_queries[0]
+    assert len(executed_queries) == 2
+    assert "pg_advisory_xact_lock" in executed_queries[0]
+    assert "SELECT id FROM employees" in executed_queries[1]
+    assert all("INSERT INTO employees" not in query for query in executed_queries)
     assert connection.committed is False
+    assert connection.rolled_back is True
 
 
 def test_add_employees_returns_true_and_inserts_on_success(monkeypatch):
@@ -266,8 +280,9 @@ def test_add_employees_returns_true_and_inserts_on_success(monkeypatch):
 
     assert result is True
     executed_queries = [q for q, _ in connection.cursor_instance.executed]
-    assert len(executed_queries) == 2  # SELECT check + INSERT
-    assert "INSERT INTO employees" in executed_queries[1]
+    assert len(executed_queries) == 3
+    assert "pg_advisory_xact_lock" in executed_queries[0]
+    assert "INSERT INTO employees" in executed_queries[2]
     assert connection.committed is True
 
 
@@ -331,7 +346,8 @@ def test_update_employee_rolls_back_query_failure(monkeypatch):
 
     monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
 
-    employees_db.update_employee(1, "Alice", "Permanent")
+    with pytest.raises(RuntimeError, match="write failed"):
+        employees_db.update_employee(1, "Alice", "Permanent")
 
     assert connection.committed is False
     assert connection.rolled_back is True
@@ -357,23 +373,66 @@ def test_delete_employee_uses_integer_id_and_invalidates_cache(monkeypatch):
     assert employees_db._embedding_cache is None
 
 
-def test_add_employees_rejects_duplicate_embedding_before_query(monkeypatch):
+def test_add_employees_rejects_duplicate_embedding_inside_locked_transaction(
+    monkeypatch,
+):
     employees_db = load_employees_db(monkeypatch)
-    monkeypatch.setattr(
-        employees_db,
-        "find_closest_embedding",
-        lambda embedding: (4, "Existing Alice", 0.99),
-    )
-    monkeypatch.setattr(
-        employees_db,
-        "get_db_connection",
-        lambda: pytest.fail("database should not be accessed"),
+    connection = FakeConnection(
+        fetchone_result=None,
+        fetchall_result=[(4, "Existing Alice", [1.0, 0.0], "Permanent", None, None)],
     )
 
-    with pytest.raises(ValueError, match="Face already registered as Existing Alice"):
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+
+    with pytest.raises(
+        employees_db.DuplicateEmployeeError,
+        match="Face already registered as Existing Alice",
+    ):
         employees_db.add_employees(
             "New Alice", "Permanent", embedding=np.array([1.0, 0.0])
         )
+
+    executed_queries = [q for q, _ in connection.cursor_instance.executed]
+    assert "pg_advisory_xact_lock" in executed_queries[0]
+    assert "WHERE embedding IS NOT NULL" in executed_queries[1]
+    assert all("INSERT INTO employees" not in query for query in executed_queries)
+    assert connection.rolled_back is True
+
+
+def test_duplicate_check_includes_inactive_temporary_identity(monkeypatch):
+    employees_db = load_employees_db(monkeypatch)
+    connection = FakeConnection(
+        fetchall_result=[
+            (
+                9,
+                "Expired Alice",
+                [1.0, 0.0],
+                "Temporary",
+                datetime(2026, 1, 1),
+                datetime(2026, 1, 2),
+            )
+        ]
+    )
+
+    @contextlib.contextmanager
+    def mock_get_conn():
+        yield connection
+
+    monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
+
+    with pytest.raises(
+        employees_db.DuplicateEmployeeError,
+        match="Face already registered as Expired Alice",
+    ):
+        employees_db.add_employees(
+            "New Alice", "Permanent", embedding=np.array([1.0, 0.0])
+        )
+
+    assert connection.rolled_back is True
 
 
 def test_add_employees_serializes_embedding_and_temporary_dates(monkeypatch):
@@ -385,8 +444,6 @@ def test_add_employees_serializes_embedding_and_temporary_dates(monkeypatch):
         yield connection
 
     monkeypatch.setattr(employees_db, "get_db_connection", mock_get_conn)
-    monkeypatch.setattr(employees_db, "find_closest_embedding", lambda embedding: None)
-
     result = employees_db.add_employees(
         "Carol",
         "Temporary",
@@ -395,7 +452,7 @@ def test_add_employees_serializes_embedding_and_temporary_dates(monkeypatch):
         expiration_date=date(2026, 7, 12),
     )
 
-    insert_query, params = connection.cursor_instance.executed[1]
+    insert_query, params = connection.cursor_instance.executed[3]
     assert "INSERT INTO employees" in insert_query
     assert params == (
         "Carol",

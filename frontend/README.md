@@ -1,32 +1,14 @@
-# React + TypeScript + Vite
+# FaceGuardV3 frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React/Vite SPA for FaceGuardV3. Runtime API/WebSocket helpers use the page hostname and backend port `8000` by default. `VITE_API_BASE_URL`, `VITE_WS_BASE_URL`, and `VITE_CAMERA_SOURCE` are build-time settings; copy `.env.example` to `.env.local` for standalone development.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm ci
+npm run dev
+npm test
+npm run lint
+npm run build
+npm audit --audit-level=high
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+`browser` mode uses `getUserMedia` and sends at most one JPEG while awaiting a response. `backend` mode requests no browser camera and displays JPEGs returned by FastAPI. WebSockets authenticate with subprotocols; do not add a JWT query parameter.

@@ -65,14 +65,15 @@ We prioritize security and portability by keeping sensitive data out of version 
 - **Secret Storage & Runtime Configuration:** All runtime secrets and environment variables are stored securely in `backend/.env`. During runtime, this configuration is supplied to the backend container natively through the `env_file` directive in `docker-compose.yml`.
 - **Ignored Files:** Our `.gitignore` strictly ignores sensitive and environment-specific files, including `backend/.env`, `.coverage`, and large binaries/models (unless Git LFS is used).
 - **Sanitized Examples:** To onboard new developers, we commit a sanitized example file: `backend/.env.example`. Developers copy this file to `backend/.env` and fill in the actual local credentials.
-- **CI Configuration:** When CI pipelines need access to secrets (e.g., for integration testing), they are securely supplied via **GitHub Actions Repository Secrets**, never hardcoded in the YAML files.
+- **CI Configuration:** CI uses explicit, non-production test-only values and an ephemeral PostgreSQL service for integration tests. Production/customer secrets remain outside workflow files and the repository.
 - **Deployment Configuration:** For edge deployment (e.g., on the Raspberry Pi), deployment configuration is handled manually by an administrator who securely sets up the `.env` file on the production device. CI does not deploy secrets directly to the edge.
 
 ## 4. Reproducible Development Environment
 
 To eliminate "it works on my machine" issues, especially given our dependencies on native machine learning libraries (OpenCV, InsightFace), we use a containerized setup.
 
-- **Docker & Docker Compose:** The product is defined in `docker/docker-compose.yml`. Developers simply run `docker compose up --build` (or the equivalent target in a Makefile/run script) to launch the application. This ensures that the Node.js (React) and Python (FastAPI) environments, system libraries, and configurations are identical across all developer machines.
+- **Docker & Docker Compose:** The base product is defined in `docker/docker-compose.yml`; Raspberry Pi mappings are an override in `docker/docker-compose.pi.yml`. Use `docker compose --env-file backend/.env -f docker/docker-compose.yml up --build`. Pi deployment uses both `-f` files. The backend initializes/migrates its PostgreSQL schema during startup. Frontend `VITE_*` values are build-time inputs, so URL or camera-mode changes require an image rebuild.
+- **Dependency determinism limitation:** Frontend installations are locked by `package-lock.json`; the Python requirement files currently name direct dependencies without version constraints. A clean backend image therefore resolves the package releases available at build time. The audit validates the resolved image, but exact/bit-for-bit backend dependency reproduction requires a reviewed lock or constraints policy and remains a team decision.
 
 ## 5. Continuous Integration (CI) Process
 
@@ -80,9 +81,19 @@ Our repository relies on GitHub Actions for Continuous Integration. The CI pipel
 
 - **Quality Gates & Testing:** The `ci.yml` workflow enforces code quality and behavior by running:
   - Formatting checks (Black) and source-code linting (Flake8).
-  - Automated tests (Unit and Integration) covering critical logic.
-  - Automated Quality Requirement Tests (QRT).
-  - Line coverage reporting with a strict gate (e.g., `--cov-fail-under=30` for critical modules).
+  - Separate backend Unit, Integration, and Quality Requirement Test steps, including QRT-005 against a real ephemeral PostgreSQL service.
+  - Full-backend XML/JSON line coverage plus `scripts/check_critical_coverage.py`, which enforces 30% for each documented critical module.
+  - Frontend Vitest, Oxlint, TypeScript/build, and dependency-audit gates.
+  - Base/Pi Compose validation and a strict MkDocs build.
   - **Additional QA Check:** A security vulnerability scan using **Bandit**.
 - **Link Checking:** The `lychee.yml` workflow checks all Markdown files across the repository to ensure no broken links are committed.
-- **Deployment Automation:** Currently, we rely on CI for testing and validation (Continuous Integration). Automated deployment (Continuous Delivery) is handled manually or via external scripts after a SemVer release tag is pushed.
+- **Image publication and edge deployment:** `.github/workflows/docker-publish.yml` automatically builds the FastAPI backend from `docker/Dockerfile.hub` for `linux/amd64` and `linux/arm64` and pushes the Docker Hub `faceguard:latest` tag on pushes to `main` and `v*` tags. It is a separate workflow rather than a downstream `needs` job, so protected-branch/PR gates are the release safeguard; the publication workflow itself does not wait for the concurrent push CI run. It does not publish the frontend/database or deploy customer Raspberry Pis and never supplies customer secrets. Edge deployment remains a manual administrator operation.
+
+## 6. Recorded process discrepancy
+
+During the repository audit completed on 2026-07-17, duplicate-registration and LED-feedback functionality already appeared in release/UAT records while their stated automated QRTs were not available as required evidence. This note does not rewrite historical issue or acceptance records and assigns no individual fault.
+
+- Duplicate registration previously had a Planned QRT pointing to a nonexistent/mock-only design. QRT-005 is now implemented through FastAPI and real isolated PostgreSQL, including rollback/data-integrity and concurrent check/insert behavior, and is a CI gate.
+- LED feedback had no automated physical latency evidence. The software ordering/lifecycle precheck now runs in CI, but it cannot measure a real LED; QRT-006 remains Planned until a Raspberry Pi hardware-in-the-loop runner retains physical latency evidence.
+
+Future Done decisions must apply the current DoD status honestly: supporting software checks may accompany a manual hardware result, but they cannot change a physical QRT to Implemented.

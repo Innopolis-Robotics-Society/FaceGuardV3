@@ -72,11 +72,18 @@ Create a `.env` file in the `backend/` directory (copy `backend/.env.example` as
 
 These must point only to the local PostgreSQL container, never to an external or cloud database.
 
+If deploying on a Raspberry Pi with a hardware camera and LEDs, also configure the hardware paths:
+- `CAMERA_SOURCE=backend`
+- `CAMERA_DEVICE=/dev/video0` (adjust number)
+- `CAMERA_INDEX=0`
+- `GPIO_CHIP_DEVICE=/dev/gpiochip0` (adjust number)
+- `GPIO_CHIP=0`
+
 Ensure the `.env` file has restricted read permissions on the Raspberry Pi so that unauthorized users cannot extract the admin credentials or password hash.
 
 ## 4. Setup, Deployment, and Verification
 
-Full setup instructions and troubleshooting are also maintained in the root [README.md](../README.md). The steps below reflect the current actual process.
+Full setup instructions and troubleshooting are also maintained in the root [README.md](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md). The steps below reflect the current actual process.
 
 ### Initial Setup
 
@@ -100,26 +107,39 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
    python3 scripts/generate_hash.py
    ```
    Enter your chosen password when prompted and copy the generated bcrypt hash.
-4. Open `backend/.env` and fill in the required values, including the database credentials and the admin credentials, without quotes:
-   ```
+4. Open `backend/.env` and fill in the required values, including the database credentials, hardware paths, and admin credentials, without quotes:
+   ```dotenv
    POSTGRES_USER=postgres
    POSTGRES_PASSWORD=postgres
    POSTGRES_DB=faceguard
    DB_HOST=db
    ADMIN_LOGIN=myadmin
    ADMIN_PASSWORD_HASH=your_copied_bcrypt_hash
+   CAMERA_SOURCE=backend
+   CAMERA_DEVICE=/dev/video0
+   CAMERA_INDEX=0
+   GPIO_CHIP_DEVICE=/dev/gpiochip0
+   GPIO_CHIP=0
    ```
 5. Make sure Docker is running:
    - Windows: open Docker Desktop and wait for "Engine running"
    - Mac: open the Docker app and wait for the Docker icon in the menu bar
    - Linux: `sudo systemctl start docker`
-6. From the project root, build and start the containers:
+6. From the project root, build and start the containers.
+   **For normal/local deployment (browser camera):**
    ```bash
    cd ..
-   docker compose -f docker/docker-compose.yml build
-   docker compose -f docker/docker-compose.yml up
+   docker compose -f docker/docker-compose.yml up --build -d --wait
    ```
-7. Once the containers are running, open `http://localhost:3000` in a browser.
+   **For Raspberry Pi deployment (hardware camera and GPIO):**
+   ```bash
+   cd ..
+   docker compose --env-file backend/.env \
+     -f docker/docker-compose.yml \
+     -f docker/docker-compose.pi.yml \
+     up --build -d --wait
+   ```
+7. Once the containers are running and the terminal returns, open `http://localhost:3000` in a browser.
 
 ### Verification Steps
 
@@ -128,6 +148,12 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
 3. **Hardware check:** register a test user and confirm the connected LEDs respond as described in Section 5.
 4. **Background recognition check:** while a recognition is running, navigate to another page in the admin panel and confirm recognition continues without interruption.
 5. **Login lockout check:** attempt to log in with an incorrect password 5 times within a minute and confirm the system temporarily blocks further attempts.
+6. **Manual Hardware Check (Raspberry Pi only):** To verify LED wiring without using the UI, run:
+   ```bash
+   docker compose --env-file backend/.env \
+     -f docker/docker-compose.yml -f docker/docker-compose.pi.yml \
+     exec backend python -c "import time, leds; leds.access_granted(); time.sleep(6); leds.shutdown()"
+   ```
 
 ### System Recovery
 
@@ -155,9 +181,9 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
 
 For normal customer use, operation, and troubleshooting, refer to:
 
-- [Main README](../README.md): primary entry point and setup instructions
+- [Main README](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md): primary entry point and setup instructions
 - [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/): full project documentation, including authentication, registration, recognition status colors, and deployment steps, available in light and dark themes
-- [Contributor Guide](../CONTRIBUTING.md) and [Agents Guide](../AGENTS.md): guidelines for team members and AI agents
+- [Contributor Guide](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/CONTRIBUTING.md) and [Agents Guide](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/AGENTS.md): guidelines for team members and AI agents
 - [System Roadmap](roadmap.md): product evolution up to `MVP v3`
 - [User Acceptance Tests](user-acceptance-tests.md): step-by-step instructions for admin panel usage
 

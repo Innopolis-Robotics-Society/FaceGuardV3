@@ -1,5 +1,8 @@
 # ADR-006: Local PostgreSQL Database for Offline Reliability
 
+**ID:** ADR-006
+**Status:** Accepted
+
 ## Context
 
 Originally, the FaceGuardV3 system utilized a serverless cloud PostgreSQL database (Neon.tech on AWS) to store employee data, embeddings, and access logs. While this simplified local setup and removed the need for database administration, it introduced a significant deployment constraint: the system required a continuous, stable internet connection to function. If the edge device (Raspberry Pi) lost internet connectivity, it could not authenticate users, resulting in total system failure at the physical entry point.

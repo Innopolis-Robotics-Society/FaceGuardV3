@@ -1,17 +1,20 @@
+# Raspberry Pi override. Use together with docker/docker-compose.yml.
 services:
-  faceguard:
-    image: ixkci/faceguard:latest
-    ports:
-      - "8501:8501"
+  db:
+    ports: !reset []
+
+  backend:
     environment:
-      TZ: Europe/Moscow
-      PGTZ: Europe/Moscow
+      CAMERA_SOURCE: backend
+      CAMERA_INDEX: "${CAMERA_INDEX:-0}"
+      GPIO_CHIP: "${GPIO_CHIP:-0}"
     devices:
-      - /dev/video0:/dev/video0
-      # /dev/gpiomem is required for hardware LED access on Raspberry Pi
-      - /dev/gpiomem:/dev/gpiomem
-    volumes:
-      - ../backend:/app/backend
-      - ../tests:/app/tests
-      - ./insightface_models:/root/.insightface/models
-    restart: unless-stopped
+      - "${CAMERA_DEVICE:-/dev/video0}:/dev/video${CAMERA_INDEX:-0}"
+      - "${GPIO_CHIP_DEVICE:-/dev/gpiochip0}:/dev/gpiochip${GPIO_CHIP:-0}"
+
+  frontend:
+    build:
+      args:
+        VITE_CAMERA_SOURCE: backend
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-}

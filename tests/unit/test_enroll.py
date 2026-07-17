@@ -111,6 +111,26 @@ def test_enroll_user_rejects_unavailable_camera(monkeypatch):
     with pytest.raises(RuntimeError, match="Cannot open camera"):
         enroll.enroll_user(camera_index=9)
 
+    assert capture.released is True
+
+
+def test_enroll_user_releases_camera_after_inference_exception(monkeypatch):
+    frame = np.zeros((120, 120, 3), dtype=np.uint8)
+    capture = FakeCapture([frame])
+    destroyed = configure_camera(monkeypatch, capture)
+    configure_models(monkeypatch)
+    monkeypatch.setattr(
+        enroll,
+        "extract_embedding_from_frame",
+        lambda *args: (_ for _ in ()).throw(RuntimeError("inference failed")),
+    )
+
+    with pytest.raises(RuntimeError, match="inference failed"):
+        enroll.enroll_user()
+
+    assert capture.released is True
+    assert destroyed == [True]
+
 
 def test_enroll_user_displays_feedback_for_non_real_frames(monkeypatch):
     frame = np.zeros((120, 120, 3), dtype=np.uint8)

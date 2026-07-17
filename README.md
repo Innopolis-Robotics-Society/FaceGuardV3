@@ -16,25 +16,6 @@ Laboratory access control must be secure and fast. FaceGuard removes the problem
 - **Background recognition**: runs continuously without blocking the UI.
 - **Local database**: fully offline operation with PostgreSQL on the edge device.
 
-## Maintained documentation
-| Document | What it covers |
-|---|---|
-| [Roadmap](docs/roadmap.md) | Sprint-by-Sprint delivery plan |
-| [Architecture](docs/architecture/README.md) | Static, dynamic, and deployment views with ADRs |
-| [Testing status](docs/testing.md) | Coverage, QRTs, CI gates, and QA checks |
-| [Quality requirements](docs/quality-requirements.md) | Measurable non-functional requirements |
-| [User acceptance tests](docs/user-acceptance-tests.md) | Maintained UAT scenarios with execution history |
-| [System Functions](docs/system-functions.md) | Plain-language user guide and function descriptions |
-
-## Documentation Links
-| Documentation | Link |
-|---|---|
-| Hosted documentation | [docs.faceguard.dev](https://innopolis-robotics-society.github.io/FaceGuardV3/) |
-| Current release | [v3.0.0 - Trial release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) |
-| Customer handover | [docs/customer-handover.md](docs/customer-handover.md) |
-| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Agent guidance | [AGENTS.md](AGENTS.md) |
-
 ## Setup Instructions
 
 ### 1. Clone the repository
@@ -69,9 +50,18 @@ Enter your desired password when prompted, and copy the generated bcrypt hash.
 
 Open `backend/.env` and fill in all the required data.
 For the admin credentials, paste your login and the generated hash without any quotes:
-```
+```dotenv
 ADMIN_LOGIN=myadmin
 ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
+```
+
+If deploying on a Raspberry Pi with a hardware camera and LEDs, also set the device paths in `backend/.env` (modify numbers to match your host devices):
+```dotenv
+CAMERA_SOURCE=backend
+CAMERA_DEVICE=/dev/video0
+CAMERA_INDEX=0
+GPIO_CHIP_DEVICE=/dev/gpiochip0
+GPIO_CHIP=0
 ```
 
 ### 5. Make sure Docker is running
@@ -84,20 +74,44 @@ ADMIN_PASSWORD_HASH=<your_copied_bcrypt_hash>
 
 ### 6. Build and run the containers
 
-Return to the project root directory and start Docker:
+Return to the project root directory and start Docker.
+
+**For normal/local deployment (browser camera):**
 ```bash
 cd ..
-docker compose -f docker/docker-compose.yml build
-docker compose -f docker/docker-compose.yml up
+docker compose -f docker/docker-compose.yml up --build -d --wait
+```
+
+**For Raspberry Pi deployment (hardware camera and GPIO):**
+```bash
+cd ..
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.pi.yml \
+  up --build -d --wait
 ```
 
 ### 7. Access the application
-Once the containers are running, open your browser and navigate to:
+Once the containers are running and the terminal returns, open your browser and navigate to:
 ```
 http://localhost:3000
 ```
 
-## Hosted Documentation
+## Maintained documentation
+| Document | What it covers |
+|---|---|
+| [Roadmap](docs/roadmap.md) | Sprint-by-Sprint delivery plan |
+| [Architecture](docs/architecture/README.md) | Static, dynamic, and deployment views with ADRs |
+| [Testing status](docs/testing.md) | Coverage, QRTs, CI gates, and QA checks |
+| [Quality requirements](docs/quality-requirements.md) | Measurable non-functional requirements |
+| [User acceptance tests](docs/user-acceptance-tests.md) | Maintained UAT scenarios with execution history |
+| [System Functions](docs/system-functions.md) | Plain-language user guide and function descriptions |
 
-See the [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/).
-
+## Documentation Links
+| Documentation | Link |
+|---|---|
+| Hosted documentation | [docs.faceguard.dev](https://innopolis-robotics-society.github.io/FaceGuardV3/) |
+| Current release | [v3.0.0 - Trial release](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/releases/tag/v3.0.0) |
+| Customer handover | [docs/customer-handover.md](docs/customer-handover.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Agent guidance | [AGENTS.md](AGENTS.md) |
