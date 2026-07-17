@@ -118,12 +118,14 @@ def delete_expired_employees():
     with get_db_connection() as connection:
         with connection.cursor() as cursor:
             try:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     DELETE FROM employees
                     WHERE status = 'Temporary'
                     AND expiration_date IS NOT NULL
                     AND expiration_date < LOCALTIMESTAMP;
-                """)
+                """
+                )
                 connection.commit()
             except Exception as e:
                 connection.rollback()

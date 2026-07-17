@@ -61,6 +61,8 @@ nav:
 
 plugins:
   - search
+
+markdown_extensions:
   - pymdownx.tabbed
   - pymdownx.tasklist
   - admonition

@@ -83,7 +83,7 @@ Ensure the `.env` file has restricted read permissions on the Raspberry Pi so th
 
 ## 4. Setup, Deployment, and Verification
 
-Full setup instructions and troubleshooting are also maintained in the root [README.md](../README.md). The steps below reflect the current actual process.
+Full setup instructions and troubleshooting are also maintained in the root [README.md](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md). The steps below reflect the current actual process.
 
 ### Initial Setup
 
@@ -181,9 +181,9 @@ Full setup instructions and troubleshooting are also maintained in the root [REA
 
 For normal customer use, operation, and troubleshooting, refer to:
 
-- [Main README](../README.md): primary entry point and setup instructions
+- [Main README](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md): primary entry point and setup instructions
 - [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/): full project documentation, including authentication, registration, recognition status colors, and deployment steps, available in light and dark themes
-- [Contributor Guide](../CONTRIBUTING.md) and [Agents Guide](../AGENTS.md): guidelines for team members and AI agents
+- [Contributor Guide](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/CONTRIBUTING.md) and [Agents Guide](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/AGENTS.md): guidelines for team members and AI agents
 - [System Roadmap](roadmap.md): product evolution up to `MVP v3`
 - [User Acceptance Tests](user-acceptance-tests.md): step-by-step instructions for admin panel usage
 
