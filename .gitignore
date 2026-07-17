@@ -19,9 +19,14 @@ env/
 .vscode/
 .idea/
 *.swp
-*.swodocker/insightface_models/
+*.swo
+docker/insightface_models/
 
 docker/insightface_models/buffalo_s/
 .env
 backend/.env
 insightface_models/
+.coverage
+coverage.xml
+coverage.json
+htmlcov/

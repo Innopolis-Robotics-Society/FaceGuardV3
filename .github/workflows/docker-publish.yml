@@ -9,7 +9,7 @@ on:
 
 jobs:
   push_to_registry:
-    name: Build and Push to Docker Hub
+    name: Build and push FastAPI backend image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
