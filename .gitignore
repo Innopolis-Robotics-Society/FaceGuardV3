@@ -30,3 +30,4 @@ insightface_models/
 coverage.xml
 coverage.json
 htmlcov/
+site/
