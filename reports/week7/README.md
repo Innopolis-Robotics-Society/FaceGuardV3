@@ -139,7 +139,7 @@ Documentation was reviewed live and no further changes were requested.
 [CHANGELOG.md](../../CHANGELOG.md)
 
 ## 23. Public Sanitized Demo Video
-[Public demo video]()
+[Public demo video](https://drive.google.com/file/d/1t_74UzOZQ1mGClCVW_trgJ8p1RZ3ho0r/view?usp=sharing)
 
 ## 24. Demo Day Preparation Summary
 The required Week 7 rehearsal was completed. The team prepared a pre-recorded demo under 2 minutes for the Demo Day presentation. All team members will attend the Week 8 Demo Day presentation. Each team member will present at least one slide. The slide deck covers project context, delivered requirements, customer usefulness, engineering evidence, remaining limitations, and team reflection.
@@ -185,12 +185,12 @@ The public publication was permitted.
 
 | GitHub username | Issues | PRs/MRs | Review activity | Contribution |
 |---|---|---|---|---|
-| @s0ftach | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_CONTRIBUTION] |
-| @oebarbie | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | Documentation, [INSERT_CONTRIBUTION] |
-| @Exckernels | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_CONTRIBUTION] |
-| @ixkci | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_CONTRIBUTION] |
-| @grex861 | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_CONTRIBUTION] |
-| @tyajhelo | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_LINKS] | [INSERT_CONTRIBUTION] |
+| @s0ftach | [#270](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/270), [#235](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/235), [216](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/216), [#250](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/250), [#248](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/248), [#247](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/247), [#245](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/245),  | [#271](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/271), [264](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/264), [#263](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/263), [#268](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/268), [#252](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/252) | [#258](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/258), [#261](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/261), [#259](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/259), [#269](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/269),[#246](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/246), [#256](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/256), [#256](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/256), [#272](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/272) | Documentation, Task Distribution, DemoDay Preparation |
+| @oebarbie | [#257](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/257), [#255](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/255), [#253](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/253), [#251](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/251), [#254](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/254) | [261](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/261), [#258](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/258), [#259](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/259), [#262](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/262), [#272](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/272) | [#271](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/271), [#264](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/264), [#263](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/263), [#268](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/268), [252](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/252), [#246](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/246) | Documentation, Documentation Site deployment |
+| @Exckernels | [#244](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/244) | [#256](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/256) | — | Backend, System Optimization |
+| @ixkci | [#244](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/244), [#219](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/219), [#224](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/224) | [#256](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/256) | [#262](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/262) | Backend, System Optimization, Documentation, Documentation Site deployment |
+| @grex861 | [#251](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/issues/235)  | [#235](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/pull/269)  | — | Documentation |
+| @tyajhelo | — | — | — | — |
 
 ## 32. Screenshots
 Screenshots are stored in `reports/week7/images/`:
