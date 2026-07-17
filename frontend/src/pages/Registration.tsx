@@ -1,15 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
+import CameraPreview from '../components/CameraPreview';
 import { useCamera } from '../context/CameraContext';
+import { apiFetch } from '../lib/api';
 
 export default function Registration() {
-  const { stream, startEnroll, stopEnroll, enrollData } = useCamera();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const {
+    cameraSource,
+    stream,
+    remoteFrame,
+    isEnrolling,
+    startEnroll,
+    stopEnroll,
+    enrollData,
+  } = useCamera();
   const navigate = useNavigate();
-  
-  const { status, color, progress, embedding, box } = enrollData;
-  
+
+  const { status, color, progress, embedding, box, frameWidth, frameHeight } = enrollData;
+
   const [name, setName] = useState('');
   const [accessType, setAccessType] = useState('Permanent');
   const [startDate, setStartDate] = useState('');
@@ -27,13 +36,7 @@ export default function Registration() {
     return () => {
       stopEnroll();
     };
-  }, []);
-
-  useEffect(() => {
-    if (videoRef.current && stream && videoRef.current.srcObject !== stream) {
-      videoRef.current.srcObject = stream;
-    }
-  });
+  }, [startEnroll, stopEnroll]);
 
   const handleSave = () => {
     setErrorMsg('');
@@ -41,7 +44,7 @@ export default function Registration() {
       setErrorMsg('Please enter a name.');
       return;
     }
-    
+
     let finalStart = null;
     let finalEnd = null;
     if (accessType === 'Temporary') {
@@ -49,10 +52,10 @@ export default function Registration() {
         setErrorMsg('Please enter both start and expiration dates.');
         return;
       }
-      
+
       const startDt = new Date(startDate);
       const endDt = new Date(endDate);
-      
+
       if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
         setErrorMsg('Please enter valid dates.');
         return;
@@ -60,7 +63,7 @@ export default function Registration() {
 
       const now = new Date();
       now.setSeconds(0, 0);
-      
+
       if (startDt < now) {
         setErrorMsg('Start time cannot be in the past.');
         return;
@@ -69,19 +72,18 @@ export default function Registration() {
         setErrorMsg('Expiration time must be at least 1 minute after start time.');
         return;
       }
-      
+
       const pad = (n: number) => n.toString().padStart(2, '0');
       const getLocalISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00.000`;
-      
+
       finalStart = getLocalISO(startDt);
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://${window.location.hostname}:8000/api/employees`, {
+    apiFetch('/api/employees', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      headers: {
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name,
@@ -107,39 +109,34 @@ export default function Registration() {
       <div className="page-header">
         <h2>Add Employee</h2>
       </div>
-      
-      {!embedding ? (
-        <div className="camera-container">
-          <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
-          
-          {box && videoRef.current && (
-            <div style={{
-              position: 'absolute',
-              border: `2px solid ${color}`,
-              borderRadius: '8px',
-              left: `${(1 - box[2] / videoRef.current.videoWidth) * 100}%`,
-              top: `${(box[1] / videoRef.current.videoHeight) * 100}%`,
-              width: `${((box[2] - box[0]) / videoRef.current.videoWidth) * 100}%`,
-              height: `${((box[3] - box[1]) / videoRef.current.videoHeight) * 100}%`,
-              transition: 'all 0.1s ease',
-              pointerEvents: 'none'
-            }} />
-          )}
 
+      {!embedding ? (
+        <CameraPreview
+          cameraSource={cameraSource}
+          stream={stream}
+          remoteFrame={remoteFrame}
+          box={box}
+          frameWidth={frameWidth}
+          frameHeight={frameHeight}
+          boxColor={color}
+          placeholder={isEnrolling
+            ? `Connecting to ${cameraSource === 'backend' ? 'Raspberry Pi' : 'browser'} camera...`
+            : status}
+        >
           <div className="camera-overlay" style={{ borderColor: color }}>
             <div className="status-indicator" style={{ color }}>{status}</div>
             <div style={{ width: '100%', background: 'rgba(255,255,255,0.2)', height: '4px', marginTop: '8px' }}>
               <div style={{ width: `${progress * 100}%`, background: color, height: '100%', transition: 'width 0.3s' }} />
             </div>
           </div>
-        </div>
+        </CameraPreview>
       ) : (
         <div className="glass-panel">
           <div className="form-group">
             <label>Name</label>
             <input className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="Ivan Ivanov" />
           </div>
-          
+
           <div className="form-group">
             <label>Access Type</label>
             <select className="form-control" value={accessType} onChange={e => setAccessType(e.target.value)}>
@@ -152,22 +149,22 @@ export default function Registration() {
             <div style={{ display: 'flex', gap: '1rem' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Start Date & Time</label>
-                <input 
-                  type="datetime-local" 
-                  className="form-control" 
+                <input
+                  type="datetime-local"
+                  className="form-control"
                   min={minDateTimeStr}
-                  value={startDate} 
-                  onChange={e => setStartDate(e.target.value)} 
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
                 <label>Expiration Date & Time</label>
-                <input 
-                  type="datetime-local" 
-                  className="form-control" 
+                <input
+                  type="datetime-local"
+                  className="form-control"
                   min={startDate || minDateTimeStr}
-                  value={endDate} 
-                  onChange={e => setEndDate(e.target.value)} 
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
                 />
               </div>
             </div>

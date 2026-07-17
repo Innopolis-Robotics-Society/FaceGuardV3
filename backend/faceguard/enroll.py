@@ -19,65 +19,64 @@ def enroll_user(
     liveness_detector = LivenessDetector()
 
     cap = cv2.VideoCapture(camera_index)
-
-    if not cap.isOpened():
-        raise RuntimeError("Cannot open camera.")
-
     embeddings = []
+    try:
+        if not cap.isOpened():
+            raise RuntimeError("Cannot open camera.")
 
-    while len(embeddings) < target_count:
-        ret, frame = cap.read()
+        while len(embeddings) < target_count:
+            ret, frame = cap.read()
 
-        if not ret:
-            break
+            if not ret:
+                break
 
-        embedding, face, status = extract_embedding_from_frame(
-            app, liveness_detector, frame
-        )
-
-        if status == "real" and embedding is not None and face is not None:
-            embeddings.append(embedding)
-
-            draw_face_box(
-                frame,
-                face,
-                f"Collecting: {len(embeddings)}/{target_count}",
-                color=(0, 255, 0),
+            embedding, face, status = extract_embedding_from_frame(
+                app, liveness_detector, frame
             )
-        elif status == "spoof":
-            draw_face_box(frame, face, "SPOOFING ATTEMPT", color=(0, 0, 255))
-        elif status == "bad_face":
-            draw_face_box(frame, face, "Bad angle/blur", color=(0, 255, 255))
-        else:
+
+            if status == "real" and embedding is not None and face is not None:
+                embeddings.append(embedding)
+
+                draw_face_box(
+                    frame,
+                    face,
+                    f"Collecting: {len(embeddings)}/{target_count}",
+                    color=(0, 255, 0),
+                )
+            elif status == "spoof":
+                draw_face_box(frame, face, "SPOOFING ATTEMPT", color=(0, 0, 255))
+            elif status == "bad_face":
+                draw_face_box(frame, face, "Bad angle/blur", color=(0, 255, 255))
+            else:
+                cv2.putText(
+                    frame,
+                    "Show your face to the camera",
+                    (30, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (0, 0, 255),
+                    2,
+                )
+
             cv2.putText(
                 frame,
-                "Show your face to the camera",
-                (30, 40),
+                "Enrollment mode | Press ESC to stop",
+                (30, frame.shape[0] - 30),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                (0, 0, 255),
+                0.65,
+                (255, 255, 255),
                 2,
             )
 
-        cv2.putText(
-            frame,
-            "Enrollment mode | Press ESC to stop",
-            (30, frame.shape[0] - 30),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.65,
-            (255, 255, 255),
-            2,
-        )
+            cv2.imshow("Enrollment", frame)
 
-        cv2.imshow("Enrollment", frame)
+            key = cv2.waitKey(1) & 0xFF
 
-        key = cv2.waitKey(1) & 0xFF
-
-        if key == 27:
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+            if key == 27:
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
     if len(embeddings) < 10:
         raise RuntimeError(

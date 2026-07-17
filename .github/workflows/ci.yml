@@ -1,37 +1,151 @@
 name: CI
+
 on:
   pull_request:
   push:
     branches:
       - main
+
 jobs:
-  repository-checks:
+  backend:
+    name: Backend tests, QRT and coverage
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: faceguard_test
+          POSTGRES_PASSWORD: faceguard_test
+          POSTGRES_DB: faceguard_test
+          TZ: Europe/Moscow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U faceguard_test -d faceguard_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PYTHONPATH: backend:.
+      JWT_SECRET: ci-only-faceguard-signing-secret-at-least-32-bytes
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5432"
+      POSTGRES_USER: faceguard_test
+      POSTGRES_PASSWORD: faceguard_test
+      POSTGRES_DB: faceguard_test
+      RUN_POSTGRES_INTEGRATION: "1"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            backend/requirements.txt
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Устанавливаем все зависимости, включая пакеты для тестов
-          pip install -r requirements.txt
-          pip install -r backend/requirements.txt
+          python -m pip install -r requirements.txt -r backend/requirements.txt
+
       - name: Formatting check (Black)
-        run: |
-          black --check backend tests
+        run: black --check backend tests scripts/check_critical_coverage.py
+
       - name: Source-code linting (Flake8)
-        run: |
-          flake8 backend tests --count --show-source --statistics --max-line-length=120
+        run: flake8 backend tests scripts/check_critical_coverage.py --count --show-source --statistics --max-line-length=120
+
       - name: Additional QA check (Bandit)
+        run: bandit -q -r backend
+
+      - name: Backend unit tests
+        run: pytest tests/unit -q
+
+      - name: Backend integration tests
+        run: pytest tests/integration -q
+
+      - name: Automated quality-requirement tests
+        run: pytest tests/quality -q
+
+      - name: Full line-coverage run
         run: |
-          bandit -r backend
-      - name: Run automated tests (Unit, Integration, QRT) and Line coverage
+          mkdir -p reports
+          pytest tests -q --cov=backend --cov-report=term-missing --cov-report=xml:reports/coverage.xml --cov-report=json:reports/coverage.json --cov-fail-under=30
+
+      - name: Critical-module coverage gate
+        run: python scripts/check_critical_coverage.py --coverage-file reports/coverage.json --threshold 30
+
+      - name: Upload coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            reports/coverage.xml
+            reports/coverage.json
+          if-no-files-found: error
+
+  frontend:
+    name: Frontend tests, lint and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install exact frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Type check and production build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Frontend dependency audit
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+  configuration-and-docs:
+    name: Compose and documentation validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate base Docker Compose
         env:
-          PYTHONPATH: backend:.
-        run: |
-          cp backend/.env.example backend/.env
-          pytest tests/ --cov=faceguard --cov-report=term-missing --cov-fail-under=30
+          BACKEND_ENV_FILE: ../backend/.env.example
+        run: docker compose --env-file backend/.env.example -f docker/docker-compose.yml config --quiet
+
+      - name: Validate Raspberry Pi Compose override
+        env:
+          BACKEND_ENV_FILE: ../backend/.env.example
+        run: docker compose --env-file backend/.env.example -f docker/docker-compose.yml -f docker/docker-compose.pi.yml config --quiet
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install documentation dependencies
+        run: python -m pip install mkdocs mkdocs-material mkdocs-include-markdown-plugin
+
+      - name: Strict documentation build
+        run: mkdocs build --strict

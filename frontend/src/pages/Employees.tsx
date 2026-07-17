@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Edit2, Search, ArrowUp, ArrowDown, AlertCircle } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 interface Employee {
   id: number;
@@ -33,12 +34,10 @@ export default function Employees() {
 
   const minDateTime = new Date();
   const pad = (n: number) => n.toString().padStart(2, '0');
-  const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth() + 1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
+  const minDateTimeStr = `${minDateTime.getFullYear()}-${pad(minDateTime.getMonth()+1)}-${pad(minDateTime.getDate())}T${pad(minDateTime.getHours())}:${pad(minDateTime.getMinutes())}`;
 
   const fetchEmployees = () => {
-    fetch(`http://${window.location.hostname}:8000/api/employees`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch('/api/employees')
       .then(res => res.json())
       .then(data => {
         setEmployees(data);
@@ -52,10 +51,7 @@ export default function Employees() {
 
   const handleDelete = (id: number) => {
     if (!confirm('Are you sure you want to delete this employee?')) return;
-    fetch(`http://${window.location.hostname}:8000/api/employees/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch(`/api/employees/${id}`, { method: 'DELETE' })
       .then(() => {
         setSelectedIds(prev => {
           const newSet = new Set(prev);
@@ -71,10 +67,7 @@ export default function Employees() {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} employees?`)) return;
 
     for (const id of Array.from(selectedIds)) {
-      await fetch(`http://${window.location.hostname}:8000/api/employees/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-      });
+      await apiFetch(`/api/employees/${id}`, { method: 'DELETE' });
     }
 
     setSelectedIds(new Set());
@@ -107,7 +100,7 @@ export default function Employees() {
     // Helper to format Date to local YYYY-MM-DDThh:mm string
     const formatLocal = (dateStr: string) => {
       const d = new Date(dateStr);
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
     setEditStart(emp.start_date ? formatLocal(emp.start_date) : '');
@@ -133,19 +126,13 @@ export default function Employees() {
 
       const startDt = new Date(editStart);
       const endDt = new Date(editEnd);
-
-      if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
-        setEditError('Please enter valid dates.');
-        return;
-      }
-
       const now = new Date();
       now.setSeconds(0, 0);
 
       // Strict validation
       // If user edits the date to something past, reject. (unless they didn't change it, but simplest is to enforce it always)
       if (startDt < now) {
-        // Only error if the start time is strictly earlier than now 
+        // Only error if the start time is strictly earlier than now
         // AND the user actually modified the start time (or it's a new temporary record).
         // Let's enforce that any temporary access saved from now on must be valid in the future.
         setEditError('Start time cannot be in the past.');
@@ -156,17 +143,16 @@ export default function Employees() {
         return;
       }
 
-      const getLocalISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00.000`;
+      const getLocalISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00.000`;
 
       finalStart = getLocalISO(startDt);
       finalEnd = getLocalISO(endDt);
     }
 
-    fetch(`http://${window.location.hostname}:8000/api/employees/${editingEmp.id}`, {
+    apiFetch(`/api/employees/${editingEmp.id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name: editName,
@@ -245,18 +231,18 @@ export default function Employees() {
                     />
                   </th>
                   <th onClick={() => handleSort('id')} style={{ cursor: 'pointer' }}>
-                    ID {sortCol === 'id' && (sortDesc ? <ArrowDown size={14} /> : <ArrowUp size={14} />)}
+                    ID {sortCol === 'id' && (sortDesc ? <ArrowDown size={14}/> : <ArrowUp size={14}/>)}
                   </th>
                   <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
-                    Name {sortCol === 'name' && (sortDesc ? <ArrowDown size={14} /> : <ArrowUp size={14} />)}
+                    Name {sortCol === 'name' && (sortDesc ? <ArrowDown size={14}/> : <ArrowUp size={14}/>)}
                   </th>
                   <th onClick={() => handleSort('registration_date')} style={{ cursor: 'pointer' }}>
-                    Registration {sortCol === 'registration_date' && (sortDesc ? <ArrowDown size={14} /> : <ArrowUp size={14} />)}
+                    Registration {sortCol === 'registration_date' && (sortDesc ? <ArrowDown size={14}/> : <ArrowUp size={14}/>)}
                   </th>
                   <th>Status</th>
                   <th>Access Window</th>
                   <th onClick={() => handleSort('last_seen')} style={{ cursor: 'pointer' }}>
-                    Last Seen {sortCol === 'last_seen' && (sortDesc ? <ArrowDown size={14} /> : <ArrowUp size={14} />)}
+                    Last Seen {sortCol === 'last_seen' && (sortDesc ? <ArrowDown size={14}/> : <ArrowUp size={14}/>)}
                   </th>
                   <th>Actions</th>
                 </tr>
@@ -282,7 +268,7 @@ export default function Employees() {
                     <td>
                       {emp.status === 'Temporary' && emp.start_date && emp.expiration_date ? (
                         <span style={{ fontSize: '0.85em', color: 'var(--text-muted)' }}>
-                          {new Date(emp.start_date).toLocaleString()} <br />
+                          {new Date(emp.start_date).toLocaleString()} <br/>
                           to {new Date(emp.expiration_date).toLocaleString()}
                         </span>
                       ) : '-'}
@@ -339,6 +325,7 @@ export default function Employees() {
                     min={minDateTimeStr}
                     value={editStart}
                     onChange={e => setEditStart(e.target.value)}
+                    onKeyDown={e => e.preventDefault()}
                   />
                 </div>
                 <div className="form-group">
@@ -349,6 +336,7 @@ export default function Employees() {
                     min={editStart || minDateTimeStr}
                     value={editEnd}
                     onChange={e => setEditEnd(e.target.value)}
+                    onKeyDown={e => e.preventDefault()}
                   />
                 </div>
               </>

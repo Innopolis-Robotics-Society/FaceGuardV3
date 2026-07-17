@@ -1,30 +1,38 @@
-# ADR-005: Decouple Frontend and Backend for WebSocket Streaming
+# ADR-005: Decouple React Presentation from FastAPI Processing
 
+**ID:** ADR-005
+**Status:** Accepted
 **Date:** 2026-07-09
 
-## Status
-Accepted
-
 ## Context
-The FaceGuardV3 MVP was initially built as a monolithic Streamlit application. While Streamlit allowed rapid UI prototyping, it suffered from severe performance issues when applied to real-time face recognition. Streamlit's architecture requires re-executing the entire Python script and reloading the page state on every frame processed (via `st.rerun()`). This resulted in a bottleneck where the UI could not keep up with the backend model, causing significant lag, flickering, and end-to-end response times frequently exceeding the 3.0-second limit defined in **QR-001**. Furthermore, capturing video server-side via OpenCV tied the UI rendering and the ML inference to the same process loop, exacerbating the performance issues.
+
+The previous Streamlit UI reran server-side presentation code during frame processing and coupled page state to inference. FaceGuard needs a responsive SPA, an explicit authenticated API, and the ability to use either a client-attached camera or a camera attached to a remote Raspberry Pi.
 
 ## Decision
-We decided to completely decouple the presentation layer from the backend application logic. The architecture now consists of:
-1. **React Frontend (Vite)**: A lightweight Single Page Application that handles presentation and captures video natively in the browser via WebRTC.
-2. **FastAPI Backend**: A high-performance asynchronous Python server that exposes REST endpoints for data management and a WebSocket endpoint for real-time video streaming.
 
-Instead of processing video server-side, the React client captures frames and streams them as base64-encoded strings over WebSockets to the FastAPI server. The server performs the face extraction and matching asynchronously and immediately returns the result JSON over the same WebSocket.
+Use a React/Vite SPA for presentation and FastAPI for REST, WebSocket, recognition, persistence, and GPIO orchestration.
+
+- REST requests carry a Bearer JWT.
+- Recognition/enrollment WebSockets carry `faceguard.jwt` plus `bearer.<JWT>` subprotocols; tokens are not URL query parameters.
+- In `browser` mode the SPA captures JPEGs and permits only one outstanding frame.
+- In `backend` mode FastAPI owns the Pi V4L2 camera and returns the processed JPEG.
+- Both modes return bbox, dimensions, and sequence for the exact processed frame.
+- Service URL and camera mode `VITE_*` settings are compiled at frontend build time.
+
+## Considered alternatives
+
+- Continue with Streamlit: rejected because it couples UI reruns and inference state.
+- Browser-only capture: rejected because a remote administration browser cannot access the camera physically attached to the Pi.
+- Put JWTs in WebSocket query strings: rejected because URLs are commonly logged.
+- A single HTTP request per frame: rejected due to repeated request setup and poorer stream lifecycle semantics.
 
 ## Consequences
 
-**Positive:**
-- **Response Time (QR-001)**: Solves the UI rendering bottleneck. Warm recognition inference now takes ~1.1s and UI updates happen instantly (~1ms transmission over local network) without page reloads.
-- **Scalability**: Decoupling the frontend allows the system to easily support multiple remote clients or edge displays in the future.
-- **Maintainability**: The separation of concerns is much clearer. ML logic and database access are strictly isolated from UI rendering.
+- UI, data APIs, and ML logic have clear boundaries and independent tests.
+- Two technology stacks and compatible runtime URL configuration must be maintained.
+- A reverse proxy must forward WebSocket upgrades and subprotocol headers.
+- This decision removes the old UI bottleneck but does not itself prove the real-hardware 3-second QR-001 target; no unsupported 1.1-second claim is made.
 
-**Negative:**
-- **Complexity**: The development team now has to maintain two distinct codebases with two different technology stacks (Python/FastAPI and Node.js/React).
-- **Deployment Overhead**: Requires orchestrating multiple Docker containers (`docker-frontend` and `docker-backend`) instead of a single monolith.
+## Quality requirements addressed
 
-## Quality Requirements Addressed
-- **QR-001: Recognition Response Time**: Sub-3-second end-to-end latency achieved by eliminating Streamlit's polling constraints.
+- [QR-001](../../quality-requirements.md#qr-001-recognition-response-time).

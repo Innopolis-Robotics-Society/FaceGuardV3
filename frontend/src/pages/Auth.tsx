@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { isUsableJwt } from '../auth/token';
+import { apiUrl } from '../lib/urls';
 
 interface AuthProps {
   onLogin: (token: string) => void;
@@ -13,14 +15,18 @@ export default function Auth({ onLogin }: AuthProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`http://${window.location.hostname}:8000/api/login`, {
+    fetch(apiUrl('/api/login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     }).then(async res => {
       if (res.ok) {
         const data = await res.json();
-        onLogin(data.token);
+        if (typeof data.token === 'string' && isUsableJwt(data.token)) {
+          onLogin(data.token);
+        } else {
+          setError('Invalid authentication response');
+        }
       } else if (res.status === 429) {
         setError('Too many attempts. Please try again later.');
       } else {

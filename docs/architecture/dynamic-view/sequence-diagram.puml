@@ -1,40 +1,105 @@
 @startuml dynamic-view
+actor Admin
+participant "React SPA" as Client
+participant "FastAPI" as API
+participant "Operation lock" as Lock
+participant "Browser camera" as BrowserCam
+participant "LatestFrameCamera" as BackendCam
+participant "Recognition provider" as Recognition
+participant "Liveness detector" as Liveness
+database PostgreSQL as DB
+participant "LED controller" as LED
 
-actor User
-participant Camera
-participant "React Client" as Client
-participant "FastAPI Server" as Server
-participant "Recognition Module" as Recognition
-participant "Recognition Model" as Model
-database Storage
-participant Logs
-participant "LED Indicator" as LED
+== Authentication ==
+Admin -> Client: Submit login/password
+Client -> API: POST /api/login
+API -> API: bcrypt verification + signed JWT
+API --> Client: JWT or 401/429
+Client -> API: Open /ws/recognize or /ws/enroll\nsubprotocols faceguard.jwt + bearer.<JWT>
+alt missing, expired, or invalid JWT
+  API --> Client: close 1008
+else valid JWT
+  API -> Lock: acquire with bounded timeout
+  alt another operation owns camera pipeline
+    API --> Client: operation_busy + close 1013
+  else operation acquired
+    API --> Client: accept WebSocket
+  end
+end
 
-== Frame capture ==
-User -> Camera: Approaches camera
-Camera -> Client: Capture frame (WebRTC)
-Client -> Server: Send frame (WebSocket Base64)
+== Frame acquisition ==
+alt CAMERA_SOURCE=browser
+  Client -> BrowserCam: Capture JPEG only when no response is pending
+  BrowserCam --> API: base64 JPEG over WebSocket
+  API -> API: drain queued messages and decode newest
+else CAMERA_SOURCE=backend
+  API -> BackendCam: start one VideoCapture worker
+  loop capture worker
+    BackendCam -> BackendCam: replace latest frame (never append)
+  end
+  BackendCam --> API: newest sequence > last processed
+end
 
-== Face recognition ==
-Server -> Recognition: Extract face embedding
-Recognition -> Recognition: Detect face & check liveness
-Recognition -> Model: Generate embedding
-Model --> Recognition: Return embedding
-Recognition --> Server: Return embedding & status
+== Normal recognition and liveness failure ==
+API -> Recognition: extract_embedding(frame)
+Recognition -> Liveness: analyze exact face crop
+alt liveness says spoof
+  Liveness --> Recognition: spoof
+  Recognition --> API: status=spoof, no match
+  API -> DB: log SPOOF_ATTEMPT
+  API -> LED: red feedback
+else live face
+  Liveness --> Recognition: real
+  Recognition --> API: normalized embedding + bbox
+  API -> DB: fetch active employee embeddings
+  DB --> API: permanent + in-window temporary identities
+  alt similarity match
+    API -> DB: log ACCESS_GRANTED
+    API -> LED: blue feedback
+    API --> Client: granted + bbox + exact dimensions/sequence/frame
+  else no match after recognition threshold
+    API -> DB: log ACCESS_DENIED
+    API -> LED: red feedback
+    API --> Client: denied + bbox + exact dimensions/sequence/frame
+  end
+end
 
-== Identity verification ==
-Server -> Storage: Request identity match for embedding
-Storage -> Storage: Fetch all stored embeddings
-Storage -> Storage: Compare via Cosine Similarity
-Storage --> Server: Return matching User ID
+== Enrollment and duplicate attempt ==
+loop until 30 real samples
+  API -> Recognition: liveness-check and extract sample
+  Recognition --> API: embedding/status/bbox
+  alt real sample
+    API -> LED: all LEDs on
+    API --> Client: progress + bbox + exact frame metadata
+  else spoof
+    API -> LED: red feedback
+    API --> Client: spoof + bbox + exact frame metadata
+  else bad face/angle
+    API -> LED: yellow solid feedback
+    API --> Client: look straight + bbox + exact frame metadata
+  else no face
+    API -> LED: all off
+    API --> Client: no face + exact frame metadata
+  end
+end
+API -> LED: registration complete; all LEDs hold 3 seconds
+API --> Client: averaged normalized embedding
+Client -> API: POST /api/employees + Bearer JWT
+API -> DB: BEGIN; pg_advisory_xact_lock
+API -> DB: read active stored embeddings and compare cosine similarity
+alt duplicate exceeds 0.56 threshold
+  API -> DB: ROLLBACK (no INSERT)
+  API --> Client: HTTP 409 with existing employee name
+else distinct face and name
+  API -> DB: INSERT; COMMIT
+  API --> Client: HTTP 200
+end
 
-== Access decision ==
-Server -> Server: Approve access
-
-== Physical response and logging ==
-Server -> Logs: Write successful access log
-Server -> LED: Turn on blue LED
-Server --> Client: Return Access Granted JSON
-Client -> Client: Update UI (Green Box & Text)
-
+== Stop, disconnect, or process shutdown ==
+API -> BackendCam: stop/release if backend mode
+API -> LED: cancel old generation; all off
+API -> Lock: release
+API -> API: on application shutdown cancel log cleanup task
+API -> LED: close LEDs and pin factory
+API -> DB: close threaded connection pool
 @enduml

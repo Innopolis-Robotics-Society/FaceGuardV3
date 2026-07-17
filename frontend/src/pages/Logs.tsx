@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCamera } from '../context/CameraContext';
+import { apiFetch } from '../lib/api';
 
 interface Log {
   id: number;
@@ -22,9 +23,7 @@ export default function Logs() {
   const lastLogRef = useRef<{ name: string, status: string, time: number } | null>(null);
 
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:8000/api/logs`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
-    })
+    apiFetch('/api/logs')
       .then(res => res.json())
       .then(data => {
         setLogs(data);

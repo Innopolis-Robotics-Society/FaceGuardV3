@@ -1,166 +1,185 @@
 # Customer Handover and Operations Guide
 
-This document is the authoritative handover artifact for FaceGuard, Week 6 Trial Release (`v3.0.0`, MVP v2). It defines the current transition status, operational requirements, and essential knowledge required by the customer to independently deploy, operate, and maintain the system.
+This is the maintained operational handover for the current FaceGuardV3 repository. It describes what the software actually implements and separates CI evidence from checks that require the customer's Raspberry Pi and physical hardware.
 
-## 1. Product Status and Handover Scope
+## Scope and current assurance
 
-**Product Overview:** FaceGuard is a secure, decoupled face recognition access control system. It uses an edge-hosted FastAPI backend, a React SPA frontend, and local PostgreSQL storage to recognize registered employees in real time and log all access attempts.
+FaceGuardV3 consists of a React SPA, a FastAPI/InsightFace/MiniFASNet backend, local PostgreSQL, a browser or Raspberry Pi camera adapter, and optional yellow/blue/red GPIO LEDs. It stores data locally and can operate without cloud services after model assets have been populated.
 
-**Scope of this release:** This handover covers the Week 6 Trial Release (MVP v2 progress, towards MVP v3). It includes a fully persistent local database, background recognition that runs while the admin navigates other pages, and recognition with accessories. Physical door integration is not part of this release and is not planned; the LED indicators serve as the access signal in place of a physical door mechanism.
+The repository does **not** contain a motor or physical door actuator. LEDs are indicators only. This audit verified software tests, PostgreSQL QRT, frontend build/tests, configuration validation, and CI definitions. It did not have access to the customer's Pi camera, gpiochip wiring, physical LEDs, lighting, or door environment; therefore physical deployment readiness and QR-006 latency are not claimed by this document.
 
-**Important customer requirement:** the system must not use any external database or cloud resource. All data must be stored locally on the device only. This was explicitly and firmly stated by the customer during the Week 6 session, after the team had briefly used cloud storage before migrating to fully local storage.
+## Customer-owned assets
 
-## 2. Handover Status and Ownership
+| Asset | Operational responsibility |
+|---|---|
+| Raspberry Pi 5, camera, LED wiring/resistors | Customer administrator |
+| `backend/.env`, admin password, JWT secret, database password | Customer administrator; never commit or share |
+| PostgreSQL `pgdata` volume and backups | Customer administrator |
+| InsightFace/liveness model directory | Customer administrator; keep available locally |
+| Source and maintained documentation | Repository maintainers |
 
-### Transition Status
+## Prerequisites
 
-| Attribute | Value |
-|:---|:---|
-| **Transition Outcome** | `Ready for independent use` |
-| **Customer Confirmation Status** | `Accepted` |
-| **Deployment Responsibility** | Customer (Raspberry Pi 5) |
-| **Repository Ownership** | Team (retained) |
-| **Documentation Sufficiency** | Not confirmed as sufficient; the customer requested a dedicated documentation page or site describing the system's functions |
+- Raspberry Pi 5 with a 64-bit OS, active cooling for continuous inference, Docker Engine, and recent Docker Compose v2.
+- A camera visible as `/dev/videoN` through V4L2. USB webcams are supported. A CSI/Pi camera is supported only if it is deliberately exposed through a working V4L2 interface; there is no native libcamera adapter.
+- For LEDs: a usable `/dev/gpiochipN`, `gpioinfo`, and correctly protected BCM 17/27/22 wiring.
+- Initial access to model assets. The tracked MiniFASNet model is mounted from `docker/insightface_models`; when `buffalo_s` is absent, the backend downloads it with bounded retries, validates the archive and required ONNX files, then retains it in the mounted cache.
 
-Detailed confirmation evidence, the meeting date, and the customer's exact feedback are recorded in `reports/week6/sprint-review-summary.md` and, if recorded, the transcript. This file only reflects the resulting status.
+## Secure configuration
 
-### Why Full Transition Was Not Reached
+From the repository root:
 
-**Current level:** `Ready for independent use`
+```bash
+cp backend/.env.example backend/.env
+python3 backend/scripts/generate_hash.py
+openssl rand -hex 32
+```
 
-**Why not `Independently used by customer` or `Deployed or operated on customer side`:**
-- The system is deployed on customer hardware, but formal independent use has not yet been observed
-- Actual production usage will begin after handover
-- This is acceptable for the current course scope
+Set at least:
 
-**Remaining actions needed:** None blocking for the current handover level. Follow-up items are non-blocking enhancements, see Section 7.
+- `ADMIN_LOGIN` and the generated bcrypt `ADMIN_PASSWORD_HASH`;
+- a new, independent `JWT_SECRET` (mandatory at startup);
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DB_HOST=db`, and `DB_PORT=5432`;
+- the real browser origin in `CORS_ORIGINS`, for example `http://faceguard-pi:3000` in addition to any local origins;
+- camera and GPIO variables described below.
 
-### Ownership and Access Transfer
+Restrict file permissions and never put the JWT or plaintext admin password in documentation. Use `--env-file backend/.env` in Compose commands; otherwise Compose interpolation can create database credentials that differ from those received by the backend.
 
-| Asset | Owner after handover | Notes |
-|:---|:---|:---|
-| Source code (GitHub) | Team (retained) | Customer has read access |
-| Deployed product | Customer | Raspberry Pi 5, local deployment |
-| Admin credentials | Customer | Managed in `.env` file |
-| Hardware (camera, LEDs) | Customer | Pre-existing hardware |
-| Database (PostgreSQL) | Customer | Local only, operated on Raspberry Pi. No external or cloud database is used |
-| Documentation | Customer | Public repository and hosted docs |
-| Future support | Team | Critical fixes only, until course completion |
+## Camera modes
 
-## 3. Configuration and Secrets Management
+| Mode | Capture owner | Deployment use | Backlog behavior |
+|---|---|---|---|
+| `browser` | Browser `getUserMedia` | Local development or a client-attached camera | One JPEG may await a response; no client-side queue |
+| `backend` | Pi backend OpenCV worker | Camera physically attached to the Pi | One replace-only latest frame; no FIFO queue |
 
-To operate the system, the customer must manage the runtime environment variables securely. No secrets are committed to the repository.
+The base Compose file builds browser mode. The Pi override builds backend mode and maps the selected device. `VITE_*` settings are build-time values, so rebuild the frontend after changing them. A remote browser camera needs HTTPS and camera permission; a remote browser cannot access a camera attached to the Pi, which is why backend mode exists.
 
-### Required Environment Variables
+The single capture-owner guarantee applies to the deployed FastAPI service. Legacy maintenance CLIs under `backend/faceguard/` open OpenCV directly and must only be used while the service is stopped if they target the same camera.
 
-Create a `.env` file in the `backend/` directory (copy `backend/.env.example` as a starting point). At minimum:
+## Deployment
 
-- `ADMIN_LOGIN`: the login required to access the React admin panel
-- `ADMIN_PASSWORD_HASH`: a bcrypt hash of the admin password. Generate it with `python3 scripts/generate_hash.py` from the `backend/` directory, then paste the resulting hash here. Do not store the plain password anywhere.
-- `POSTGRES_USER`: PostgreSQL user
-- `POSTGRES_PASSWORD`: PostgreSQL password
-- `POSTGRES_DB`: PostgreSQL database name
-- `DB_HOST`: PostgreSQL hostname (usually `db` in Docker Compose)
-These must point only to the local PostgreSQL container, never to an external or cloud database.
+### Ordinary local deployment
 
-Ensure the `.env` file has restricted read permissions on the Raspberry Pi so that unauthorized users cannot extract the admin credentials or password hash.
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml up --build -d
+```
 
-## 4. Setup, Deployment, and Verification
+### Raspberry Pi deployment
 
-Full setup instructions and troubleshooting are also maintained in the root [README.md](../README.md). The steps below reflect the current actual process.
+Find devices:
 
-### Initial Setup
+```bash
+ls -l /dev/video* /dev/gpiochip*
+v4l2-ctl --list-devices
+gpioinfo
+```
 
-1. Clone the repository:
-   ```bash
-   git clone git@github.com:Innopolis-Robotics-Society/FaceGuardV3.git
-   cd FaceGuardV3
-   ```
-   If SSH does not work, use HTTPS instead:
-   ```bash
-   git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
-   cd FaceGuardV3
-   ```
-2. Configure environment variables:
-   ```bash
-   cd backend
-   cp .env.example .env
-   ```
-3. Generate an admin password hash:
-   ```bash
-   python3 scripts/generate_hash.py
-   ```
-   Enter your chosen password when prompted and copy the generated bcrypt hash.
-4. Open `backend/.env` and fill in the required values, including the database credentials and the admin credentials, without quotes:
-   ```
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=postgres
-   POSTGRES_DB=faceguard
-   DB_HOST=db
-   ADMIN_LOGIN=myadmin
-   ADMIN_PASSWORD_HASH=your_copied_bcrypt_hash
-   ```
-5. Make sure Docker is running:
-   - Windows: open Docker Desktop and wait for "Engine running"
-   - Mac: open the Docker app and wait for the Docker icon in the menu bar
-   - Linux: `sudo systemctl start docker`
-6. From the project root, build and start the containers:
-   ```bash
-   cd ..
-   docker compose -f docker/docker-compose.yml build
-   docker compose -f docker/docker-compose.yml up
-   ```
-7. Once the containers are running, open `http://localhost:3000` in a browser.
+Example `backend/.env` values:
 
-### Verification Steps
+```dotenv
+CAMERA_SOURCE=backend
+CAMERA_DEVICE=/dev/video0
+CAMERA_INDEX=0
+GPIO_CHIP_DEVICE=/dev/gpiochip0
+GPIO_CHIP=0
+```
 
-1. **Access the UI:** confirm `http://localhost:3000` loads without errors.
-2. **Login:** enter the `ADMIN_LOGIN` and the password you hashed in step 3 above.
-3. **Hardware check:** register a test user and confirm the connected LEDs respond as described in Section 5.
-4. **Background recognition check:** while a recognition is running, navigate to another page in the admin panel and confirm recognition continues without interruption.
+The host and container gpiochip numbers must agree. For `/dev/gpiochip4`, use `GPIO_CHIP_DEVICE=/dev/gpiochip4` and `GPIO_CHIP=4`.
 
-### System Recovery
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.pi.yml \
+  up --build -d
+```
 
-- Restart services: `docker compose -f docker/docker-compose.yml restart`
-- View logs: `docker compose -f docker/docker-compose.yml logs --tail 100`
+The Pi override removes the database host port and maps only the configured camera/gpiochip into the backend. PostgreSQL remains on the internal `faceguard` bridge network. `pgdata` is persistent; schema creation and the legacy access-date migration run automatically during backend startup.
 
-## 5. Operational Notes for Normal Use
+## Startup verification
 
-- **LED feedback during recognition:**
-  - Yellow, blinking: the system is actively attempting to recognize a face
-  - Yellow, solid for 5 seconds: poor lighting or a blurry frame, the person should look straight ahead
-  - Blue, solid for 5 seconds: access granted, the person was recognized
-  - Red, solid for 5 seconds: access denied, the face was not recognized
-  - No LEDs lit: no one is currently in front of the camera
-- **LED feedback during employee registration:** all three LEDs (yellow, red, blue) light up together during registration and for 3 seconds afterward.
-- **Background recognition:** recognition keeps running while the admin uses other pages in the panel; the admin does not need to stay on the recognition page.
-- **Rate limiting and Authentication:** API endpoints are secured with JSON Web Tokens (JWT). The login page is protected against brute-force attacks via SlowAPI: if an admin inputs incorrect credentials 5 times within a minute, access is temporarily blocked with a "Too Many Requests" (429) status.
-- **Temporary access auto-expiry:** employees with temporary access are validated against their start and expiration dates. Access is automatically denied outside this window, no admin action needed. Date and time validation to prevent past dates is a planned improvement, see Section 7.
-- **Log management:** access logs are retained in the local database. The system automatically prunes logs older than 3 days to preserve storage on the Raspberry Pi.
+1. Run `docker compose ... ps`; all three services should become healthy.
+2. Open `http://<pi-host>:8000/health`. Confirm `models_ready: true`, the expected `camera_source`, and the expected `gpio_available` value.
+3. Open `http://<pi-host>:3000`, sign in, and confirm authenticated Employees and Logs requests work.
+4. Start recognition. In backend mode, confirm only one camera operation starts; trying enrollment concurrently should receive a busy result.
+5. Register a dedicated test person, try the same face again, and confirm HTTP/UI duplicate rejection without a second employee row.
+6. Verify temporary access before, within, and after its configured timestamp window.
 
-## 6. Documentation Entry Points
+## LED operation and manual check
 
-For normal customer use, operation, and troubleshooting, refer to:
+| Backend result | Physical command |
+|---|---|
+| Recognizing | Yellow begins on and blinks |
+| Bad frame/angle | Yellow solid, 5 seconds |
+| Granted | Blue solid, 5 seconds |
+| Denied or spoof | Red solid, 5 seconds |
+| Enrollment valid sample/completion | All on; completion holds 3 seconds |
+| Enrollment spoof / bad frame / no face | Red / yellow / all off |
+| Stop/shutdown | All off and resources closed |
 
-- [Main README](../README.md): primary entry point and setup instructions
-- [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/): full project documentation
-- [Contributor Guide](../CONTRIBUTING.md) and [Agents Guide](../AGENTS.md): guidelines for team members and AI agents
-- [System Roadmap](roadmap.md): product evolution up to `MVP v2`
-- [User Acceptance Tests](user-acceptance-tests.md): step-by-step instructions for admin panel usage
+The preferred check is an actual controlled recognition/enrollment attempt. A maintenance-only blue test is:
 
-A dedicated function-description documentation page was requested by the customer during the Week 6 session and is planned, see Section 7.
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml -f docker/docker-compose.pi.yml \
+  exec backend python -c "import time, leds; leds.access_granted(); time.sleep(6); leds.shutdown()"
+```
 
-## 7. Remaining Actions and Known Limitations
+This confirms visible behavior manually but is not automated QR-006 evidence. CI fake GPIO proves software command ordering, stale-thread protection, chip selection, and cleanup only. Physical latency still needs a self-hosted Pi hardware-in-the-loop runner with a photodiode or logic analyzer.
 
-**Follow-up items (non-blocking):**
+## Authentication and data behavior
 
-- Fix the occasional page freeze under load
-- Add date and time validation for temporary access, minimum value is the current date and time
-- Continue optimizing performance and stability on Raspberry Pi, particularly for the camera stream on weaker hardware
-- Add a dedicated documentation page or site describing the system's functions, explicitly requested by the customer
+- Login is bcrypt-checked and limited to five attempts per minute per remote address.
+- REST uses a Bearer JWT. WebSockets use subprotocols and never require a JWT query string.
+- Recognition/enrollment are serialized to protect model and camera state.
+- Liveness failure is rejected before embedding comparison and logged as a spoof attempt.
+- Duplicate registration compares stored embeddings at threshold `0.56` under a PostgreSQL advisory transaction lock. A duplicate returns `409`, rolls back, and preserves existing data.
+- Temporary employee embeddings are available for recognition only within inclusive start/expiration timestamps.
+- Logs older than three days are pruned by a tracked background task.
 
-**Known limitations and customer-side responsibilities:**
+## Shutdown and recovery
 
-- **Lighting sensitivity:** the recognition model's accuracy degrades in low lighting. The deployment area must be well lit.
-- **Thermal management:** running the system continuously on the Raspberry Pi without active cooling may cause thermal throttling.
-- **Camera stream stability:** the camera stream occasionally does not capture correctly on weaker hardware; the customer described this as a minor issue.
+Use normal Compose shutdown so FastAPI can cancel the cleanup task, release the camera, turn off/close GPIO, and close the database pool:
+
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml -f docker/docker-compose.pi.yml \
+  down --timeout 10
+```
+
+Do not use `kill -9` as a normal stop procedure. If the backend was forcibly killed, verify no process still owns `/dev/videoN`, inspect LED state, and restart the stack before use.
+
+Useful diagnostics:
+
+```bash
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml -f docker/docker-compose.pi.yml ps
+docker compose --env-file backend/.env \
+  -f docker/docker-compose.yml -f docker/docker-compose.pi.yml logs --tail 200 db backend frontend
+```
+
+## Test and evidence commands
+
+The exact backend, QRT-005, coverage, frontend, Compose, and documentation commands are maintained in the [root README](https://github.com/Innopolis-Robotics-Society/FaceGuardV3/blob/main/README.md#tests-and-verification) and [Testing and QA](testing.md). The key evidence split is:
+
+- GitHub-hosted CI: unit/integration/software QRT, real PostgreSQL QRT-005, per-critical-module coverage, frontend tests/lint/type-check/build, Bandit, Compose configuration, docs build, and Lychee links.
+- Raspberry Pi/manual or HIL: real V4L2 stability, physical liveness attacks, real model/UI response latency, correct wiring, electrical/visible LED latency, thermal behavior, and forced-failure recovery.
+
+## Troubleshooting
+
+- **Camera:** validate `v4l2-ctl --list-devices`, `CAMERA_DEVICE`, `CAMERA_INDEX`, container mapping/permissions, and that no other process owns it. For browser mode, check HTTPS and browser permission.
+- **WebSocket 403 or close 1008:** sign out/in, verify Pi time and unchanged `JWT_SECRET`, and ensure any reverse proxy forwards WebSocket subprotocol headers. Never move the JWT into the URL.
+- **GPIO unavailable:** compare `gpioinfo` with `GPIO_CHIP_DEVICE`/`GPIO_CHIP`, verify BCM 17/27/22 wiring, and inspect backend initialization logs. The software deliberately continues without LEDs.
+- **PostgreSQL unhealthy/authentication failed:** include `--env-file backend/.env`, inspect `db` logs, and remember that changing credentials does not rewrite credentials inside an existing initialized `pgdata` volume.
+- **Frontend wrong backend URL/mode:** update `VITE_API_BASE_URL`, `VITE_WS_BASE_URL`, or the selected Compose mode and rebuild the frontend.
+- **Models not ready:** verify the bind-mounted MiniFASNet file, `LIVENESS_MODEL_PATH`, `buffalo_s` files, permissions, disk space, and first-start network availability.
+
+## Remaining limitations
+
+- No physical door actuator.
+- No native libcamera adapter; backend capture is V4L2/OpenCV.
+- QR-001 and QR-002 have supporting CI checks but no complete real-hardware automated evidence.
+- QRT-006 is Planned because no physical-latency runner exists.
+- Model thresholds and real-world accuracy still require customer-environment calibration and acceptance testing.
+- The Logs backend accepts a date range, but the current Logs page has no date-range controls.
+- Employee registration is stored/displayed as a date, not a registration timestamp; temporary access bounds remain full timestamps.
