@@ -6,13 +6,11 @@ on:
       - main
       - 175-hosting-documentation
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -31,14 +29,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs mkdocs-material mkdocs-include-markdown-plugin pymdown-extensions
+          python -m pip install --upgrade pip
+          pip install mkdocs-material pymdown-extensions
+
+      - name: Verify installations
+        run: |
+          pip list | grep -E "mkdocs|pymdown"
 
       - name: Build site
         run: |
           mkdocs build
 
       - name: Upload Pages artifact
-        # Fixed: Using v3 instead of v1
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/
