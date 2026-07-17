@@ -4,12 +4,21 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-19  
+
+### Added
+- Сonnection via SSH
+
+### Changed
+- Selection of web-camera happens remotely via SSH
+- Formed validation for temporary access dates
+- Extended Documentation
+
 ## [3.0.0] - 2026-07-12  
 
 ### Added
 - Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming
 - Recognition runs efficiently in the background without blocking the UI
-- Connection of the system and the door
 - Recognition with accessories
 - Extensive customer handover documentation and contributor guides
 
@@ -76,3 +85,4 @@ All notable changes to FaceGuard will be documented in this file.
 [2.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/1.0.0...v2.0.0  
 [2.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.0.0...v2.1.0  
 [3.0.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v2.1.0...v3.0.0
+[3.1.0]: https://github.com/Innopolis-Robotics-Society/FaceGuardV3/compare/v3.0.0...v3.1.0
