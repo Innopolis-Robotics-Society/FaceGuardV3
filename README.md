@@ -21,6 +21,15 @@ FaceGuardV3 is a local face-recognition access indicator for a laboratory. A Rea
 - For edge deployment: Raspberry Pi 5 with a 64-bit OS, a V4L2-visible USB webcam (or a camera deliberately exposed as a V4L2 device), and optional LEDs wired through suitable resistors.
 - Enough local storage for the PostgreSQL volume and InsightFace models. On first initialization, the backend downloads a missing `buffalo_s` archive with bounded retries, validates the ZIP and required ONNX files, and populates the persistent `docker/insightface_models` cache. Later starts are local while that cache remains intact.
 
+## Installation
+
+Clone the repository to your host machine or Raspberry Pi and navigate into it:
+
+```bash
+git clone https://github.com/Innopolis-Robotics-Society/FaceGuardV3.git
+cd FaceGuardV3
+```
+
 ## Configuration
 
 Create the private backend environment file:
@@ -50,7 +59,7 @@ Frontend service URLs are Vite build-time settings. Empty `VITE_API_BASE_URL` an
 The base Compose file uses `CAMERA_SOURCE=browser` from the example configuration:
 
 ```bash
-docker compose --env-file backend/.env -f docker/docker-compose.yml up --build -d
+docker compose --env-file backend/.env -f docker/docker-compose.yml up --build -d --wait
 docker compose --env-file backend/.env -f docker/docker-compose.yml ps
 ```
 
@@ -82,7 +91,7 @@ If the usable controller is `/dev/gpiochip4`, set both `GPIO_CHIP_DEVICE=/dev/gp
 docker compose --env-file backend/.env \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.pi.yml \
-  up --build -d
+  up --build -d --wait
 ```
 
 The override removes the public PostgreSQL port, maps the selected camera and gpiochip devices only into the backend, and builds the frontend for backend-camera mode. Native libcamera/CSI capture is not implemented; a Pi camera must appear through a working V4L2 interface for the current OpenCV adapter.

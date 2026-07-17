@@ -62,7 +62,7 @@ The single capture-owner guarantee applies to the deployed FastAPI service. Lega
 
 ```bash
 docker compose --env-file backend/.env \
-  -f docker/docker-compose.yml up --build -d
+  -f docker/docker-compose.yml up --build -d --wait
 ```
 
 ### Raspberry Pi deployment
@@ -91,7 +91,7 @@ The host and container gpiochip numbers must agree. For `/dev/gpiochip4`, use `G
 docker compose --env-file backend/.env \
   -f docker/docker-compose.yml \
   -f docker/docker-compose.pi.yml \
-  up --build -d
+  up --build -d --wait
 ```
 
 The Pi override removes the database host port and maps only the configured camera/gpiochip into the backend. PostgreSQL remains on the internal `faceguard` bridge network. `pgdata` is persistent; schema creation and the legacy access-date migration run automatically during backend startup.

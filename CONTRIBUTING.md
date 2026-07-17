@@ -17,7 +17,7 @@ cp backend/.env.example backend/.env
 python3 backend/scripts/generate_hash.py
 openssl rand -hex 32
 docker compose --env-file backend/.env \
-  -f docker/docker-compose.yml up --build -d
+  -f docker/docker-compose.yml up --build -d --wait
 ```
 
 Use the base file plus `docker/docker-compose.pi.yml` only for Raspberry Pi backend-camera/GPIO deployment. See the root [README](README.md) before mapping `/dev/videoN` or `/dev/gpiochipN`. Frontend `VITE_*` settings are compiled at build time.
