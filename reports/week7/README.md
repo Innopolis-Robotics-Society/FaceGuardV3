@@ -68,9 +68,9 @@ For local evaluation, start with Docker and open at: `http://localhost:3000`
 ## 14. Hosted Documentation Site
 [Hosted Documentation Site](https://innopolis-robotics-society.github.io/FaceGuardV3/)
 
-## 15. Final Transition Outcome Summary
-**Handover Level Reached:** Ready for independent use
-**Customer Confirmation Status:** Accepted
+## 15. Final Transition Outcome Summary  
+**Handover Level Reached:** Ready for independent use  
+**Customer Confirmation Status:** Accepted  
 
 The customer confirmed during the Sprint 5 Review session on 16.07.2026 that they are able to use the system independently, that the current version is sufficient to manage the system going forward, and that they accept this as the final delivered product. No further changes were requested. Documentation was explicitly confirmed as sufficient after the System Functions page was added.
 
@@ -145,7 +145,7 @@ Documentation was reviewed live and no further changes were requested.
 The required Week 7 rehearsal was completed. The team prepared a pre-recorded demo under 2 minutes for the Demo Day presentation. All team members will attend the Week 8 Demo Day presentation. Each team member will present at least one slide. The slide deck covers project context, delivered requirements, customer usefulness, engineering evidence, remaining limitations, and team reflection.
 
 ## 25. Sprint Review Transcript
-The public publication was permitted.
+The public publication was permitted.  
 [Sprint Review Transcript](sprint-review-transcript.md)
 
 ## 26. Sprint Review Summary
