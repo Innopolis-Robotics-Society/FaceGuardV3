@@ -64,8 +64,8 @@ real, spoofed, or invalid.
 
 **Quality requirements addressed:**
 
-- QR-002 (Resistance to Static Photo Spoofing) — directly addressed. This
-  is the architectural decision that QRT-002 verifies (rejection of
-  `"spoof"` and `"no_face"` status codes, and rejection of low-similarity
-  embeddings, before access can be granted). See
+- QR-002 (Resistance to Static Photo Spoofing) — directly addressed. The
+  current supporting QRT-002 check verifies rejection of `"spoof"` and
+  `"no_face"` statuses before access can be granted; it does not prove the
+  requirement's 9/10 physical presentation-attack target. See
   [QR-002](../../quality-requirements.md#qr-002-resistance-to-static-photo-spoofing).
