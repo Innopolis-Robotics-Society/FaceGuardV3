@@ -4,33 +4,12 @@ All notable changes to FaceGuard will be documented in this file.
 
 ## [Unreleased]
 
-### Added
-- Dual browser/backend camera modes with a single latest-frame backend capture loop and no stale-frame queue
-- Validated, retry-bounded InsightFace `buffalo_s` bootstrap into the persistent model cache
-- Automated QRT-005 through the FastAPI boundary and isolated PostgreSQL, including concurrent duplicate-registration prevention
-- Frontend behavior tests and per-critical-backend-module coverage gates in CI
-
-### Changed
-- WebSocket JWT authentication now uses subprotocols instead of URL query parameters
-- Recognition/enrollment are serialized and frame responses correlate JPEG, bounding box, dimensions, and sequence
-- Backend-camera streams record aggregate capture, frame-age, inference, encoding and send timings without logging frame or credential data
-- GPIO feedback is generation-safe, configurable by gpiochip, tolerant of unavailable hardware, and cleaned up at shutdown
-- Deployment, architecture, QRT, DoD, testing, and customer instructions now describe the implemented system and hardware-evidence limits
-
-### Fixed
-- Duplicate similarity check and insert now execute atomically and roll back without changing the existing employee
-- Enrollment now maps spoof, bad-frame, no-face, valid-sample, and completion states to the documented LED feedback
-- Database pool connections are rolled back after an exceptional context exit before being returned to the pool
-- Frontend container builds now exclude host `node_modules`, build output, logs, and private environment files from the Docker context
-- Camera, GPIO, background task, and database-pool resources are released during normal shutdown and error paths
-- Docker Hub image now starts the FastAPI backend instead of the removed Streamlit application
-
 ## [3.0.0] - 2026-07-12  
 
 ### Added
 - Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming
 - Recognition runs efficiently in the background without blocking the UI
-- LED access indication (no physical door actuator is included)
+- Connection of the system and the door
 - Recognition with accessories
 - Extensive customer handover documentation and contributor guides
 
