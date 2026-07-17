@@ -7,18 +7,18 @@ All notable changes to FaceGuard will be documented in this file.
 ## [3.1.0] - 2026-07-19  
 
 ### Added
-- Working web-camera in the remote web interface
-- Extended Documentation
+- Сonnection via SSH
 
 ### Changed
+- Selection of web-camera happens remotely via SSH
 - Formed validation for temporary access dates
+- Extended Documentation
 
 ## [3.0.0] - 2026-07-12  
 
 ### Added
 - Decoupled React frontend and FastAPI backend communicating via WebSockets for real-time video streaming
 - Recognition runs efficiently in the background without blocking the UI
-- Connection of the system and the door
 - Recognition with accessories
 - Extensive customer handover documentation and contributor guides
 
